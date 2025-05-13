@@ -1,0 +1,45 @@
+{
+  "name": "trailblazers-next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --turbopack",
+    "lint": "next lint",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.808.0",
+    "@aws-sdk/client-dynamodb": "^3.808.0",
+    "@aws-sdk/lib-dynamodb": "^3.808.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.0",
+    "@mui/material": "^7.1.0",
+    "@tanstack/react-query": "^5.76.0",
+    "@tanstack/react-query-devtools": "^5.76.0",
+    "amazon-cognito-identity-js": "^6.3.15",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "nanoid": "^5.1.5",
+    "next": "15.3.2",
+    "next-auth": "^4.24.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sst": "3.14.16",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.2",
+    "sst": "^3.14.16",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
+}
