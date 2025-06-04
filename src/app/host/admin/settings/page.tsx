@@ -8,10 +8,12 @@ import Link from 'next/link';
 import { useActivities } from '@/hooks/useActivity';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { useToastNotifications } from '@/hooks/useToast';
 
 export default function HostSettings() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
+  const { success, error, info } = useToastNotifications();
   
   // Get current host and location from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
@@ -39,8 +41,6 @@ export default function HostSettings() {
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isEditingDisclaimer, setIsEditingDisclaimer] = useState(false);
   const [isEditingActivities, setIsEditingActivities] = useState(false);
-  const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   
   // Mutations
   const updateHost = useUpdateHost();
@@ -94,9 +94,19 @@ export default function HostSettings() {
   
   // Handle password update
   const handlePasswordUpdate = async () => {
-    if (!hostId || !adminPassword) return;
+    if (!hostId || !adminPassword) {
+      error('Please enter a new password');
+      return;
+    }
+    
+    if (adminPassword.length < 6) {
+      error('Password must be at least 6 characters long');
+      return;
+    }
     
     try {
+      info('Updating admin password...');
+      
       await updateHost.mutateAsync({
         id: hostId,
         data: {
@@ -104,25 +114,13 @@ export default function HostSettings() {
         }
       });
       
-      setFormStatus('success');
-      setStatusMessage('Admin password updated successfully');
+      success('Admin password updated successfully');
       setIsEditingPassword(false);
+      setAdminPassword('');
       
-      // Clear status after 3 seconds
-      setTimeout(() => {
-        setFormStatus('idle');
-        setStatusMessage(null);
-      }, 3000);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setFormStatus('error');
-      setStatusMessage(error.message || 'Failed to update password');
-      
-      // Clear status after 5 seconds
-      setTimeout(() => {
-        setFormStatus('idle');
-        setStatusMessage(null);
-      }, 5000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update password';
+      error(errorMessage);
     }
   };
   
@@ -131,6 +129,8 @@ export default function HostSettings() {
     if (!hostId) return;
     
     try {
+      info('Updating disclaimer...');
+      
       await updateHost.mutateAsync({
         id: hostId,
         data: {
@@ -138,57 +138,36 @@ export default function HostSettings() {
         }
       });
       
-      setFormStatus('success');
-      setStatusMessage('Disclaimer updated successfully');
+      success('Disclaimer updated successfully');
       setIsEditingDisclaimer(false);
       
-      // Clear status after 3 seconds
-      setTimeout(() => {
-        setFormStatus('idle');
-        setStatusMessage(null);
-      }, 3000);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setFormStatus('error');
-      setStatusMessage(error.message || 'Failed to update disclaimer');
-      
-      // Clear status after 5 seconds
-      setTimeout(() => {
-        setFormStatus('idle');
-        setStatusMessage(null);
-      }, 5000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update disclaimer';
+      error(errorMessage);
     }
   };
   
   // Handle activities update
   const handleActivitiesUpdate = async () => {
-    if (!selectedLocation) return;
+    if (!selectedLocation) {
+      error('Please select a location');
+      return;
+    }
     
     try {
+      info('Updating location activities...');
+      
       await updateLocationActivities.mutateAsync({
         locationId: selectedLocation,
         activityIds: selectedActivities
       });
       
-      setFormStatus('success');
-      setStatusMessage('Activities updated successfully');
+      success('Activities updated successfully');
       setIsEditingActivities(false);
       
-      // Clear status after 3 seconds
-      setTimeout(() => {
-        setFormStatus('idle');
-        setStatusMessage(null);
-      }, 3000);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setFormStatus('error');
-      setStatusMessage(error.message || 'Failed to update activities');
-      
-      // Clear status after 5 seconds
-      setTimeout(() => {
-        setFormStatus('idle');
-        setStatusMessage(null);
-      }, 5000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update activities';
+      error(errorMessage);
     }
   };
   
@@ -202,14 +181,7 @@ export default function HostSettings() {
       if (selectedActivities.length < 3) {
         setSelectedActivities([...selectedActivities, activityId]);
       } else {
-        setFormStatus('error');
-        setStatusMessage('Maximum 3 activities allowed per location');
-        
-        // Clear status after 3 seconds
-        setTimeout(() => {
-          setFormStatus('idle');
-          setStatusMessage(null);
-        }, 3000);
+        error('Maximum 3 activities allowed per location');
       }
     }
   };
@@ -223,6 +195,26 @@ export default function HostSettings() {
     const loc = hostLocations?.find(l => l.id === newLocationId);
     if (loc) {
       setSelectedActivities(loc.acts || []);
+      info(`Switched to location: ${loc.n}`);
+    }
+  };
+  
+  const handleCancelPasswordEdit = () => {
+    setIsEditingPassword(false);
+    setAdminPassword('');
+  };
+  
+  const handleCancelDisclaimerEdit = () => {
+    setIsEditingDisclaimer(false);
+    if (host) {
+      setDisclaimer(host.disc || '');
+    }
+  };
+  
+  const handleCancelActivitiesEdit = () => {
+    setIsEditingActivities(false);
+    if (location) {
+      setSelectedActivities(location.acts || []);
     }
   };
   
@@ -251,18 +243,6 @@ export default function HostSettings() {
           </Link>
         </div>
         
-        {formStatus === 'success' && statusMessage && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-lg" role="alert">
-            <p>{statusMessage}</p>
-          </div>
-        )}
-        
-        {formStatus === 'error' && statusMessage && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-lg" role="alert">
-            <p>{statusMessage}</p>
-          </div>
-        )}
-        
         {/* Admin Password Section */}
         <div className="card mb-lg">
           <h2 className="text-xl font-bold mb-md">Admin Password</h2>
@@ -280,12 +260,16 @@ export default function HostSettings() {
                   onChange={(e) => setAdminPassword(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-md"
                   placeholder="Enter new admin password"
+                  autoFocus
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Must be at least 6 characters long
+                </p>
               </div>
               
               <div className="flex justify-end gap-md">
                 <button
-                  onClick={() => setIsEditingPassword(false)}
+                  onClick={handleCancelPasswordEdit}
                   className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                 >
                   Cancel
@@ -337,7 +321,7 @@ export default function HostSettings() {
               
               <div className="flex justify-end gap-md">
                 <button
-                  onClick={() => setIsEditingDisclaimer(false)}
+                  onClick={handleCancelDisclaimerEdit}
                   className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                 >
                   Cancel
@@ -404,7 +388,7 @@ export default function HostSettings() {
                   {activities.map(activity => (
                     <div 
                       key={activity.id}
-                      className={`border rounded-md p-4 cursor-pointer ${
+                      className={`border rounded-md p-4 cursor-pointer transition-colors ${
                         selectedActivities.includes(activity.id) 
                           ? 'bg-primary-light border-primary' 
                           : 'hover:bg-gray-50'
@@ -433,7 +417,7 @@ export default function HostSettings() {
               
               <div className="flex justify-end gap-md">
                 <button
-                  onClick={() => setIsEditingActivities(false)}
+                  onClick={handleCancelActivitiesEdit}
                   className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                 >
                   Cancel

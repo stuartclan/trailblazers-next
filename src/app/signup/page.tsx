@@ -21,6 +21,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCreatePet } from '@/hooks/usePet';
 import { useHost } from '@/hooks/useHost';
 import { useRouter } from 'next/navigation';
+import { useToastNotifications } from '@/hooks/useToast';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -61,6 +62,7 @@ type AthleteFormValues = z.infer<typeof athleteSchema>;
 export default function Signup() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { success, error, info } = useToastNotifications();
   
   // Get current host from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
@@ -117,11 +119,12 @@ export default function Signup() {
   // Handle form submission
   const handleSubmit = async (data: AthleteFormValues) => {
     if (!hostId) {
-      methods.setError('root', { message: 'No host selected. Please return to check-in.' });
+      error('No host selected. Please return to check-in.');
       return;
     }
     
     setIsSubmitting(true);
+    info('Creating athlete registration...');
     
     try {
       // Create the athlete
@@ -137,6 +140,8 @@ export default function Signup() {
         emergencyPhone: data.emergencyPhone,
       });
       
+      info('Signing disclaimer...');
+      
       // Sign the disclaimer
       await signDisclaimer.mutateAsync({
         athleteId: newAthlete.id,
@@ -145,24 +150,25 @@ export default function Signup() {
       
       // Create a pet if specified
       if (data.hasPet && data.petName?.trim()) {
+        info('Registering pet...');
         await createPet.mutateAsync({
           athleteId: newAthlete.id,
           name: data.petName.trim(),
         });
       }
       
+      success(`Welcome ${data.firstName}! Registration completed successfully.`, 'Registration Complete');
       setSubmitSuccess(true);
       
       // Redirect after success
       setTimeout(() => {
         router.push('/checkin');
-      }, 3000);
+      }, 2000);
       
     } catch (error) {
       console.error('Registration error:', error);
-      methods.setError('root', { 
-        message: error instanceof Error ? error.message : 'Registration failed. Please try again.' 
-      });
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      error(errorMessage, 'Registration Failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -198,7 +204,7 @@ export default function Signup() {
               Registration Successful!
             </h2>
             <p className="text-gray-600 mb-4">
-              You have been registered successfully. Redirecting to check-in...
+              Welcome to Trailblazers! Redirecting to check-in...
             </p>
             <Button onClick={() => router.push('/checkin')}>
               Go to Check-in Now
@@ -252,7 +258,6 @@ export default function Signup() {
         <FormProvider {...methods}>
           <Form
             onSubmit={methods.handleSubmit(handleSubmit)}
-            errorMessage={methods.formState.errors.root?.message}
             isSubmitting={isSubmitting}
           >
             {/* Personal Information */}

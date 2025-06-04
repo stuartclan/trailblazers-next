@@ -1,4 +1,3 @@
-// src/components/organisms/check-in-flow/check-in-flow.tsx
 'use client';
 
 import * as React from 'react';
@@ -19,6 +18,7 @@ import { Switch } from '@/components/atoms/switch/switch';
 import { useAthletesPets } from '@/hooks/usePet';
 import { useHasSignedDisclaimer } from '@/hooks/useAthlete';
 import { useLocationActivities } from '@/hooks/useActivity';
+import { useToastNotifications } from '@/hooks/useToast';
 
 interface CheckInFlowProps {
   host: HostEntity;
@@ -35,6 +35,8 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   onNewAthlete,
   className,
 }) => {
+  const { success, error, info } = useToastNotifications();
+  
   // State management
   const [currentStep, setCurrentStep] = React.useState<FlowStep>('search');
   const [selectedAthlete, setSelectedAthlete] = React.useState<AthleteEntity | null>(null);
@@ -69,13 +71,15 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
       setIncludePet(false);
       setSelectedPet(null);
       setShowPetRegistration(false);
+      info(`Selected athlete: ${selectedAthlete.fn} ${selectedAthlete.ln}`);
     }
-  }, [selectedAthlete]);
+  }, [selectedAthlete, info]);
 
   // Check disclaimer when athlete and activity are selected
   React.useEffect(() => {
     if (selectedAthlete && selectedActivity && hasSignedDisclaimer !== undefined) {
       if (!hasSignedDisclaimer) {
+        info('Disclaimer required for this athlete');
         setCurrentStep('disclaimer');
       } else {
         handleProceedToCheckIn();
@@ -90,9 +94,14 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
   const handleActivitySelect = (activityId: string) => {
     setSelectedActivity(activityId);
+    const activity = activities?.find(a => a.id === activityId);
+    if (activity) {
+      info(`Selected activity: ${activity.n}`);
+    }
   };
 
   const handleDisclaimerAccepted = () => {
+    success('Disclaimer accepted successfully');
     setCurrentStep('pet');
   };
 
@@ -107,6 +116,9 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   const handlePetSelect = (petId: string) => {
     const pet = athletePets?.find(p => p.id === petId);
     setSelectedPet(pet || null);
+    if (pet) {
+      info(`Selected pet: ${pet.n}`);
+    }
     performCheckIn();
   };
 
@@ -115,6 +127,9 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     const newPet = athletePets?.find(p => p.id === petId);
     setSelectedPet(newPet || null);
     setShowPetRegistration(false);
+    if (newPet) {
+      success(`Pet "${newPet.n}" registered successfully!`);
+    }
     performCheckIn();
   };
 
@@ -127,6 +142,8 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
       const timestamp = Date.now();
 
+      info('Processing check-in...');
+
       // Create athlete check-in
       await createCheckIn.mutateAsync({
         athleteId: selectedAthlete.id,
@@ -137,6 +154,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
       // Create pet check-in if applicable
       if (includePet && selectedPet) {
+        info('Processing pet check-in...');
         await createPetCheckIn.mutateAsync({
           athleteId: selectedAthlete.id,
           petId: selectedPet.id,
@@ -153,10 +171,17 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
         timestamp,
       });
 
+      const petMessage = selectedPet ? ` and ${selectedPet.n}` : '';
+      success(
+        `Check-in successful for ${selectedAthlete.fn}${petMessage}!`,
+        'Welcome to Trailblazers'
+      );
+
       setCurrentStep('confirmation');
-    } catch (error) {
-      console.error('Check-in error:', error);
-      // Handle error appropriately
+    } catch (err) {
+      console.error('Check-in error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to complete check-in';
+      error(errorMessage, 'Check-in Failed');
     }
   };
 
@@ -168,6 +193,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     setSelectedPet(null);
     setShowPetRegistration(false);
     setCheckInResult(null);
+    info('Ready for new check-in');
   };
 
   const renderCurrentStep = () => {
@@ -197,7 +223,12 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
               <div className="space-y-4">
                 <Switch
                   checked={includePet}
-                  onCheckedChange={setIncludePet}
+                  onCheckedChange={(checked) => {
+                    setIncludePet(checked);
+                    if (checked) {
+                      info('Pet check-in enabled');
+                    }
+                  }}
                   label="Include pet check-in"
                 />
 

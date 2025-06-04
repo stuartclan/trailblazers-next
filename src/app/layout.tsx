@@ -4,6 +4,8 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { Inter } from 'next/font/google';
 import type { Metadata } from 'next';
 import { Providers } from './providers';
+import { ToastProvider } from '@/hooks/useToast';
+import { Toaster } from '@/components/molecules/toaster/toaster';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,7 +24,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <AuthProvider>
-            {children}
+            <ToastProvider>
+              {children}
+              <Toaster />
+            </ToastProvider>
           </AuthProvider>
         </Providers>
       </body>
