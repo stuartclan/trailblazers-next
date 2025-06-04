@@ -1,109 +1,140 @@
 'use client';
 
+import { ArrowLeft, Heart, Shield, User } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useCreateAthlete, useSignDisclaimer } from '@/hooks/useAthlete';
 import { useEffect, useState } from 'react';
 
+import { Alert } from '@/components/atoms/alert/alert';
+import { Button } from '@/components/atoms/button/button';
+import { Checkbox } from '@/components/atoms/checkbox/checkbox';
+import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
+import { Form } from '@/components/atoms/form/form';
+import { FormControl } from '@/components/atoms/form-control/form-control';
+import { Input } from '@/components/atoms/input/input';
+import { PageHeader } from '@/components/molecules/page-header/page-header';
+import { PageLoading } from '@/components/molecules/page-loading/page-loading';
+import { Select } from '@/components/atoms/select/select';
+import { Textarea } from '@/components/atoms/textarea/textarea';
 import { useAuth } from '@/hooks/useAuth';
-import { useCreateAthlete } from '@/hooks/useAthlete';
 import { useCreatePet } from '@/hooks/usePet';
 import { useHost } from '@/hooks/useHost';
 import { useRouter } from 'next/navigation';
-import { useSignDisclaimer } from '@/hooks/useAthlete';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+// Validation schema
+const athleteSchema = z.object({
+  firstName: z.string().min(1, 'First name is required').max(50, 'First name too long'),
+  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name too long'),
+  middleInitial: z.string().max(1, 'Only one letter allowed').optional(),
+  email: z.string().email('Please enter a valid email address'),
+  employer: z.string().max(100, 'Employer name too long').optional(),
+  shirtGender: z.string().optional(),
+  shirtSize: z.string().optional(),
+  emergencyName: z.string().min(1, 'Emergency contact name is required'),
+  emergencyPhone: z.string()
+    .min(10, 'Phone number must be at least 10 digits')
+    .regex(/^[\d\s\-\(\)\+\.]+$/, 'Please enter a valid phone number'),
+  
+  // Pet information
+  hasPet: z.boolean().default(false),
+  petName: z.string().optional(),
+  
+  // Disclaimer
+  disclaimerAccepted: z.boolean().refine(val => val === true, {
+    message: 'You must accept the disclaimer to register'
+  })
+}).refine((data) => {
+  if (data.hasPet && !data.petName?.trim()) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Pet name is required when registering a pet",
+  path: ["petName"]
+});
+
+type AthleteFormValues = z.infer<typeof athleteSchema>;
 
 export default function Signup() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   
   // Get current host from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
-  const [locationId, setLocationId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   
-  // Fetch host details to get disclaimer
-  const { data: host } = useHost(hostId || '');
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    middleInitial: '',
-    email: '',
-    employer: '',
-    shirtGender: '',
-    shirtSize: '',
-    emergencyName: '',
-    emergencyPhone: '',
-  });
-  
-  // Pet state
-  const [hasPet, setHasPet] = useState(false);
-  const [petName, setPetName] = useState('');
-  
-  // Disclaimer state
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
-  
-  // Form submission state
-  const [formStatus, setFormStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Fetch host details
+  const { data: host, isLoading: isLoadingHost, error: hostError } = useHost(hostId || '');
   
   // Mutations
   const createAthlete = useCreateAthlete();
   const createPet = useCreatePet();
   const signDisclaimer = useSignDisclaimer();
   
-  // Load host/location from localStorage on component mount
+  // Form setup
+  const methods = useForm<AthleteFormValues>({
+    resolver: zodResolver(athleteSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      middleInitial: '',
+      email: '',
+      employer: '',
+      shirtGender: '',
+      shirtSize: '',
+      emergencyName: '',
+      emergencyPhone: '',
+      hasPet: false,
+      petName: '',
+      disclaimerAccepted: false,
+    },
+  });
+
+  const { watch } = methods;
+  const hasPet = watch('hasPet');
+  
+  // Load host from localStorage
   useEffect(() => {
     const savedHostId = localStorage.getItem('currentHostId');
-    const savedLocationId = localStorage.getItem('currentLocationId');
-    
-    if (savedHostId && savedLocationId) {
+    if (savedHostId) {
       setHostId(savedHostId);
-      setLocationId(savedLocationId);
     } else {
-      // If no location is selected, redirect to location selection
       router.push('/host/select-location');
     }
   }, [router]);
   
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isAuthLoading && !isAuthenticated) {
       router.push('/host/login');
     }
-  }, [isAuthenticated, isLoading, router]);
-  
-  // Handle form field changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, [isAuthenticated, isAuthLoading, router]);
   
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (data: AthleteFormValues) => {
     if (!hostId) {
-      setErrorMessage('No host selected. Please return to the check-in page.');
-      setFormStatus('error');
+      methods.setError('root', { message: 'No host selected. Please return to check-in.' });
       return;
     }
     
-    if (!disclaimerAccepted) {
-      setErrorMessage('You must accept the disclaimer to sign up.');
-      setFormStatus('error');
-      return;
-    }
+    setIsSubmitting(true);
     
     try {
       // Create the athlete
       const newAthlete = await createAthlete.mutateAsync({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        middleInitial: formData.middleInitial,
-        email: formData.email,
-        employer: formData.employer,
-        shirtGender: formData.shirtGender,
-        shirtSize: formData.shirtSize,
-        emergencyName: formData.emergencyName,
-        emergencyPhone: formData.emergencyPhone,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        middleInitial: data.middleInitial,
+        email: data.email,
+        employer: data.employer,
+        shirtGender: data.shirtGender,
+        shirtSize: data.shirtSize,
+        emergencyName: data.emergencyName,
+        emergencyPhone: data.emergencyPhone,
       });
       
       // Sign the disclaimer
@@ -112,311 +143,348 @@ export default function Signup() {
         hostId,
       });
       
-      // Create a pet if one was specified
-      if (hasPet && petName.trim()) {
+      // Create a pet if specified
+      if (data.hasPet && data.petName?.trim()) {
         await createPet.mutateAsync({
           athleteId: newAthlete.id,
-          name: petName.trim(),
+          name: data.petName.trim(),
         });
       }
       
-      // Set success state
-      setFormStatus('success');
+      setSubmitSuccess(true);
       
-      // Clear form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        middleInitial: '',
-        email: '',
-        employer: '',
-        shirtGender: '',
-        shirtSize: '',
-        emergencyName: '',
-        emergencyPhone: '',
-      });
-      setHasPet(false);
-      setPetName('');
-      setDisclaimerAccepted(false);
-      
-      // Redirect after a brief delay
+      // Redirect after success
       setTimeout(() => {
         router.push('/checkin');
       }, 3000);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setFormStatus('error');
-      setErrorMessage(error.message || 'Failed to create athlete');
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      methods.setError('root', { 
+        message: error instanceof Error ? error.message : 'Registration failed. Please try again.' 
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
-  // Show loading state
-  if (isLoading) {
+  // Loading state
+  if (isAuthLoading || isLoadingHost) {
+    return <PageLoading message="Loading registration form..." />;
+  }
+  
+  // Error state
+  if (hostError || !host) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-md">Loading...</h1>
-        </div>
+      <ErrorDisplay
+        title="Unable to Load Registration"
+        message="Could not load host information for registration."
+        onGoHome={() => router.push('/checkin')}
+        showRetry={false}
+      />
+    );
+  }
+  
+  // Success state
+  if (submitSuccess) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="text-center py-8">
+            <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <User className="h-8 w-8 text-green-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-green-600 mb-2">
+              Registration Successful!
+            </h2>
+            <p className="text-gray-600 mb-4">
+              You have been registered successfully. Redirecting to check-in...
+            </p>
+            <Button onClick={() => router.push('/checkin')}>
+              Go to Check-in Now
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
   
+  const shirtGenderOptions = [
+    { value: '', label: 'Select gender...' },
+    { value: 'Men', label: 'Men' },
+    { value: 'Women', label: 'Women' },
+    { value: 'Unisex', label: 'Unisex' },
+  ];
+  
+  const shirtSizeOptions = [
+    { value: '', label: 'Select size...' },
+    { value: 'XS', label: 'Extra Small (XS)' },
+    { value: 'S', label: 'Small (S)' },
+    { value: 'M', label: 'Medium (M)' },
+    { value: 'L', label: 'Large (L)' },
+    { value: 'XL', label: 'Extra Large (XL)' },
+    { value: 'XXL', label: '2X Large (XXL)' },
+    { value: 'XXXL', label: '3X Large (XXXL)' },
+  ];
+  
   return (
     <div className="min-h-screen bg-gray-100 py-8">
-      <div className="container max-w-2xl">
-        <div className="mb-lg">
-          <h1 className="text-2xl font-bold">Register New Athlete</h1>
-          <p className="text-gray-600">Please fill out the form below to join Trailblazers</p>
-        </div>
+      <div className="container max-w-2xl mx-auto px-4">
+        <PageHeader
+          title="Register New Athlete"
+          description={`Join the Trailblazers community at ${host.n}`}
+          breadcrumbs={[
+            { label: 'Check-in', href: '/checkin' },
+            { label: 'Register', current: true }
+          ]}
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/checkin')}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Check-in
+            </Button>
+          }
+        />
         
-        <div className="card">
-          {formStatus === 'success' && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-lg" role="alert">
-              <p className="font-bold">Registration Successful!</p>
-              <p>You have been registered successfully. Redirecting to check-in page...</p>
-            </div>
-          )}
-          
-          {formStatus === 'error' && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-lg" role="alert">
-              <p className="font-bold">Error</p>
-              <p>{errorMessage}</p>
-            </div>
-          )}
-          
-          <form onSubmit={handleSubmit} className="space-y-md">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-              {/* Name Fields */}
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-sm">
-                  First Name*
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-sm">
-                  Last Name*
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="middleInitial" className="block text-sm font-medium text-gray-700 mb-sm">
-                  Middle Initial
-                </label>
-                <input
-                  type="text"
-                  id="middleInitial"
-                  name="middleInitial"
-                  value={formData.middleInitial}
-                  onChange={handleInputChange}
-                  maxLength={1}
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-sm">
-                  Email*
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                />
-              </div>
-              
-              {/* Employer */}
-              <div>
-                <label htmlFor="employer" className="block text-sm font-medium text-gray-700 mb-sm">
-                  Employer
-                </label>
-                <input
-                  type="text"
-                  id="employer"
-                  name="employer"
-                  value={formData.employer}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                />
-              </div>
-              
-              {/* T-shirt Information */}
-              <div>
-                <label htmlFor="shirtGender" className="block text-sm font-medium text-gray-700 mb-sm">
-                  Shirt Gender
-                </label>
-                <select
-                  id="shirtGender"
-                  name="shirtGender"
-                  value={formData.shirtGender}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                >
-                  <option value="">Select One</option>
-                  <option value="Men">Men</option>
-                  <option value="Women">Women</option>
-                  <option value="Unisex">Unisex</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="shirtSize" className="block text-sm font-medium text-gray-700 mb-sm">
-                  Shirt Size
-                </label>
-                <select
-                  id="shirtSize"
-                  name="shirtSize"
-                  value={formData.shirtSize}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                >
-                  <option value="">Select One</option>
-                  <option value="XS">XS</option>
-                  <option value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
-                  <option value="XXL">XXL</option>
-                  <option value="XXXL">XXXL</option>
-                </select>
-              </div>
-              
-              {/* Emergency Contact */}
-              <div>
-                <label htmlFor="emergencyName" className="block text-sm font-medium text-gray-700 mb-sm">
-                  Emergency Contact Name*
-                </label>
-                <input
-                  type="text"
-                  id="emergencyName"
-                  name="emergencyName"
-                  value={formData.emergencyName}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="emergencyPhone" className="block text-sm font-medium text-gray-700 mb-sm">
-                  Emergency Contact Phone*
-                </label>
-                <input
-                  type="tel"
-                  id="emergencyPhone"
-                  name="emergencyPhone"
-                  value={formData.emergencyPhone}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md"
-                />
-              </div>
-            </div>
-            
-            {/* Pet Information */}
-            <div className="border-t pt-md">
-              <div className="flex items-center mb-sm">
-                <input
-                  type="checkbox"
-                  id="hasPet"
-                  checked={hasPet}
-                  onChange={() => setHasPet(!hasPet)}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                />
-                <label htmlFor="hasPet" className="ml-2 block text-sm font-medium text-gray-700">
-                  I have a pet that will be joining me
-                </label>
-              </div>
-              
-              {hasPet && (
-                <div>
-                  <label htmlFor="petName" className="block text-sm font-medium text-gray-700 mb-sm">
-                    Pet Name*
-                  </label>
-                  <input
-                    type="text"
-                    id="petName"
-                    value={petName}
-                    onChange={(e) => setPetName(e.target.value)}
-                    required={hasPet}
-                    className="w-full p-3 border border-gray-300 rounded-md"
+        <FormProvider {...methods}>
+          <Form
+            onSubmit={methods.handleSubmit(handleSubmit)}
+            errorMessage={methods.formState.errors.root?.message}
+            isSubmitting={isSubmitting}
+          >
+            {/* Personal Information */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Personal Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <FormControl
+                      name="firstName"
+                      label="First Name"
+                      render={({ field, error }) => (
+                        <Input
+                          {...field}
+                          error={error}
+                          placeholder="Enter first name"
+                        />
+                      )}
+                    />
+                  </div>
+                  <FormControl
+                    name="middleInitial"
+                    label="M.I."
+                    render={({ field, error }) => (
+                      <Input
+                        {...field}
+                        error={error}
+                        placeholder="M"
+                        maxLength={1}
+                      />
+                    )}
                   />
                 </div>
-              )}
-            </div>
+                
+                <FormControl
+                  name="lastName"
+                  label="Last Name"
+                  render={({ field, error }) => (
+                    <Input
+                      {...field}
+                      error={error}
+                      placeholder="Enter last name"
+                    />
+                  )}
+                />
+                
+                <FormControl
+                  name="email"
+                  label="Email Address"
+                  render={({ field, error }) => (
+                    <Input
+                      {...field}
+                      type="email"
+                      error={error}
+                      placeholder="Enter email address"
+                    />
+                  )}
+                />
+                
+                <FormControl
+                  name="employer"
+                  label="Employer (Optional)"
+                  render={({ field, error }) => (
+                    <Input
+                      {...field}
+                      error={error}
+                      placeholder="Enter employer name"
+                    />
+                  )}
+                />
+              </CardContent>
+            </Card>
+            
+            {/* T-Shirt Information */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>T-Shirt Information (Optional)</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormControl
+                    name="shirtGender"
+                    label="Shirt Style"
+                    render={({ field, error }) => (
+                      <Select
+                        options={shirtGenderOptions}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        error={error}
+                      />
+                    )}
+                  />
+                  
+                  <FormControl
+                    name="shirtSize"
+                    label="Shirt Size"
+                    render={({ field, error }) => (
+                      <Select
+                        options={shirtSizeOptions}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        error={error}
+                      />
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Emergency Contact */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="h-5 w-5 text-red-500" />
+                  Emergency Contact
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormControl
+                  name="emergencyName"
+                  label="Emergency Contact Name"
+                  render={({ field, error }) => (
+                    <Input
+                      {...field}
+                      error={error}
+                      placeholder="Enter emergency contact name"
+                    />
+                  )}
+                />
+                
+                <FormControl
+                  name="emergencyPhone"
+                  label="Emergency Contact Phone"
+                  render={({ field, error }) => (
+                    <Input
+                      {...field}
+                      type="tel"
+                      error={error}
+                      placeholder="Enter phone number"
+                    />
+                  )}
+                />
+              </CardContent>
+            </Card>
+            
+            {/* Pet Information */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Pet Information (Optional)</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormControl
+                  name="hasPet"
+                  render={({ field }) => (
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      label="I have a pet that will be joining me"
+                    />
+                  )}
+                />
+                
+                {hasPet && (
+                  <FormControl
+                    name="petName"
+                    label="Pet Name"
+                    render={({ field, error }) => (
+                      <Input
+                        {...field}
+                        error={error}
+                        placeholder="Enter your pet's name"
+                      />
+                    )}
+                  />
+                )}
+              </CardContent>
+            </Card>
             
             {/* Disclaimer */}
-            <div className="border-t pt-md">
-              <h3 className="font-medium mb-sm">Disclaimer</h3>
-              
-              <div className="bg-gray-50 p-4 rounded-md mb-md max-h-60 overflow-y-auto">
-                {host?.disc ? (
-                  <p className="text-sm">{host.disc}</p>
-                ) : (
-                  <p className="text-sm italic">
-                    By participating in Trailblazers activities, you acknowledge and accept all risks associated with outdoor activities. 
-                    The organizers and hosts are not responsible for any injuries or accidents that may occur during participation.
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-blue-500" />
+                  Disclaimer Agreement
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-md max-h-48 overflow-y-auto">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {host.disc || `By participating in activities at this location, you acknowledge that you are participating voluntarily and at your own risk. You understand that physical activities involve inherent risks of injury, and you assume all such risks. You agree to release, indemnify, and hold harmless the host organization, its employees, and volunteers from any and all claims, damages, or injuries that may arise from your participation.`}
                   </p>
-                )}
-              </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="disclaimerAccepted"
-                  checked={disclaimerAccepted}
-                  onChange={() => setDisclaimerAccepted(!disclaimerAccepted)}
-                  required
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                </div>
+                
+                <FormControl
+                  name="disclaimerAccepted"
+                  render={({ field, error }) => (
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      label="I have read, understood, and agree to the terms of this disclaimer"
+                      error={error}
+                    />
+                  )}
                 />
-                <label htmlFor="disclaimerAccepted" className="ml-2 block text-sm font-medium text-gray-700">
-                  I have read and accept the disclaimer*
-                </label>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
-            <div className="border-t pt-md">
-              <button
-                type="submit"
-                disabled={createAthlete.isPending || !disclaimerAccepted}
-                className="w-full bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            {/* Submit Button */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => router.push('/checkin')}
+                className="flex-1"
               >
-                {createAthlete.isPending ? 'Registering...' : 'Register'}
-              </button>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                {isSubmitting ? 'Registering...' : 'Register Athlete'}
+              </Button>
             </div>
-          </form>
-        </div>
-        
-        <div className="mt-lg text-center">
-          <button 
-            onClick={() => router.push('/checkin')}
-            className="text-primary hover:underline"
-          >
-            Back to Check-In
-          </button>
-        </div>
+          </Form>
+        </FormProvider>
       </div>
     </div>
   );
