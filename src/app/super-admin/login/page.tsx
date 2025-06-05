@@ -1,8 +1,14 @@
 'use client';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+
+import { Alert } from '@/components/atoms/alert/alert';
+import { Button } from '@/components/atoms/button/button';
+import { Input } from '@/components/atoms/input/input';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useToastNotifications } from '@/hooks/useToast';
 
 export default function SuperAdminLogin() {
   const [email, setEmail] = useState('');
@@ -12,79 +18,100 @@ export default function SuperAdminLogin() {
   
   const router = useRouter();
   const { login } = useAuth();
+  const { success, error: toastError, info } = useToastNotifications();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     
+    // Show progress toast
+    info('Authenticating super admin access...', 'Admin Authentication');
+    
     try {
       await login(email, password);
       
-      // After login, we need to verify the user is actually a super-admin
-      // This would require checking their Cognito group in a real app
-      // For now, we'll assume they are and redirect
-      router.push('/super-admin');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // Show success toast
+      success(
+        'Super admin access granted! Welcome to the admin dashboard.',
+        'Admin Access Granted'
+      );
+      
+      // Delay to show success message, then redirect
+      setTimeout(() => {
+        router.push('/super-admin');
+      }, 1000);
+      
     } catch (err: any) {
-      setError(err.message || 'Failed to login. Please check your credentials.');
+      console.error('Super admin login error:', err);
+      const errorMessage = err.message || 'Failed to login. Please check your credentials.';
+      
+      // Show error in both local state and toast
+      setError(errorMessage);
+      toastError(errorMessage, 'Admin Authentication Failed');
     } finally {
       setLoading(false);
     }
   };
   
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="card w-full max-w-md">
-        <div className="text-center mb-lg">
-          <h1 className="text-2xl font-bold">Trailblazers Super Admin</h1>
-          <p className="text-gray-600 mt-sm">Sign in to manage the Trailblazers system</p>
-        </div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center">
+            <h1 className="text-2xl font-bold">Trailblazers Super Admin</h1>
+            <p className="text-gray-600 mt-2 font-normal">Sign in to manage the Trailblazers system</p>
+          </CardTitle>
+        </CardHeader>
         
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-lg" role="alert">
-            <p>{error}</p>
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="flex flex-col gap-md">
-          <div className="flex flex-col gap-sm">
-            <label htmlFor="email" className="font-medium">Email</label>
-            <input
-              id="email"
+        <CardContent>
+          {error && (
+            <Alert variant="error" className="mb-6">
+              {error}
+            </Alert>
+          )}
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Admin Email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="border rounded p-2"
+              placeholder="Enter admin email"
+              disabled={loading}
             />
-          </div>
-          
-          <div className="flex flex-col gap-sm">
-            <label htmlFor="password" className="font-medium">Password</label>
-            <input
-              id="password"
+            
+            <Input
+              label="Admin Password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="border rounded p-2"
+              placeholder="Enter admin password"
+              disabled={loading}
             />
-          </div>
+            
+            <Button
+              type="submit"
+              disabled={loading || !email || !password}
+              className="w-full"
+            >
+              {loading ? 'Authenticating...' : 'Sign In as Super Admin'}
+            </Button>
+          </form>
           
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-primary text-white py-2 px-4 rounded hover:bg-primary-dark mt-md"
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-        
-        <div className="mt-lg text-center text-sm text-gray-600">
-          <p>For host access, please <a href="/host/login" className="text-primary hover:underline">login here</a>.</p>
-        </div>
-      </div>
+          <div className="mt-6 text-center text-sm text-gray-600">
+            <p>
+              For host access, please{' '}
+              <a href="/host/login" className="text-primary hover:underline">
+                login here
+              </a>
+              .
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

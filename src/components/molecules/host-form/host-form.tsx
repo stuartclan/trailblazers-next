@@ -9,6 +9,7 @@ import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
 import { Textarea } from '@/components/atoms/textarea/textarea';
+import { useToastNotifications } from '@/hooks/useToast';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -46,8 +47,7 @@ export const HostForm: React.FC<HostFormProps> = ({
   isEdit = false,
 }) => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [submitError, setSubmitError] = React.useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = React.useState(false);
+  const { success, error, info } = useToastNotifications();
 
   const methods = useForm<HostFormValues>({
     resolver: zodResolver(hostSchema),
@@ -62,17 +62,28 @@ export const HostForm: React.FC<HostFormProps> = ({
 
   const handleSubmit = async (data: HostFormValues) => {
     setIsSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
+
+    // Show progress toast
+    const action = isEdit ? 'Updating' : 'Creating';
+    info(`${action} host configuration...`, `Host ${isEdit ? 'Update' : 'Creation'}`);
 
     try {
       await onSubmit(data);
-      setSubmitSuccess(true);
+      
+      // Show success toast
+      const successAction = isEdit ? 'updated' : 'created';
+      success(
+        `Host "${data.name}" has been ${successAction} successfully!`,
+        `Host ${isEdit ? 'Updated' : 'Created'}`
+      );
+
       if (!isEdit) {
         methods.reset();
       }
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'An error occurred');
+    } catch (err) {
+      console.error('Host form submission error:', err);
+      const errorMessage = err instanceof Error ? err.message : `Failed to ${isEdit ? 'update' : 'create'} host`;
+      error(errorMessage, `Host ${isEdit ? 'Update' : 'Creation'} Failed`);
     } finally {
       setIsSubmitting(false);
     }
@@ -82,8 +93,6 @@ export const HostForm: React.FC<HostFormProps> = ({
     <FormProvider {...methods}>
       <Form
         onSubmit={methods.handleSubmit(handleSubmit)}
-        successMessage={submitSuccess ? `Host ${isEdit ? 'updated' : 'created'} successfully!` : null}
-        errorMessage={submitError}
         isSubmitting={isSubmitting}
       >
         {/* Host Name */}
@@ -97,6 +106,7 @@ export const HostForm: React.FC<HostFormProps> = ({
               type='text'
               error={error}
               placeholder="Enter host name"
+              disabled={isSubmitting}
             />
           )}
         />
@@ -112,7 +122,7 @@ export const HostForm: React.FC<HostFormProps> = ({
               type="email"
               error={error}
               placeholder="Enter email address"
-              disabled={isEdit}
+              disabled={isEdit || isSubmitting}
             />
           )}
         />
@@ -128,6 +138,7 @@ export const HostForm: React.FC<HostFormProps> = ({
               type="password"
               error={error}
               placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
+              disabled={isSubmitting}
             />
           )}
         />
@@ -142,6 +153,7 @@ export const HostForm: React.FC<HostFormProps> = ({
               type="password"
               error={error}
               placeholder={isEdit ? "Confirm new password" : "Confirm password"}
+              disabled={isSubmitting}
             />
           )}
         />
@@ -157,6 +169,7 @@ export const HostForm: React.FC<HostFormProps> = ({
               error={error}
               placeholder="Enter disclaimer text"
               rows={5}
+              disabled={isSubmitting}
             />
           )}
         />
@@ -166,15 +179,22 @@ export const HostForm: React.FC<HostFormProps> = ({
           <Button
             variant="outline"
             type="button"
-            onClick={() => methods.reset()}
+            onClick={() => {
+              methods.reset();
+              info('Form has been reset', 'Form Reset');
+            }}
+            disabled={isSubmitting}
           >
-            Cancel
+            Reset
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
           >
-            {isEdit ? (isSubmitting ? 'Updating...' : 'Update Host') : (isSubmitting ? 'Creating...' : 'Create Host')}
+            {isEdit 
+              ? (isSubmitting ? 'Updating...' : 'Update Host')
+              : (isSubmitting ? 'Creating...' : 'Create Host')
+            }
           </Button>
         </div>
       </Form>

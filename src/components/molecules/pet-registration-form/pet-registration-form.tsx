@@ -1,4 +1,3 @@
-// src/components/molecules/pet-registration-form/pet-registration-form.tsx
 'use client';
 
 import * as React from 'react';
@@ -10,6 +9,7 @@ import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
 import { useCreatePet } from '@/hooks/usePet';
+import { useToastNotifications } from '@/hooks/useToast';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -37,7 +37,7 @@ export const PetRegistrationForm: React.FC<PetRegistrationFormProps> = ({
   existingPetNames = [],
 }) => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const { success, error, info } = useToastNotifications();
 
   const createPet = useCreatePet();
 
@@ -58,7 +58,9 @@ export const PetRegistrationForm: React.FC<PetRegistrationFormProps> = ({
 
   const handleSubmit = async (data: PetFormValues) => {
     setIsSubmitting(true);
-    setSubmitError(null);
+    
+    // Show progress toast
+    info('Registering your pet...', 'Pet Registration');
 
     try {
       const newPet = await createPet.mutateAsync({
@@ -69,12 +71,23 @@ export const PetRegistrationForm: React.FC<PetRegistrationFormProps> = ({
       // Reset form
       methods.reset();
       
+      // Show success toast
+      success(
+        `${data.name.trim()} has been registered successfully!`,
+        'Pet Registered'
+      );
+      
       // Call success callback
       if (onSuccess) {
         onSuccess(newPet.id);
       }
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Failed to register pet');
+    } catch (err) {
+      console.error('Pet registration error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to register pet';
+      error(
+        errorMessage,
+        'Registration Failed'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -92,7 +105,6 @@ export const PetRegistrationForm: React.FC<PetRegistrationFormProps> = ({
       <FormProvider {...methods}>
         <Form
           onSubmit={methods.handleSubmit(handleSubmit)}
-          errorMessage={submitError}
           isSubmitting={isSubmitting}
         >
           <FormControl

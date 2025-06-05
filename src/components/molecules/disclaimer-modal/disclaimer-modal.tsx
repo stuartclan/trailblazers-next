@@ -1,4 +1,3 @@
-// src/components/molecules/disclaimer-modal/disclaimer-modal.tsx
 'use client';
 
 import * as Dialog from '@radix-ui/react-dialog';
@@ -9,6 +8,7 @@ import { Checkbox } from '@/components/atoms/checkbox/checkbox';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils/ui';
 import { useSignDisclaimer } from '@/hooks/useAthlete';
+import { useToastNotifications } from '@/hooks/useToast';
 
 interface DisclaimerModalProps {
   isOpen: boolean;
@@ -37,6 +37,7 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
   const [error, setError] = React.useState<string | null>(null);
 
   const signDisclaimer = useSignDisclaimer();
+  const { success, error: toastError, info } = useToastNotifications();
 
   // Reset state when modal opens/closes
   React.useEffect(() => {
@@ -52,19 +53,34 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
     setIsSubmitting(true);
     setError(null);
 
+    // Show progress toast
+    info('Processing disclaimer agreement...', 'Legal Agreement');
+
     try {
       await signDisclaimer.mutateAsync({
         athleteId,
         hostId,
       });
 
+      // Show success toast
+      success(
+        `Disclaimer accepted successfully for ${athleteName}`,
+        'Agreement Completed'
+      );
+
       // Success - call callback and close modal
       if (onSuccess) {
         onSuccess();
       }
       onClose();
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign disclaimer');
+      console.error('Disclaimer signing error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to sign disclaimer';
+      
+      // Show error in both local state and toast
+      setError(errorMessage);
+      toastError(errorMessage, 'Agreement Failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -136,7 +152,7 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
                   onClick={handleAccept}
                   disabled={!hasAccepted || isSubmitting}
                 >
-                  {isSubmitting ? 'Accepting...' : 'Accept & Continue'}
+                  {isSubmitting ? 'Processing...' : 'Accept & Continue'}
                 </Button>
               </div>
             </div>

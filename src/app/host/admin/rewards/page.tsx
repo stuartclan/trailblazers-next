@@ -5,9 +5,8 @@ import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { useHost } from '@/hooks/useHost';
-import { useLocation } from '@/hooks/useLocation';
 import { useRouter } from 'next/navigation';
+import { useToastNotifications } from '@/hooks/useToast';
 
 export default function HostRewards() {
   const router = useRouter();
@@ -16,13 +15,8 @@ export default function HostRewards() {
   // Get current host and location from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
-  
-  // Get host data
-  const { data: host } = useHost(hostId || '');
-  
-  // Get location data
-  const { data: location } = useLocation(locationId || '');
-  
+  const { success, error, info } = useToastNotifications();
+    
   // Get rewards
   const { data: globalRewards } = useGlobalRewards();
   const { data: hostRewards } = useHostRewards(hostId || '');
@@ -32,8 +26,6 @@ export default function HostRewards() {
   
   // UI state
   const [showAllEligible, setShowAllEligible] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Claim reward mutation
   const createRewardClaim = useCreateRewardClaim();
@@ -73,6 +65,9 @@ export default function HostRewards() {
   const handleClaimReward = async (athleteId: string, rewardId: string) => {
     if (!hostId || !locationId) return;
     
+    // Show progress toast
+    info('Processing reward claim...', 'Reward Claim');
+    
     try {
       await createRewardClaim.mutateAsync({
         athleteId,
@@ -81,23 +76,22 @@ export default function HostRewards() {
         locationId
       });
       
-      setSuccessMessage('Reward claimed successfully');
+      // Get reward name for better user experience
+      const reward = [...(globalRewards || []), ...(hostRewards || [])].find(r => r.id === rewardId);
+      const rewardName = reward?.n || 'Unknown Reward';
       
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Failed to claim reward');
+      success(
+        `Reward "${rewardName}" has been claimed successfully!`,
+        'Reward Claimed'
+      );
       
-      // Clear error message after 5 seconds
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
+    } catch (err) {
+      console.error('Reward claim error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to claim reward';
+      error(errorMessage, 'Claim Failed');
     }
   };
-  
+
   // Show loading state
   if (isLoading) {
     return (
@@ -146,18 +140,6 @@ export default function HostRewards() {
             Back to Admin
           </Link>
         </div>
-        
-        {successMessage && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-lg" role="alert">
-            <p>{successMessage}</p>
-          </div>
-        )}
-        
-        {errorMessage && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-lg" role="alert">
-            <p>{errorMessage}</p>
-          </div>
-        )}
         
         <div className="card mb-lg">
           <div className="flex justify-between items-center mb-md">
