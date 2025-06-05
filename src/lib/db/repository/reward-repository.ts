@@ -7,6 +7,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { getDynamoDBDocumentClient, getTableName } from '../utils/client';
 
+import { ActivityIcon } from '@/lib/utils/material-icons';
 import { RewardEntity } from '../entities/types';
 import { nanoid } from 'nanoid';
 
@@ -202,9 +203,9 @@ export class RewardRepository {
     
     // Define default global rewards
     const defaultGlobalRewards = [
-      { count: 8, name: 'Tier 1 Reward', icon: 'EmojiEvents' },
-      { count: 30, name: 'Tier 2 Reward', icon: 'EmojiEvents' },
-      { count: 60, name: 'Tier 3 Reward', icon: 'EmojiEvents' }
+      { count: 8, name: 'Tier 1 Reward', icon: ActivityIcon.EmojiEvents },
+      { count: 30, name: 'Tier 2 Reward', icon: ActivityIcon.EmojiEvents },
+      { count: 60, name: 'Tier 3 Reward', icon: ActivityIcon.EmojiEvents }
     ];
     
     // Create all default global rewards
@@ -234,7 +235,7 @@ export class RewardRepository {
     
     // Define default pet rewards
     const defaultPetRewards = [
-      { count: 8, name: 'Pet Reward', icon: 'Pets' }
+      { count: 8, name: 'Pet Reward', icon: ActivityIcon.Pets }
     ];
     
     // Create default pet rewards

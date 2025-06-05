@@ -8,6 +8,7 @@ import {
 import { getDynamoDBDocumentClient, getTableName } from '../utils/client';
 
 import { ActivityEntity } from '../entities/types';
+import { ActivityIcon } from '@/lib/utils/material-icons';
 import { nanoid } from 'nanoid';
 
 export class ActivityRepository {
@@ -187,10 +188,10 @@ export class ActivityRepository {
     
     // Define default activities
     const defaultActivities = [
-      { name: 'Bike', icon: 'DirectionsBike' },
-      { name: 'Shoe', icon: 'DirectionsWalk' },
-      { name: 'Snow', icon: 'AcUnit' },
-      { name: 'Water', icon: 'Waves' }
+      { name: 'Bike', icon: ActivityIcon.DirectionsBike },
+      { name: 'Shoe', icon: ActivityIcon.DirectionsWalk },
+      { name: 'Snow', icon: ActivityIcon.Ice },
+      { name: 'Water', icon: ActivityIcon.Waves }
     ];
     
     // Create all default activities
