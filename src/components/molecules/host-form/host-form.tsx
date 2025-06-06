@@ -8,7 +8,9 @@ import { Button } from '@/components/atoms/button/button';
 import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
+import { MobileFormField } from '@/components/molecules/mobile-form-field/mobile-form-field';
 import { Textarea } from '@/components/atoms/textarea/textarea';
+import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { useToastNotifications } from '@/hooks/useToast';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,18 +38,32 @@ interface HostFormProps {
   onSubmit: (data: HostFormValues) => Promise<void>;
   defaultValues?: Partial<HostFormValues>;
   isEdit?: boolean;
+  onCancel?: () => void;
 }
 
 /**
- * Host registration/edit form component
+ * Host registration/edit form component with comprehensive toast integration and mobile support
  */
 export const HostForm: React.FC<HostFormProps> = ({
   onSubmit,
   defaultValues,
   isEdit = false,
+  onCancel,
 }) => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
   const { success, error, info } = useToastNotifications();
+
+  // Check if we're on mobile
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const methods = useForm<HostFormValues>({
     resolver: zodResolver(hostSchema),
@@ -60,33 +76,99 @@ export const HostForm: React.FC<HostFormProps> = ({
     },
   });
 
+  const { watch, setValue, reset } = methods;
+
+  // Enhanced form submission with comprehensive toast feedback
   const handleSubmit = async (data: HostFormValues) => {
     setIsSubmitting(true);
 
-    // Show progress toast
+    // Show initial progress toast
     const action = isEdit ? 'Updating' : 'Creating';
-    info(`${action} host configuration...`, `Host ${isEdit ? 'Update' : 'Creation'}`);
+    const progressToastId = info(
+      `${action} host configuration...`,
+      `Host ${isEdit ? 'Update' : 'Creation'}`
+    );
 
     try {
+      // Validate password strength visually for user
+      if (!isEdit || data.password) {
+        info('Validating password requirements...', 'Validation');
+      }
+
+      // Show data validation step
+      info('Validating form data...', 'Validation');
+
+      // Call the submission handler
       await onSubmit(data);
       
-      // Show success toast
+      // Show detailed success toast with next steps
       const successAction = isEdit ? 'updated' : 'created';
       success(
-        `Host "${data.name}" has been ${successAction} successfully!`,
+        `Host "${data.name}" has been ${successAction} successfully! ${
+          isEdit 
+            ? 'Changes are now active.' 
+            : 'You can now login with your credentials.'
+        }`,
         `Host ${isEdit ? 'Updated' : 'Created'}`
       );
 
+      // Reset form only for new host creation
       if (!isEdit) {
-        methods.reset();
+        reset();
+        info('Form has been reset for next entry', 'Ready for Next Host');
+      } else {
+        info('Host configuration updated', 'Settings Applied');
       }
+
     } catch (err) {
       console.error('Host form submission error:', err);
-      const errorMessage = err instanceof Error ? err.message : `Failed to ${isEdit ? 'update' : 'create'} host`;
-      error(errorMessage, `Host ${isEdit ? 'Update' : 'Creation'} Failed`);
+      
+      // Provide specific error messaging based on error type
+      let errorMessage = `Failed to ${isEdit ? 'update' : 'create'} host`;
+      let errorTitle = `Host ${isEdit ? 'Update' : 'Creation'} Failed`;
+      
+      if (err instanceof Error) {
+        if (err.message.includes('email')) {
+          errorMessage = 'Email address is already in use or invalid';
+          errorTitle = 'Email Conflict';
+        } else if (err.message.includes('password')) {
+          errorMessage = 'Password does not meet security requirements';
+          errorTitle = 'Password Error';
+        } else if (err.message.includes('network')) {
+          errorMessage = 'Network error. Please check your connection and try again';
+          errorTitle = 'Connection Error';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      error(errorMessage, errorTitle);
+      
+      // Provide recovery suggestions
+      setTimeout(() => {
+        info(
+          'Please review your information and try again. Contact support if the problem persists.',
+          'Next Steps'
+        );
+      }, 2000);
+      
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Enhanced reset handler with toast feedback
+  const handleReset = () => {
+    reset();
+    info('Form has been reset to default values', 'Form Reset');
+  };
+
+  // Enhanced cancel handler
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    }
+    info('Form editing cancelled', 'Cancelled');
   };
 
   return (
@@ -94,109 +176,204 @@ export const HostForm: React.FC<HostFormProps> = ({
       <Form
         onSubmit={methods.handleSubmit(handleSubmit)}
         isSubmitting={isSubmitting}
+        className="space-y-6"
       >
         {/* Host Name */}
-        <FormControl
-          name="name"
-          label="Host Name"
-          helpText="The name of the organization or business"
-          render={({ field, error }) => (
-            <Input
-              {...field}
-              type='text'
-              error={error}
-              placeholder="Enter host name"
-              disabled={isSubmitting}
-            />
-          )}
-        />
+        {isMobile ? (
+          <MobileFormField
+            type="input"
+            label="Host Name"
+            value={watch('name')}
+            onChange={(value) => setValue('name', value)}
+            placeholder="Enter host name"
+            required
+            error={methods.formState.errors.name?.message}
+          />
+        ) : (
+          <FormControl
+            name="name"
+            label="Host Name"
+            helpText="The name of the organization or business"
+            render={({ field, error }) => (
+              <Input
+                {...field}
+                type='text'
+                error={error}
+                placeholder="Enter host name"
+                disabled={isSubmitting}
+              />
+            )}
+          />
+        )}
 
         {/* Email */}
-        <FormControl
-          name="email"
-          label="Email"
-          helpText="This email will be used for login"
-          render={({ field, error }) => (
-            <Input
-              {...field}
-              type="email"
-              error={error}
-              placeholder="Enter email address"
-              disabled={isEdit || isSubmitting}
-            />
-          )}
-        />
+        {isMobile ? (
+          <MobileFormField
+            type="input"
+            label="Email"
+            value={watch('email')}
+            onChange={(value) => setValue('email', value)}
+            placeholder="Enter email address"
+            required
+            error={methods.formState.errors.email?.message}
+          />
+        ) : (
+          <FormControl
+            name="email"
+            label="Email"
+            helpText="This email will be used for login"
+            render={({ field, error }) => (
+              <Input
+                {...field}
+                type="email"
+                error={error}
+                placeholder="Enter email address"
+                disabled={isEdit || isSubmitting}
+              />
+            )}
+          />
+        )}
 
         {/* Password */}
-        <FormControl
-          name="password"
-          label={isEdit ? "New Password" : "Password"}
-          helpText="At least 8 characters with uppercase, lowercase, and number"
-          render={({ field, error }) => (
-            <Input
-              {...field}
-              type="password"
-              error={error}
-              placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
-              disabled={isSubmitting}
-            />
-          )}
-        />
+        {isMobile ? (
+          <MobileFormField
+            type="input"
+            label={isEdit ? "New Password" : "Password"}
+            value={watch('password')}
+            onChange={(value) => setValue('password', value)}
+            placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
+            required={!isEdit}
+            error={methods.formState.errors.password?.message}
+          />
+        ) : (
+          <FormControl
+            name="password"
+            label={isEdit ? "New Password" : "Password"}
+            helpText="At least 8 characters with uppercase, lowercase, and number"
+            render={({ field, error }) => (
+              <Input
+                {...field}
+                type="password"
+                error={error}
+                placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
+                disabled={isSubmitting}
+              />
+            )}
+          />
+        )}
 
         {/* Confirm Password */}
-        <FormControl
-          name="passwordConfirm"
-          label={isEdit ? "Confirm New Password" : "Confirm Password"}
-          render={({ field, error }) => (
-            <Input
-              {...field}
-              type="password"
-              error={error}
-              placeholder={isEdit ? "Confirm new password" : "Confirm password"}
-              disabled={isSubmitting}
-            />
-          )}
-        />
+        {isMobile ? (
+          <MobileFormField
+            type="input"
+            label={isEdit ? "Confirm New Password" : "Confirm Password"}
+            value={watch('passwordConfirm')}
+            onChange={(value) => setValue('passwordConfirm', value)}
+            placeholder={isEdit ? "Confirm new password" : "Confirm password"}
+            required={!isEdit}
+            error={methods.formState.errors.passwordConfirm?.message}
+          />
+        ) : (
+          <FormControl
+            name="passwordConfirm"
+            label={isEdit ? "Confirm New Password" : "Confirm Password"}
+            render={({ field, error }) => (
+              <Input
+                {...field}
+                type="password"
+                error={error}
+                placeholder={isEdit ? "Confirm new password" : "Confirm password"}
+                disabled={isSubmitting}
+              />
+            )}
+          />
+        )}
 
         {/* Disclaimer */}
-        <FormControl
-          name="disclaimer"
-          label="Disclaimer Text"
-          helpText="This text will be shown to athletes during registration"
-          render={({ field, error }) => (
-            <Textarea
-              {...field}
-              error={error}
-              placeholder="Enter disclaimer text"
-              rows={5}
-              disabled={isSubmitting}
-            />
-          )}
-        />
+        {isMobile ? (
+          <MobileFormField
+            type="textarea"
+            label="Disclaimer Text"
+            value={watch('disclaimer') || ''}
+            onChange={(value) => setValue('disclaimer', value)}
+            placeholder="Enter disclaimer text that will be shown to athletes during registration"
+            error={methods.formState.errors.disclaimer?.message}
+          />
+        ) : (
+          <FormControl
+            name="disclaimer"
+            label="Disclaimer Text"
+            helpText="This text will be shown to athletes during registration"
+            render={({ field, error }) => (
+              <Textarea
+                {...field}
+                error={error}
+                placeholder="Enter disclaimer text"
+                rows={5}
+                disabled={isSubmitting}
+              />
+            )}
+          />
+        )}
 
-        {/* Submit Button */}
-        <div className="flex justify-end gap-4 pt-4">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => {
-              methods.reset();
-              info('Form has been reset', 'Form Reset');
-            }}
-            disabled={isSubmitting}
-          >
-            Reset
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-          >
-            {isEdit 
-              ? (isSubmitting ? 'Updating...' : 'Update Host')
-              : (isSubmitting ? 'Creating...' : 'Create Host')
-            }
-          </Button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t">
+          {onCancel && (
+            <TouchTarget>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                className="order-3 sm:order-1"
+              >
+                Cancel
+              </Button>
+            </TouchTarget>
+          )}
+          
+          <TouchTarget>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={handleReset}
+              disabled={isSubmitting}
+              className="order-2"
+            >
+              Reset Form
+            </Button>
+          </TouchTarget>
+          
+          <TouchTarget>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="order-1 sm:order-3"
+            >
+              {isEdit 
+                ? (isSubmitting ? 'Updating Host...' : 'Update Host')
+                : (isSubmitting ? 'Creating Host...' : 'Create Host')
+              }
+            </Button>
+          </TouchTarget>
         </div>
+
+        {/* Progress indicator for long operations */}
+        {isSubmitting && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+              <div className="text-sm text-blue-700">
+                <p className="font-medium">
+                  {isEdit ? 'Updating host configuration...' : 'Creating new host...'}
+                </p>
+                <p className="text-blue-600">
+                  Please wait while we process your request.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </Form>
     </FormProvider>
   );

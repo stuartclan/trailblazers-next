@@ -4,6 +4,7 @@ import { useCreateRewardClaim, useGlobalRewards, useHostRewards, useOneAwayAthle
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
+import { RewardsPageLoading } from '@/components/molecules/loading-states/loading-states';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -92,15 +93,9 @@ export default function HostRewards() {
     }
   };
 
-  // Show loading state
+  // Show skeleton loading state instead of basic loading
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-md">Loading...</h1>
-        </div>
-      </div>
-    );
+    return <RewardsPageLoading />;
   }
   
   // Combine and process one-away athletes

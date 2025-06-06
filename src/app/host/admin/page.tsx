@@ -1,4 +1,3 @@
-// src/app/host/admin/page.tsx
 'use client';
 
 import {
@@ -18,9 +17,9 @@ import { Alert } from '@/components/atoms/alert/alert';
 import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
+import { HostAdminLoading } from '@/components/molecules/loading-states/loading-states';
 import Link from 'next/link';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
-import { PageLoading } from '@/components/molecules/page-loading/page-loading';
 import { formatRelativeTime } from '@/lib/utils/dates';
 import { useAuth } from '@/hooks/useAuth';
 import { useHost } from '@/hooks/useHost';
@@ -123,9 +122,9 @@ export default function HostAdmin() {
     refetchCheckIns();
   };
   
-  // Loading state
+  // Loading state - use skeleton instead of spinner
   if (isAuthLoading || isLoadingHost || isLoadingLocation) {
-    return <PageLoading message="Loading admin dashboard..." />;
+    return <HostAdminLoading />;
   }
   
   // Error state
@@ -373,8 +372,20 @@ export default function HostAdmin() {
           </CardHeader>
           <CardContent>
             {isLoadingCheckIns ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg animate-pulse">
+                    <div className="h-8 w-8 bg-gray-300 rounded-full mr-3"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-300 rounded w-20"></div>
+                      <div className="h-3 bg-gray-300 rounded w-16"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : checkInsError ? (
               <Alert variant="error">

@@ -6,17 +6,17 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useCreateAthlete, useSignDisclaimer } from '@/hooks/useAthlete';
 import { useEffect, useState } from 'react';
 
-import { Alert } from '@/components/atoms/alert/alert';
 import { Button } from '@/components/atoms/button/button';
 import { Checkbox } from '@/components/atoms/checkbox/checkbox';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
+import { MobileFormField } from '@/components/molecules/mobile-form-field/mobile-form-field';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
-import { PageLoading } from '@/components/molecules/page-loading/page-loading';
 import { Select } from '@/components/atoms/select/select';
-import { Textarea } from '@/components/atoms/textarea/textarea';
+import { SignupFormLoading } from '@/components/molecules/loading-states/loading-states';
+import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreatePet } from '@/hooks/usePet';
 import { useHost } from '@/hooks/useHost';
@@ -96,7 +96,7 @@ export default function Signup() {
     },
   });
 
-  const { watch } = methods;
+  const { watch, setValue } = methods;
   const hasPet = watch('hasPet');
   
   // Load host from localStorage
@@ -174,9 +174,9 @@ export default function Signup() {
     }
   };
   
-  // Loading state
+  // Loading state with skeleton instead of basic loading
   if (isAuthLoading || isLoadingHost) {
-    return <PageLoading message="Loading registration form..." />;
+    return <SignupFormLoading />;
   }
   
   // Error state
@@ -206,9 +206,11 @@ export default function Signup() {
             <p className="text-gray-600 mb-4">
               Welcome to Trailblazers! Redirecting to check-in...
             </p>
-            <Button onClick={() => router.push('/checkin')}>
-              Go to Check-in Now
-            </Button>
+            <TouchTarget>
+              <Button onClick={() => router.push('/checkin')}>
+                Go to Check-in Now
+              </Button>
+            </TouchTarget>
           </CardContent>
         </Card>
       </div>
@@ -233,6 +235,19 @@ export default function Signup() {
     { value: 'XXXL', label: '3X Large (XXXL)' },
   ];
   
+  // Check if we're on mobile (simple check)
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <div className="container max-w-2xl mx-auto px-4">
@@ -244,14 +259,16 @@ export default function Signup() {
             { label: 'Register', current: true }
           ]}
           actions={
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/checkin')}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Check-in
-            </Button>
+            <TouchTarget>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/checkin')}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Check-in
+              </Button>
+            </TouchTarget>
           }
         />
         
@@ -271,68 +288,127 @@ export default function Signup() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="md:col-span-2">
+                    {isMobile ? (
+                      <MobileFormField
+                        type="input"
+                        label="First Name"
+                        value={watch('firstName')}
+                        onChange={(value) => setValue('firstName', value)}
+                        placeholder="Enter first name"
+                        required
+                        error={methods.formState.errors.firstName?.message}
+                      />
+                    ) : (
+                      <FormControl
+                        name="firstName"
+                        label="First Name"
+                        render={({ field, error }) => (
+                          <Input
+                            {...field}
+                            error={error}
+                            placeholder="Enter first name"
+                          />
+                        )}
+                      />
+                    )}
+                  </div>
+                  
+                  {isMobile ? (
+                    <MobileFormField
+                      type="input"
+                      label="M.I."
+                      value={watch('middleInitial') || ''}
+                      onChange={(value) => setValue('middleInitial', value)}
+                      placeholder="M"
+                      error={methods.formState.errors.middleInitial?.message}
+                    />
+                  ) : (
                     <FormControl
-                      name="firstName"
-                      label="First Name"
+                      name="middleInitial"
+                      label="M.I."
                       render={({ field, error }) => (
                         <Input
                           {...field}
                           error={error}
-                          placeholder="Enter first name"
+                          placeholder="M"
+                          maxLength={1}
                         />
                       )}
                     />
-                  </div>
+                  )}
+                </div>
+                
+                {isMobile ? (
+                  <MobileFormField
+                    type="input"
+                    label="Last Name"
+                    value={watch('lastName')}
+                    onChange={(value) => setValue('lastName', value)}
+                    placeholder="Enter last name"
+                    required
+                    error={methods.formState.errors.lastName?.message}
+                  />
+                ) : (
                   <FormControl
-                    name="middleInitial"
-                    label="M.I."
+                    name="lastName"
+                    label="Last Name"
                     render={({ field, error }) => (
                       <Input
                         {...field}
                         error={error}
-                        placeholder="M"
-                        maxLength={1}
+                        placeholder="Enter last name"
                       />
                     )}
                   />
-                </div>
+                )}
                 
-                <FormControl
-                  name="lastName"
-                  label="Last Name"
-                  render={({ field, error }) => (
-                    <Input
-                      {...field}
-                      error={error}
-                      placeholder="Enter last name"
-                    />
-                  )}
-                />
+                {isMobile ? (
+                  <MobileFormField
+                    type="input"
+                    label="Email Address"
+                    value={watch('email')}
+                    onChange={(value) => setValue('email', value)}
+                    placeholder="Enter email address"
+                    required
+                    error={methods.formState.errors.email?.message}
+                  />
+                ) : (
+                  <FormControl
+                    name="email"
+                    label="Email Address"
+                    render={({ field, error }) => (
+                      <Input
+                        {...field}
+                        type="email"
+                        error={error}
+                        placeholder="Enter email address"
+                      />
+                    )}
+                  />
+                )}
                 
-                <FormControl
-                  name="email"
-                  label="Email Address"
-                  render={({ field, error }) => (
-                    <Input
-                      {...field}
-                      type="email"
-                      error={error}
-                      placeholder="Enter email address"
-                    />
-                  )}
-                />
-                
-                <FormControl
-                  name="employer"
-                  label="Employer (Optional)"
-                  render={({ field, error }) => (
-                    <Input
-                      {...field}
-                      error={error}
-                      placeholder="Enter employer name"
-                    />
-                  )}
-                />
+                {isMobile ? (
+                  <MobileFormField
+                    type="input"
+                    label="Employer (Optional)"
+                    value={watch('employer') || ''}
+                    onChange={(value) => setValue('employer', value)}
+                    placeholder="Enter employer name"
+                    error={methods.formState.errors.employer?.message}
+                  />
+                ) : (
+                  <FormControl
+                    name="employer"
+                    label="Employer (Optional)"
+                    render={({ field, error }) => (
+                      <Input
+                        {...field}
+                        error={error}
+                        placeholder="Enter employer name"
+                      />
+                    )}
+                  />
+                )}
               </CardContent>
             </Card>
             
@@ -343,31 +419,53 @@ export default function Signup() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormControl
-                    name="shirtGender"
-                    label="Shirt Style"
-                    render={({ field, error }) => (
-                      <Select
-                        options={shirtGenderOptions}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        error={error}
-                      />
-                    )}
-                  />
+                  {isMobile ? (
+                    <MobileFormField
+                      type="select"
+                      label="Shirt Style"
+                      value={watch('shirtGender') || ''}
+                      onChange={(value) => setValue('shirtGender', value)}
+                      options={shirtGenderOptions}
+                      error={methods.formState.errors.shirtGender?.message}
+                    />
+                  ) : (
+                    <FormControl
+                      name="shirtGender"
+                      label="Shirt Style"
+                      render={({ field, error }) => (
+                        <Select
+                          options={shirtGenderOptions}
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          error={error}
+                        />
+                      )}
+                    />
+                  )}
                   
-                  <FormControl
-                    name="shirtSize"
-                    label="Shirt Size"
-                    render={({ field, error }) => (
-                      <Select
-                        options={shirtSizeOptions}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        error={error}
-                      />
-                    )}
-                  />
+                  {isMobile ? (
+                    <MobileFormField
+                      type="select"
+                      label="Shirt Size"
+                      value={watch('shirtSize') || ''}
+                      onChange={(value) => setValue('shirtSize', value)}
+                      options={shirtSizeOptions}
+                      error={methods.formState.errors.shirtSize?.message}
+                    />
+                  ) : (
+                    <FormControl
+                      name="shirtSize"
+                      label="Shirt Size"
+                      render={({ field, error }) => (
+                        <Select
+                          options={shirtSizeOptions}
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          error={error}
+                        />
+                      )}
+                    />
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -381,30 +479,54 @@ export default function Signup() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormControl
-                  name="emergencyName"
-                  label="Emergency Contact Name"
-                  render={({ field, error }) => (
-                    <Input
-                      {...field}
-                      error={error}
-                      placeholder="Enter emergency contact name"
-                    />
-                  )}
-                />
+                {isMobile ? (
+                  <MobileFormField
+                    type="input"
+                    label="Emergency Contact Name"
+                    value={watch('emergencyName')}
+                    onChange={(value) => setValue('emergencyName', value)}
+                    placeholder="Enter emergency contact name"
+                    required
+                    error={methods.formState.errors.emergencyName?.message}
+                  />
+                ) : (
+                  <FormControl
+                    name="emergencyName"
+                    label="Emergency Contact Name"
+                    render={({ field, error }) => (
+                      <Input
+                        {...field}
+                        error={error}
+                        placeholder="Enter emergency contact name"
+                      />
+                    )}
+                  />
+                )}
                 
-                <FormControl
-                  name="emergencyPhone"
-                  label="Emergency Contact Phone"
-                  render={({ field, error }) => (
-                    <Input
-                      {...field}
-                      type="tel"
-                      error={error}
-                      placeholder="Enter phone number"
-                    />
-                  )}
-                />
+                {isMobile ? (
+                  <MobileFormField
+                    type="input"
+                    label="Emergency Contact Phone"
+                    value={watch('emergencyPhone')}
+                    onChange={(value) => setValue('emergencyPhone', value)}
+                    placeholder="Enter phone number"
+                    required
+                    error={methods.formState.errors.emergencyPhone?.message}
+                  />
+                ) : (
+                  <FormControl
+                    name="emergencyPhone"
+                    label="Emergency Contact Phone"
+                    render={({ field, error }) => (
+                      <Input
+                        {...field}
+                        type="tel"
+                        error={error}
+                        placeholder="Enter phone number"
+                      />
+                    )}
+                  />
+                )}
               </CardContent>
             </Card>
             
@@ -414,29 +536,43 @@ export default function Signup() {
                 <CardTitle>Pet Information (Optional)</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormControl
-                  name="hasPet"
-                  render={({ field }) => (
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      label="I have a pet that will be joining me"
-                    />
-                  )}
-                />
-                
-                {hasPet && (
+                <TouchTarget>
                   <FormControl
-                    name="petName"
-                    label="Pet Name"
-                    render={({ field, error }) => (
-                      <Input
-                        {...field}
-                        error={error}
-                        placeholder="Enter your pet's name"
+                    name="hasPet"
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        label="I have a pet that will be joining me"
                       />
                     )}
                   />
+                </TouchTarget>
+                
+                {hasPet && (
+                  isMobile ? (
+                    <MobileFormField
+                      type="input"
+                      label="Pet Name"
+                      value={watch('petName') || ''}
+                      onChange={(value) => setValue('petName', value)}
+                      placeholder="Enter your pet's name"
+                      required
+                      error={methods.formState.errors.petName?.message}
+                    />
+                  ) : (
+                    <FormControl
+                      name="petName"
+                      label="Pet Name"
+                      render={({ field, error }) => (
+                        <Input
+                          {...field}
+                          error={error}
+                          placeholder="Enter your pet's name"
+                        />
+                      )}
+                    />
+                  )
                 )}
               </CardContent>
             </Card>
@@ -456,37 +592,43 @@ export default function Signup() {
                   </p>
                 </div>
                 
-                <FormControl
-                  name="disclaimerAccepted"
-                  render={({ field, error }) => (
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      label="I have read, understood, and agree to the terms of this disclaimer"
-                      error={error}
-                    />
-                  )}
-                />
+                <TouchTarget>
+                  <FormControl
+                    name="disclaimerAccepted"
+                    render={({ field, error }) => (
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        label="I have read, understood, and agree to the terms of this disclaimer"
+                        error={error}
+                      />
+                    )}
+                  />
+                </TouchTarget>
               </CardContent>
             </Card>
             
             {/* Submit Button */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => router.push('/checkin')}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1"
-              >
-                {isSubmitting ? 'Registering...' : 'Register Athlete'}
-              </Button>
+              <TouchTarget className="flex-1">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => router.push('/checkin')}
+                  className="w-full"
+                >
+                  Cancel
+                </Button>
+              </TouchTarget>
+              <TouchTarget className="flex-1">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting ? 'Registering...' : 'Register Athlete'}
+                </Button>
+              </TouchTarget>
             </div>
           </Form>
         </FormProvider>

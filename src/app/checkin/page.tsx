@@ -1,12 +1,12 @@
-// src/app/checkin/page.tsx
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { useEffect, useState } from 'react';
 
 import { Alert } from '@/components/atoms/alert/alert';
 import { Button } from '@/components/atoms/button/button';
 import { CheckInFlow } from '@/components/organisms/check-in-flow/check-in-flow';
+import { CheckInPageLoading } from '@/components/molecules/loading-states/loading-states';
+import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useHost } from '@/hooks/useHost';
@@ -64,51 +64,26 @@ export default function CheckIn() {
     router.push('/host/select-location');
   };
   
-  // Show loading state
+  // Show skeleton loading state instead of spinner
   if (isLoading || isLoadingHost || isLoadingLocation || !isReady) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading check-in system...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <CheckInPageLoading />;
   }
   
   // Show error state
   if (hostError || locationError || !host || !location) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-red-600">Configuration Error</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert variant="error">
-              {hostError && <p>Failed to load host information</p>}
-              {locationError && <p>Failed to load location information</p>}
-              {!host && !hostError && <p>Host not found</p>}
-              {!location && !locationError && <p>Location not found</p>}
-            </Alert>
-            
-            <div className="flex flex-col gap-2">
-              <Button onClick={handleChangeLocation} variant="outline">
-                Select Different Location
-              </Button>
-              <Link href="/host/login">
-                <Button variant="ghost" className="w-full">
-                  Back to Login
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <ErrorDisplay
+        title="Configuration Error"
+        message={
+          hostError ? "Failed to load host information" :
+          locationError ? "Failed to load location information" :
+          !host ? "Host not found" :
+          "Location not found"
+        }
+        error={hostError || locationError}
+        onRetry={() => window.location.reload()}
+        onGoHome={() => router.push('/host/login')}
+      />
     );
   }
   

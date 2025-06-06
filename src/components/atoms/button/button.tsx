@@ -4,6 +4,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils/ui';
 import { Slot } from '@radix-ui/react-slot';
+import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 
 // Define button variants using class-variance-authority
 const buttonVariants = cva(
@@ -36,18 +37,72 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  /**
+   * Whether to wrap the button in TouchTarget for enhanced mobile interactions
+   */
+  enableTouch?: boolean;
+  /**
+   * Whether to show ripple effect on touch (only applies when enableTouch is true)
+   */
+  ripple?: boolean;
+  /**
+   * Whether to provide haptic feedback on touch (only applies when enableTouch is true)
+   */
+  haptic?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ 
+    className, 
+    variant, 
+    size, 
+    asChild = false, 
+    enableTouch = true, // Enable touch by default for better mobile UX
+    ripple = true,
+    haptic = false,
+    disabled,
+    children,
+    onClick,
+    ...props 
+  }, ref) => {
     const Comp = asChild ? Slot : "button";
-    return (
+    
+    const buttonElement = (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        disabled={disabled}
+        onClick={onClick}
         {...props}
-      />
+      >
+        {children}
+      </Comp>
     );
+
+    // Wrap in TouchTarget for enhanced mobile interactions if enabled
+    if (enableTouch && !asChild) {
+      return (
+        <TouchTarget
+          ripple={ripple}
+          haptic={haptic}
+          disabled={disabled}
+          onClick={onClick}
+          className="inline-flex"
+        >
+          <Comp
+            className={cn(buttonVariants({ variant, size, className }))}
+            ref={ref}
+            disabled={disabled}
+            onClick={undefined} // Let TouchTarget handle the click
+            {...props}
+          >
+            {children}
+          </Comp>
+        </TouchTarget>
+      );
+    }
+
+    return buttonElement;
   }
 );
 

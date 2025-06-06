@@ -4,6 +4,8 @@ import * as React from 'react';
 
 import { ActivityEntity } from '@/lib/db/entities/types';
 import { Icon } from '@/components/atoms/icon/icon';
+import { SkeletonActivitySelector } from '@/components/atoms/skeleton/skeleton';
+import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { cn } from '@/lib/utils/ui';
 import { useActivities } from '@/hooks/useActivity';
 
@@ -19,7 +21,7 @@ interface ActivitySelectorProps {
 }
 
 /**
- * A specialized component for selecting activities
+ * A specialized component for selecting activities with enhanced touch interactions
  */
 export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   value,
@@ -34,8 +36,6 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   // Fetch activities if not provided
   const { data: fetchedActivities, isLoading } = useActivities(false);
   
-  // We should only use the data if providedActivities is not available
-
   // Use provided activities or fetched ones
   const activities = providedActivities || fetchedActivities || [];
 
@@ -65,9 +65,7 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-        </div>
+        <SkeletonActivitySelector count={limit} />
       ) : activities.length === 0 ? (
         <div className="py-4 text-center text-gray-500">
           No activities available
@@ -75,24 +73,32 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
       ) : (
         <div className={cn('grid gap-3', gridColsClass)}>
           {limitedActivities.map((activity) => (
-            <button
+            <TouchTarget
               key={activity.id}
-              type="button"
-              className={cn(
-                'flex flex-col items-center justify-center p-4 border rounded-lg transition-colors',
-                value === activity.id
-                  ? 'bg-primary-light border-primary text-primary'
-                  : 'bg-white hover:bg-gray-50 border-gray-200',
-                disabled && 'opacity-60 cursor-not-allowed'
-              )}
-              onClick={() => handleActivityClick(activity.id)}
+              ripple={true}
+              haptic={true}
               disabled={disabled || !activity.en}
+              onClick={() => handleActivityClick(activity.id)}
+              className={cn(
+                'flex flex-col items-center justify-center p-4 border rounded-lg transition-all duration-200',
+                'hover:shadow-md active:scale-98',
+                value === activity.id
+                  ? 'bg-primary-light border-primary text-primary shadow-md'
+                  : 'bg-white hover:bg-gray-50 border-gray-200',
+                (disabled || !activity.en) && 'opacity-60 cursor-not-allowed'
+              )}
             >
-              <div className="text-2xl mb-2">
-                <Icon name={activity.i} size="lg" color={value === activity.id ? 'primary' : 'inherit'} />
+              <div className="text-2xl mb-2 transition-transform duration-200">
+                <Icon 
+                  name={activity.i} 
+                  size="lg" 
+                  color={value === activity.id ? 'primary' : 'inherit'} 
+                />
               </div>
-              <span className="text-sm font-medium">{activity.n}</span>
-            </button>
+              <span className="text-sm font-medium text-center leading-tight">
+                {activity.n}
+              </span>
+            </TouchTarget>
           ))}
         </div>
       )}
