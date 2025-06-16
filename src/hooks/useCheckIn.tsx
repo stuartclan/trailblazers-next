@@ -1,39 +1,58 @@
+// src/hooks/useCheckIn.tsx
 'use client';
 
 import type { CheckInEntity, PetCheckInEntity } from '@/lib/db/entities/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-// API client functions
+import { apiClient } from '@/lib/utils/api-client';
+
+// API client functions using the new authenticated client
 const fetchAthleteCheckIns = async (athleteId: string, limit = 50): Promise<CheckInEntity[]> => {
-  const response = await fetch(`/api/athletes/${athleteId}/checkins?limit=${limit}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch athlete check-ins');
+  const response = await apiClient.get<CheckInEntity[]>(
+    `/api/athletes/${athleteId}/checkins?limit=${limit}`
+  );
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchPetCheckIns = async (petId: string, limit = 50): Promise<PetCheckInEntity[]> => {
-  const response = await fetch(`/api/pets/${petId}/checkins?limit=${limit}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch pet check-ins');
+  const response = await apiClient.get<PetCheckInEntity[]>(
+    `/api/pets/${petId}/checkins?limit=${limit}`
+  );
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchHostCheckIns = async (hostId: string, limit = 50): Promise<CheckInEntity[]> => {
-  const response = await fetch(`/api/hosts/${hostId}/checkins?limit=${limit}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch host check-ins');
+  const response = await apiClient.get<CheckInEntity[]>(
+    `/api/hosts/${hostId}/checkins?limit=${limit}`
+  );
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchHostPetCheckIns = async (hostId: string, limit = 50): Promise<PetCheckInEntity[]> => {
-  const response = await fetch(`/api/hosts/${hostId}/pet-checkins?limit=${limit}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch host pet check-ins');
+  const response = await apiClient.get<PetCheckInEntity[]>(
+    `/api/hosts/${hostId}/pet-checkins?limit=${limit}`
+  );
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const createCheckIn = async (data: {
@@ -42,20 +61,13 @@ const createCheckIn = async (data: {
   locationId: string;
   activityId: string;
 }): Promise<CheckInEntity> => {
-  const response = await fetch('/api/checkins', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<CheckInEntity>('/api/checkins', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create check-in');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const createPetCheckIn = async (data: {
@@ -64,41 +76,28 @@ const createPetCheckIn = async (data: {
   hostId: string;
   locationId: string;
 }): Promise<PetCheckInEntity> => {
-  const response = await fetch('/api/pet-checkins', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<PetCheckInEntity>('/api/pet-checkins', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create pet check-in');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const deleteCheckIn = async ({ athleteId, timestamp }: { athleteId: string; timestamp: number }): Promise<void> => {
-  const response = await fetch(`/api/athletes/${athleteId}/checkins/${timestamp}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete(`/api/athletes/${athleteId}/checkins/${timestamp}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete check-in');
+  if (response.error) {
+    throw new Error(response.error);
   }
 };
 
 const deletePetCheckIn = async ({ petId, timestamp }: { petId: string; timestamp: number }): Promise<void> => {
-  const response = await fetch(`/api/pets/${petId}/checkins/${timestamp}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete(`/api/pets/${petId}/checkins/${timestamp}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete pet check-in');
+  if (response.error) {
+    throw new Error(response.error);
   }
 };
 
@@ -108,13 +107,13 @@ const getAthleteCheckInCount = async (athleteId: string, hostId?: string): Promi
     url += `?hostId=${hostId}`;
   }
   
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to get check-in count');
+  const response = await apiClient.get<{ count: number }>(url);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  const data = await response.json();
-  return data.count;
+  return response.data!.count;
 };
 
 const getPetCheckInCount = async (petId: string, hostId?: string): Promise<number> => {
@@ -123,23 +122,25 @@ const getPetCheckInCount = async (petId: string, hostId?: string): Promise<numbe
     url += `?hostId=${hostId}`;
   }
   
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to get pet check-in count');
+  const response = await apiClient.get<{ count: number }>(url);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  const data = await response.json();
-  return data.count;
+  return response.data!.count;
 };
 
 const hasCheckedInAtHostWithinWeek = async ({ athleteId, hostId }: { athleteId: string; hostId: string }): Promise<boolean> => {
-  const response = await fetch(`/api/athletes/${athleteId}/checkins/recent?hostId=${hostId}`);
-  if (!response.ok) {
-    throw new Error('Failed to check recent check-ins');
+  const response = await apiClient.get<{ hasCheckedIn: boolean }>(
+    `/api/athletes/${athleteId}/checkins/recent?hostId=${hostId}`
+  );
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  const data = await response.json();
-  return data.hasCheckedIn;
+  return response.data!.hasCheckedIn;
 };
 
 // React Query Hooks

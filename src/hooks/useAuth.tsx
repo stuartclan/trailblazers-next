@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/hooks/useAuth.tsx
 'use client';
 
 import {
@@ -13,17 +13,6 @@ import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, 
 const userPoolId = process.env.NEXT_PUBLIC_POOL_ID || '';
 const userPoolClientId = process.env.NEXT_PUBLIC_POOL_CLIENT_ID || '';
 
-// // In client-side code, we need to load from the SITE_CONFIG parameter
-// if (typeof window !== 'undefined') {
-//   try {
-//     const siteConfig = JSON.parse(process.env.NEXT_PUBLIC_SITE_CONFIG || '{}');
-//     userPoolId = siteConfig.userPoolId || '';
-//     userPoolClientId = siteConfig.userPoolClientId || '';
-//   } catch (error) {
-//     console.error('Error parsing SITE_CONFIG:', error);
-//   }
-// }
-
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -35,6 +24,7 @@ interface AuthContextType {
   changePassword: (oldPassword: string, newPassword: string) => Promise<any>;
   getUserGroup: () => string | null;
   getHostId: () => string | null;
+  getAccessToken: () => Promise<string | null>; // NEW: Get current access token
 }
 
 interface AuthUser {
@@ -57,6 +47,7 @@ const AuthContext = createContext<AuthContextType>({
   changePassword: async () => ({}),
   getUserGroup: () => null,
   getHostId: () => null,
+  getAccessToken: async () => null, // NEW
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -67,17 +58,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   // Configure Cognito user pool
-  // TODO: Verify adding useMemo wrapper works (Typescript asked for it)
   const userPool = useMemo(() => {
     return new CognitoUserPool({
-    UserPoolId: userPoolId,
-    ClientId: userPoolClientId,
+      UserPoolId: userPoolId,
+      ClientId: userPoolClientId,
     });
   }, []);
 
   const getCurrentUser = useCallback(() => {
     return userPool.getCurrentUser();
   }, [userPool]);
+
+  // NEW: Get current access token
+  const getAccessToken = useCallback(async (): Promise<string | null> => {
+    const cognitoUser = getCurrentUser();
+    if (!cognitoUser) {
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
+        if (err || !session || !session.isValid()) {
+          resolve(null);
+          return;
+        }
+
+        const accessToken = session.getAccessToken();
+        resolve(accessToken.getJwtToken());
+      });
+    });
+  }, [getCurrentUser]);
 
   // Get user session details
   const getSession = useCallback(async () => {
@@ -115,7 +125,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(null);
               setIsAuthenticated(false);
             } else {
-              console.log('DEBUG: setting attributes:', userAttributes);
               setUser({
                 email: userAttributes.email,
                 hostId: userAttributes['custom:hostId'],
@@ -322,6 +331,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         changePassword,
         getUserGroup,
         getHostId,
+        getAccessToken, // NEW
       }}
     >
       {children}

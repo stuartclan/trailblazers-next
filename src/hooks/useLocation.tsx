@@ -1,32 +1,40 @@
+// src/hooks/useLocation.tsx
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { LocationEntity } from '@/lib/db/entities/types';
+import { apiClient } from '@/lib/utils/api-client';
 
-// API client functions
+// API client functions using the new authenticated client
 const fetchLocation = async (locationId: string): Promise<LocationEntity> => {
-  const response = await fetch(`/api/locations/${locationId}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch location');
+  const response = await apiClient.get<LocationEntity>(`/api/locations/${locationId}`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchLocations = async (): Promise<LocationEntity[]> => {
-  const response = await fetch('/api/locations');
-  if (!response.ok) {
-    throw new Error('Failed to fetch locations');
+  const response = await apiClient.get<LocationEntity[]>('/api/locations');
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchLocationsByHost = async (hostId: string): Promise<LocationEntity[]> => {
-  const response = await fetch(`/api/hosts/${hostId}/locations`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch host locations');
+  const response = await apiClient.get<LocationEntity[]>(`/api/hosts/${hostId}/locations`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const createLocation = async (data: {
@@ -35,20 +43,13 @@ const createLocation = async (data: {
   address: string;
   activityIds?: string[];
 }): Promise<LocationEntity> => {
-  const response = await fetch('/api/locations', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<LocationEntity>('/api/locations', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create location');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const updateLocation = async ({
@@ -58,30 +59,20 @@ const updateLocation = async ({
   id: string;
   data: Partial<Omit<LocationEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'GSI1PK' | 'GSI1SK'>>;
 }): Promise<LocationEntity> => {
-  const response = await fetch(`/api/locations/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.patch<LocationEntity>(`/api/locations/${id}`, data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update location');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const deleteLocation = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/locations/${id}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete(`/api/locations/${id}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete location');
+  if (response.error) {
+    throw new Error(response.error);
   }
 };
 
@@ -92,20 +83,16 @@ const updateLocationActivities = async ({
   locationId: string;
   activityIds: string[];
 }): Promise<LocationEntity> => {
-  const response = await fetch(`/api/locations/${locationId}/activities`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ activityIds }),
-  });
+  const response = await apiClient.put<LocationEntity>(
+    `/api/locations/${locationId}/activities`, 
+    { activityIds }
+  );
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update location activities');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 // React Query Hooks

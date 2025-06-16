@@ -1,24 +1,30 @@
+// src/hooks/usePet.tsx
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { PetEntity } from '@/lib/db/entities/types';
+import { apiClient } from '@/lib/utils/api-client';
 
-// API client functions
+// API client functions using the new authenticated client
 const fetchPet = async (petId: string): Promise<PetEntity> => {
-  const response = await fetch(`/api/pets/${petId}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch pet');
+  const response = await apiClient.get<PetEntity>(`/api/pets/${petId}`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchAthletesPets = async (athleteId: string): Promise<PetEntity[]> => {
-  const response = await fetch(`/api/athletes/${athleteId}/pets`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch athlete pets');
+  const response = await apiClient.get<PetEntity[]>(`/api/athletes/${athleteId}/pets`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchPets = async (limit = 50, cursor?: string): Promise<{
@@ -30,31 +36,29 @@ const fetchPets = async (limit = 50, cursor?: string): Promise<{
     url += `&cursor=${encodeURIComponent(cursor)}`;
   }
   
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to fetch pets');
+  const response = await apiClient.get<{
+    pets: PetEntity[],
+    nextCursor?: string
+  }>(url);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const createPet = async (data: {
   athleteId: string;
   name: string;
 }): Promise<PetEntity> => {
-  const response = await fetch('/api/pets', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<PetEntity>('/api/pets', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create pet');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const updatePet = async ({
@@ -64,41 +68,33 @@ const updatePet = async ({
   id: string;
   data: Partial<Omit<PetEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'GSI1PK' | 'GSI1SK'>>;
 }): Promise<PetEntity> => {
-  const response = await fetch(`/api/pets/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.patch<PetEntity>(`/api/pets/${id}`, data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update pet');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const deletePet = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/pets/${id}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete(`/api/pets/${id}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete pet');
+  if (response.error) {
+    throw new Error(response.error);
   }
 };
 
 const checkPetExists = async ({ athleteId, name }: { athleteId: string; name: string }): Promise<boolean> => {
-  const response = await fetch(`/api/athletes/${athleteId}/pets/exists?name=${encodeURIComponent(name)}`);
-  if (!response.ok) {
-    throw new Error('Failed to check if pet exists');
+  const response = await apiClient.get<{ exists: boolean }>(
+    `/api/athletes/${athleteId}/pets/exists?name=${encodeURIComponent(name)}`
+  );
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  const data = await response.json();
-  return data.exists;
+  return response.data!.exists;
 };
 
 // React Query Hooks

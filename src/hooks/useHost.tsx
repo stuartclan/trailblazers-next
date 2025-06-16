@@ -1,28 +1,30 @@
+// src/hooks/useHost.tsx
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { HostEntity } from '@/lib/db/entities/types';
+import { apiClient } from '@/lib/utils/api-client';
 
-// API client functions
+// API client functions using the new authenticated client
 const fetchHost = async (hostId: string): Promise<HostEntity> => {
-  const response = await fetch(`/api/hosts/${hostId}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch host');
+  const response = await apiClient.get<HostEntity>(`/api/hosts/${hostId}`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchHosts = async (): Promise<HostEntity[]> => {
-  const response = await fetch('/api/hosts');
-  if (response.status === 401) {
-    // Need to log-in
-    throw new Error('Login required');
+  const response = await apiClient.get<HostEntity[]>('/api/hosts');
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  if (!response.ok) {
-    throw new Error('Failed to fetch hosts');
-  }
-  return response.json();
+  
+  return response.data!;
 };
 
 const createHost = async (data: {
@@ -31,20 +33,13 @@ const createHost = async (data: {
   password: string;
   disclaimer?: string;
 }): Promise<HostEntity> => {
-  const response = await fetch('/api/hosts', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<HostEntity>('/api/hosts', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create host');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const updateHost = async ({
@@ -54,30 +49,20 @@ const updateHost = async ({
   id: string;
   data: Partial<Omit<HostEntity, 'pk' | 'sk' | 't' | 'id' | 'c'>>;
 }): Promise<HostEntity> => {
-  const response = await fetch(`/api/hosts/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.patch<HostEntity>(`/api/hosts/${id}`, data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update host');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const deleteHost = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/hosts/${id}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete(`/api/hosts/${id}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete host');
+  if (response.error) {
+    throw new Error(response.error);
   }
 };
 
@@ -92,20 +77,16 @@ const addCustomReward = async ({
     icon: string;
   };
 }): Promise<HostEntity> => {
-  const response = await fetch(`/api/hosts/${hostId}/rewards`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(rewardData),
-  });
+  const response = await apiClient.post<HostEntity>(
+    `/api/hosts/${hostId}/rewards`, 
+    rewardData
+  );
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to add custom reward');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const removeCustomReward = async ({
@@ -115,16 +96,13 @@ const removeCustomReward = async ({
   hostId: string;
   rewardId: string;
 }): Promise<HostEntity> => {
-  const response = await fetch(`/api/hosts/${hostId}/rewards/${rewardId}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete<HostEntity>(`/api/hosts/${hostId}/rewards/${rewardId}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to remove custom reward');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 // React Query Hooks

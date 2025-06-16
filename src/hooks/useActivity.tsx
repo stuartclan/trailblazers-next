@@ -1,32 +1,42 @@
+// src/hooks/useActivity.tsx
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { ActivityEntity } from '@/lib/db/entities/types';
+import { apiClient } from '@/lib/utils/api-client';
 
-// API client functions
+// API client functions using the new authenticated client
 const fetchActivity = async (activityId: string): Promise<ActivityEntity> => {
-  const response = await fetch(`/api/activities/${activityId}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch activity');
+  const response = await apiClient.get<ActivityEntity>(`/api/activities/${activityId}`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchActivities = async (includeDisabled = false): Promise<ActivityEntity[]> => {
-  const response = await fetch(`/api/activities?includeDisabled=${includeDisabled}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch activities');
+  const response = await apiClient.get<ActivityEntity[]>(
+    `/api/activities?includeDisabled=${includeDisabled}`
+  );
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchLocationActivities = async (locationId: string): Promise<ActivityEntity[]> => {
-  const response = await fetch(`/api/locations/${locationId}/activities`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch location activities');
+  const response = await apiClient.get<ActivityEntity[]>(`/api/locations/${locationId}/activities`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const createActivity = async (data: {
@@ -34,20 +44,13 @@ const createActivity = async (data: {
   icon: string;
   enabled?: boolean;
 }): Promise<ActivityEntity> => {
-  const response = await fetch('/api/activities', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<ActivityEntity>('/api/activities', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create activity');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const updateActivity = async ({
@@ -57,44 +60,31 @@ const updateActivity = async ({
   id: string;
   data: Partial<Omit<ActivityEntity, 'pk' | 'sk' | 't' | 'id' | 'c'>>;
 }): Promise<ActivityEntity> => {
-  const response = await fetch(`/api/activities/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.patch<ActivityEntity>(`/api/activities/${id}`, data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update activity');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const deleteActivity = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/activities/${id}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete(`/api/activities/${id}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete activity');
+  if (response.error) {
+    throw new Error(response.error);
   }
 };
 
 const createDefaultActivities = async (): Promise<ActivityEntity[]> => {
-  const response = await fetch('/api/activities/create-defaults', {
-    method: 'POST',
-  });
+  const response = await apiClient.post<ActivityEntity[]>('/api/activities/create-defaults');
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create default activities');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 // React Query Hooks

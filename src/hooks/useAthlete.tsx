@@ -3,22 +3,27 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { AthleteEntity } from '@/lib/db/entities/types';
+import { apiClient } from '@/lib/utils/api-client';
 
-// API client functions
+// API client functions using the new authenticated client
 const fetchAthlete = async (athleteId: string): Promise<AthleteEntity> => {
-  const response = await fetch(`/api/athletes/${athleteId}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch athlete');
+  const response = await apiClient.get<AthleteEntity>(`/api/athletes/${athleteId}`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const searchAthletes = async (searchQuery: string): Promise<AthleteEntity[]> => {
-  const response = await fetch(`/api/athletes/search?q=${encodeURIComponent(searchQuery)}`);
-  if (!response.ok) {
-    throw new Error('Failed to search athletes');
+  const response = await apiClient.get<AthleteEntity[]>(`/api/athletes/search?q=${encodeURIComponent(searchQuery)}`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchAthletes = async (limit = 50, cursor?: string): Promise<{
@@ -30,11 +35,16 @@ const fetchAthletes = async (limit = 50, cursor?: string): Promise<{
     url += `&cursor=${encodeURIComponent(cursor)}`;
   }
   
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to fetch athletes');
+  const response = await apiClient.get<{
+    athletes: AthleteEntity[],
+    nextCursor?: string
+  }>(url);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const createAthlete = async (data: {
@@ -49,20 +59,13 @@ const createAthlete = async (data: {
   emergencyPhone?: string;
   legacyCount?: number;
 }): Promise<AthleteEntity> => {
-  const response = await fetch('/api/athletes', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<AthleteEntity>('/api/athletes', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create athlete');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const updateAthlete = async ({
@@ -72,30 +75,20 @@ const updateAthlete = async ({
   id: string;
   data: Partial<Omit<AthleteEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'GSI2PK' | 'GSI2SK'>>;
 }): Promise<AthleteEntity> => {
-  const response = await fetch(`/api/athletes/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.patch<AthleteEntity>(`/api/athletes/${id}`, data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update athlete');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const deleteAthlete = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/athletes/${id}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete(`/api/athletes/${id}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete athlete');
+  if (response.error) {
+    throw new Error(response.error);
   }
 };
 
@@ -106,20 +99,16 @@ const signDisclaimer = async ({
   athleteId: string;
   hostId: string;
 }): Promise<AthleteEntity> => {
-  const response = await fetch(`/api/athletes/${athleteId}/disclaimer`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ hostId }),
-  });
+  const response = await apiClient.post<AthleteEntity>(
+    `/api/athletes/${athleteId}/disclaimer`, 
+    { hostId }
+  );
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to sign disclaimer');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const hasSignedDisclaimer = async ({
@@ -129,18 +118,18 @@ const hasSignedDisclaimer = async ({
   athleteId: string;
   hostId: string;
 }): Promise<boolean> => {
-  const response = await fetch(`/api/athletes/${athleteId}/disclaimer/${hostId}`);
+  const response = await apiClient.get<{ hasSigned: boolean }>(
+    `/api/athletes/${athleteId}/disclaimer/${hostId}`
+  );
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to check disclaimer status');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  const result = await response.json();
-  return result.hasSigned;
+  return response.data!.hasSigned;
 };
 
-// React Query Hooks
+// React Query Hooks (unchanged - they use the updated API functions)
 export const useAthlete = (athleteId: string) => {
   return useQuery({
     queryKey: ['athletes', athleteId],

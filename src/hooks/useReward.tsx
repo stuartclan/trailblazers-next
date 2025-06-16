@@ -1,39 +1,50 @@
+// src/hooks/useReward.tsx
 'use client';
 
 import type { RewardClaimEntity, RewardEntity } from '@/lib/db/entities/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-// API client functions
+import { apiClient } from '@/lib/utils/api-client';
+
+// API client functions using the new authenticated client
 const fetchReward = async (rewardId: string): Promise<RewardEntity> => {
-  const response = await fetch(`/api/rewards/${rewardId}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch reward');
+  const response = await apiClient.get<RewardEntity>(`/api/rewards/${rewardId}`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchGlobalRewards = async (): Promise<RewardEntity[]> => {
-  const response = await fetch('/api/rewards/global');
-  if (!response.ok) {
-    throw new Error('Failed to fetch global rewards');
+  const response = await apiClient.get<RewardEntity[]>('/api/rewards/global');
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchPetRewards = async (): Promise<RewardEntity[]> => {
-  const response = await fetch('/api/rewards/pet');
-  if (!response.ok) {
-    throw new Error('Failed to fetch pet rewards');
+  const response = await apiClient.get<RewardEntity[]>('/api/rewards/pet');
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchHostRewards = async (hostId: string): Promise<RewardEntity[]> => {
-  const response = await fetch(`/api/hosts/${hostId}/rewards`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch host rewards');
+  const response = await apiClient.get<RewardEntity[]>(`/api/hosts/${hostId}/rewards`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const createReward = async (data: {
@@ -43,20 +54,13 @@ const createReward = async (data: {
   type: 'global' | 'host' | 'pet';
   hostId?: string;
 }): Promise<RewardEntity> => {
-  const response = await fetch('/api/rewards', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<RewardEntity>('/api/rewards', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create reward');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const updateReward = async ({
@@ -66,47 +70,43 @@ const updateReward = async ({
   id: string;
   data: Partial<Omit<RewardEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'rt' | 'GSI1PK' | 'GSI1SK'>>;
 }): Promise<RewardEntity> => {
-  const response = await fetch(`/api/rewards/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.patch<RewardEntity>(`/api/rewards/${id}`, data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update reward');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const deleteReward = async (id: string): Promise<void> => {
-  const response = await fetch(`/api/rewards/${id}`, {
-    method: 'DELETE',
-  });
+  const response = await apiClient.delete(`/api/rewards/${id}`);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete reward');
+  if (response.error) {
+    throw new Error(response.error);
   }
 };
 
 const fetchRewardClaims = async (athleteId: string): Promise<RewardClaimEntity[]> => {
-  const response = await fetch(`/api/athletes/${athleteId}/rewards/claims`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch reward claims');
+  const response = await apiClient.get<RewardClaimEntity[]>(`/api/athletes/${athleteId}/rewards/claims`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const fetchHostRewardClaims = async (hostId: string, limit = 50): Promise<RewardClaimEntity[]> => {
-  const response = await fetch(`/api/hosts/${hostId}/rewards/claims?limit=${limit}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch host reward claims');
+  const response = await apiClient.get<RewardClaimEntity[]>(
+    `/api/hosts/${hostId}/rewards/claims?limit=${limit}`
+  );
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  
+  return response.data!;
 };
 
 const createRewardClaim = async (data: {
@@ -116,20 +116,13 @@ const createRewardClaim = async (data: {
   locationId: string;
   petId?: string;
 }): Promise<RewardClaimEntity> => {
-  const response = await fetch('/api/rewards/claims', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await apiClient.post<RewardClaimEntity>('/api/rewards/claims', data);
   
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create reward claim');
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const checkRewardEligibility = async (data: {
@@ -144,12 +137,16 @@ const checkRewardEligibility = async (data: {
     url += `?hostId=${data.hostId}`;
   }
   
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to check reward eligibility');
+  const response = await apiClient.get<{
+    globalRewards: { rewardId: string; count: number }[];
+    hostRewards: { rewardId: string; count: number }[];
+  }>(url);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 const checkPetRewardEligibility = async (data: {
@@ -163,12 +160,15 @@ const checkPetRewardEligibility = async (data: {
     url += `?hostId=${data.hostId}`;
   }
   
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to check pet reward eligibility');
+  const response = await apiClient.get<{
+    petRewards: { rewardId: string; count: number }[];
+  }>(url);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
 };
 
 // Function to get athletes that are "one-away" from rewards at a specific host
@@ -176,12 +176,32 @@ const getOneAwayAthletes = async (hostId: string): Promise<{
   globalOneAway: { athleteId: string; rewardId: string; currentCount: number; requiredCount: number }[];
   hostOneAway: { athleteId: string; rewardId: string; currentCount: number; requiredCount: number }[];
 }> => {
-  const response = await fetch(`/api/hosts/${hostId}/rewards/one-away`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch one-away athletes');
+  const response = await apiClient.get<{
+    globalOneAway: { athleteId: string; rewardId: string; currentCount: number; requiredCount: number }[];
+    hostOneAway: { athleteId: string; rewardId: string; currentCount: number; requiredCount: number }[];
+  }>(`/api/hosts/${hostId}/rewards/one-away`);
+  
+  if (response.error) {
+    throw new Error(response.error);
   }
   
-  return response.json();
+  return response.data!;
+};
+
+const createDefaultRewards = async (): Promise<{
+  global: RewardEntity[];
+  pet: RewardEntity[];
+}> => {
+  const response = await apiClient.post<{
+    global: RewardEntity[];
+    pet: RewardEntity[];
+  }>('/api/rewards/create-defaults');
+  
+  if (response.error) {
+    throw new Error(response.error);
+  }
+  
+  return response.data!;
 };
 
 // React Query Hooks
@@ -336,5 +356,17 @@ export const useOneAwayAthletes = (hostId: string) => {
     queryKey: ['rewards', 'one-away', hostId],
     queryFn: () => getOneAwayAthletes(hostId),
     enabled: !!hostId,
+  });
+};
+
+export const useCreateDefaultRewards = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: createDefaultRewards,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rewards', 'global'] });
+      queryClient.invalidateQueries({ queryKey: ['rewards', 'pet'] });
+    },
   });
 };
