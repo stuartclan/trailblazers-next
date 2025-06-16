@@ -39,13 +39,13 @@ export const AWS_CONFIG = {
   cognito: {
     userPoolId: process.env.COGNITO_USER_POOL_ID!,
     userPoolClientId: process.env.COGNITO_USER_POOL_CLIENT_ID!,
-    identityPoolId: process.env.COGNITO_IDENTITY_POOL_ID!,
+    // identityPoolId: process.env.COGNITO_IDENTITY_POOL_ID!,
     region: process.env.COGNITO_REGION || AWS_REGION,
   },
-  s3: {
-    bucketName: process.env.S3_BUCKET_NAME,
-    bucketUrl: process.env.S3_BUCKET_URL,
-  },
+//   s3: {
+//     bucketName: process.env.S3_BUCKET_NAME,
+//     bucketUrl: process.env.S3_BUCKET_URL,
+//   },
 } as const;
 
 // Validate required environment variables
@@ -54,7 +54,7 @@ export function validateAWSConfig() {
     'DYNAMODB_TABLE_NAME',
     'COGNITO_USER_POOL_ID', 
     'COGNITO_USER_POOL_CLIENT_ID',
-    'COGNITO_IDENTITY_POOL_ID',
+    // 'COGNITO_IDENTITY_POOL_ID',
   ];
 
   const missing = required.filter(key => !process.env[key]);

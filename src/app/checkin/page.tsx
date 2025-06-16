@@ -88,7 +88,7 @@ export default function CheckIn() {
   }
   
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <div className="container max-w-4xl mx-auto px-4">
         
         {/* Header */}

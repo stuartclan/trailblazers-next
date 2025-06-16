@@ -10,19 +10,19 @@ import {
 import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 // Get Cognito config from environment variables
-let userPoolId = '';
-let userPoolClientId = '';
+const userPoolId = process.env.NEXT_PUBLIC_POOL_ID || '';
+const userPoolClientId = process.env.NEXT_PUBLIC_POOL_CLIENT_ID || '';
 
-// In client-side code, we need to load from the SITE_CONFIG parameter
-if (typeof window !== 'undefined') {
-  try {
-    const siteConfig = JSON.parse(process.env.NEXT_PUBLIC_SITE_CONFIG || '{}');
-    userPoolId = siteConfig.userPoolId || '';
-    userPoolClientId = siteConfig.userPoolClientId || '';
-  } catch (error) {
-    console.error('Error parsing SITE_CONFIG:', error);
-  }
-}
+// // In client-side code, we need to load from the SITE_CONFIG parameter
+// if (typeof window !== 'undefined') {
+//   try {
+//     const siteConfig = JSON.parse(process.env.NEXT_PUBLIC_SITE_CONFIG || '{}');
+//     userPoolId = siteConfig.userPoolId || '';
+//     userPoolClientId = siteConfig.userPoolClientId || '';
+//   } catch (error) {
+//     console.error('Error parsing SITE_CONFIG:', error);
+//   }
+// }
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -30,8 +30,20 @@ interface AuthContextType {
   user: any | null;
   login: (email: string, password: string) => Promise<any>;
   logout: () => void;
+  confirmNewPassword: (newPassword: string) => Promise<any>;
+  confirm: (verificationCode: string, newPassword: string) => Promise<any>;
+  changePassword: (oldPassword: string, newPassword: string) => Promise<any>;
   getUserGroup: () => string | null;
   getHostId: () => string | null;
+}
+
+interface AuthUser {
+  email: string;
+  hostId?: string;
+  hostName?: string;
+  // what else?
+  // location?
+  // groups? isAdmin? isHost?
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -40,6 +52,9 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   login: async () => ({}),
   logout: () => {},
+  confirmNewPassword: async () => ({}),
+  confirm: async () => ({}),
+  changePassword: async () => ({}),
   getUserGroup: () => null,
   getHostId: () => null,
 });
@@ -49,7 +64,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   // Configure Cognito user pool
   // TODO: Verify adding useMemo wrapper works (Typescript asked for it)
@@ -89,20 +104,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (err) {
             console.error('Error getting user attributes:', err);
             setUser(null);
+            setIsAuthenticated(false);
           } else {
-            const userAttributes = attributes?.reduce((acc, attr) => {
+            const userAttributes: Record<string, string> | undefined = attributes?.reduce((acc, attr) => {
               return { ...acc, [attr.getName()]: attr.getValue() };
             }, {});
             
-            setUser({
-              email: userAttributes?.email,
-              hostId: userAttributes?.['custom:hostId'],
-              hostName: userAttributes?.['custom:hostName'],
-              ...userAttributes
-            });
+            if (!userAttributes) {
+              console.error('User attributes: is empty', err);
+              setUser(null);
+              setIsAuthenticated(false);
+            } else {
+              setUser({
+                email: userAttributes.email,
+                hostId: userAttributes['custom:hostId'],
+                hostName: userAttributes['custom:hostName'],
+                ...userAttributes
+              });
+              setIsAuthenticated(true);
+            }
           }
           
-          setIsAuthenticated(true);
           setIsLoading(false);
           resolve(session);
         });
@@ -133,8 +155,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
         newPasswordRequired: (userAttributes, requiredAttributes) => {
           // Handle new password required case
+          // Can uncomment this and just set the password used as the permanent password.
+          // cognitoUser.completeNewPasswordChallenge(password, requiredAttributes, {
+          //   onSuccess: async (session) => {
+          //     await getSession();
+          //     resolve({ success: true, session });
+          //   },
+          //   onFailure: (err) => {
+          //     reject(err);
+          //   },
+          // });
           // For simplicity, we're not implementing this here
           reject(new Error('New password required'));
+          // resolve({ success: true, newPasswordRequired: true });
+
+          console.log('DEBUG: new password userAttributes:', userAttributes);
+          console.log('DEBUG: new password requiredAttributes:', requiredAttributes);
         },
       });
     });
@@ -152,6 +188,80 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('currentHostId');
       localStorage.removeItem('currentLocationId');
     }
+  };
+
+  // Confirm function
+  const confirmNewPassword = async (newPassword: string): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const email = user?.email;
+      console.log('DEBUG: confirm email:', email);
+      if (!email) {
+        reject(new Error('Missing email in state'));
+        return;
+      }
+
+      const cognitoUser = new CognitoUser({
+        Username: email,
+        Pool: userPool,
+      });
+
+      cognitoUser.completeNewPasswordChallenge(newPassword, null, {
+        onSuccess: async (session) => {
+          await getSession();
+          resolve({ success: true, session });
+        },
+        onFailure: (err) => {
+          reject(err);
+        },
+      });
+    });
+  };
+
+  // Confirm function
+  const confirm = async (verificationCode: string, newPassword: string): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const email = user?.email;
+      console.log('DEBUG: confirm email:', email);
+      if (!email) {
+        reject(new Error('Missing email in state'));
+        return;
+      }
+
+      const cognitoUser = new CognitoUser({
+        Username: email,
+        Pool: userPool,
+      });
+
+      cognitoUser.confirmPassword(verificationCode, newPassword, {
+        onSuccess: async (session) => {
+          await getSession();
+          resolve({ success: true, session });
+        },
+        onFailure: (err) => {
+          reject(err);
+        },
+      });
+    });
+  };
+
+  // Reset function
+  const changePassword = async (oldPassword: string, newPassword: string): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const cognitoUser = getCurrentUser();
+
+      if (!cognitoUser) {
+        reject(new Error('Not currently logged in'));
+        return;
+      }
+
+      cognitoUser.changePassword(oldPassword, newPassword, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({success: true});
+        }
+      })
+    });
   };
 
   // Get user group
@@ -206,6 +316,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         login,
         logout,
+        confirmNewPassword,
+        confirm,
+        changePassword,
         getUserGroup,
         getHostId,
       }}

@@ -223,16 +223,16 @@ export default function HostSettings() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-md">Loading...</h1>
+          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
         </div>
       </div>
     );
   }
   
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <div className="container max-w-4xl">
-        <div className="flex justify-between items-center mb-lg">
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Host Settings</h1>
           
           <Link
@@ -244,13 +244,13 @@ export default function HostSettings() {
         </div>
         
         {/* Admin Password Section */}
-        <div className="card mb-lg">
-          <h2 className="text-xl font-bold mb-md">Admin Password</h2>
+        <div className="card mb-6">
+          <h2 className="text-xl font-bold mb-4">Admin Password</h2>
           
           {isEditingPassword ? (
             <div>
-              <div className="mb-md">
-                <label htmlFor="adminPassword" className="block text-sm font-medium text-gray-700 mb-sm">
+              <div className="mb-4">
+                <label htmlFor="adminPassword" className="block text-sm font-medium text-gray-700 mb-2">
                   New Admin Password
                 </label>
                 <input
@@ -267,7 +267,7 @@ export default function HostSettings() {
                 </p>
               </div>
               
-              <div className="flex justify-end gap-md">
+              <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelPasswordEdit}
                   className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
@@ -286,7 +286,7 @@ export default function HostSettings() {
             </div>
           ) : (
             <div>
-              <p className="text-gray-600 mb-md">
+              <p className="text-gray-600 mb-4">
                 The admin password is used to access the host admin area. This is different from your login credentials.
               </p>
               
@@ -301,13 +301,13 @@ export default function HostSettings() {
         </div>
         
         {/* Disclaimer Section */}
-        <div className="card mb-lg">
-          <h2 className="text-xl font-bold mb-md">Disclaimer</h2>
+        <div className="card mb-6">
+          <h2 className="text-xl font-bold mb-4">Disclaimer</h2>
           
           {isEditingDisclaimer ? (
             <div>
-              <div className="mb-md">
-                <label htmlFor="disclaimer" className="block text-sm font-medium text-gray-700 mb-sm">
+              <div className="mb-4">
+                <label htmlFor="disclaimer" className="block text-sm font-medium text-gray-700 mb-2">
                   Disclaimer Text
                 </label>
                 <textarea
@@ -319,7 +319,7 @@ export default function HostSettings() {
                 />
               </div>
               
-              <div className="flex justify-end gap-md">
+              <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelDisclaimerEdit}
                   className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
@@ -338,7 +338,7 @@ export default function HostSettings() {
             </div>
           ) : (
             <div>
-              <div className="bg-gray-50 p-4 rounded-md mb-md">
+              <div className="bg-gray-50 p-4 rounded-md mb-4">
                 {disclaimer ? (
                   <p className="text-gray-700">{disclaimer}</p>
                 ) : (
@@ -358,11 +358,11 @@ export default function HostSettings() {
         
         {/* Activities Section */}
         <div className="card">
-          <h2 className="text-xl font-bold mb-md">Allowed Activities</h2>
+          <h2 className="text-xl font-bold mb-4">Allowed Activities</h2>
           
           {hostLocations && hostLocations.length > 1 && (
-            <div className="mb-lg">
-              <label htmlFor="locationSelect" className="block text-sm font-medium text-gray-700 mb-sm">
+            <div className="mb-6">
+              <label htmlFor="locationSelect" className="block text-sm font-medium text-gray-700 mb-2">
                 Select Location
               </label>
               <select
@@ -381,10 +381,10 @@ export default function HostSettings() {
           
           {isEditingActivities ? (
             <div>
-              <p className="text-gray-600 mb-md">Select up to 3 activities that are available at this location:</p>
+              <p className="text-gray-600 mb-4">Select up to 3 activities that are available at this location:</p>
               
               {activities && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-md mb-lg">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                   {activities.map(activity => (
                     <div 
                       key={activity.id}
@@ -415,7 +415,7 @@ export default function HostSettings() {
                 </div>
               )}
               
-              <div className="flex justify-end gap-md">
+              <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelActivitiesEdit}
                   className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
@@ -435,7 +435,7 @@ export default function HostSettings() {
           ) : (
             <div>
               {activities && selectedActivities.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-md mb-md">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                   {selectedActivities.map(activityId => {
                     const activity = activities.find(a => a.id === activityId);
                     if (!activity) return null;
@@ -455,7 +455,7 @@ export default function HostSettings() {
                   })}
                 </div>
               ) : (
-                <p className="text-gray-600 italic mb-md">No activities selected for this location</p>
+                <p className="text-gray-600 italic mb-4">No activities selected for this location</p>
               )}
               
               <button

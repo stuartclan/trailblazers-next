@@ -11,12 +11,13 @@ export default $config({
         aws: {
           region: "us-east-2",
         },
+        random: "4.18.2",
       },
     };
   },
   async run() {
     // DynamoDB Table for single-table design
-    const table = new sst.aws.Dynamo("TrailblazersTable", {
+    const table = new sst.aws.Dynamo("Trailblazers", {
       fields: {
         pk: "string",
         sk: "string",
@@ -36,10 +37,16 @@ export default $config({
     });
 
     // Cognito User Pool for authentication
-    const userPool = new sst.aws.CognitoUserPool("TrailblazersUserPool", {
+    const userPool = new sst.aws.CognitoUserPool("TrailblazersUsers", {
       usernames: ["email"],
       transform: {
         userPool: {
+          deletionProtection: 'ACTIVE',
+          // TODO: Configure custom email via SES?
+          // emailConfiguration: {
+          //   fromEmailAddress: 'info@clubtrailblazers.com',
+          //   emailSendingAccount: 'DEVELOPER',
+          // },
           // Password policy
           passwordPolicy: {
             minimumLength: 8,
@@ -53,24 +60,23 @@ export default $config({
           accountRecoverySetting: {
             recoveryMechanisms: [
               { 
-                name: 'verifiedEmail',
+                name: 'verified_email',
                 priority: 1,
-               },
-            ]
+              },
+            ],
             // email: true,
             // phone: false,
           },
 
           // Email configuration
-          emailConfiguration: {
-            fromEmailAddress: 'noreply@clubtrailblazers.com',
-          },
+          // emailConfiguration: {
+          //   fromEmailAddress: 'noreply@clubtrailblazers.com',
+          // },
           emailVerificationSubject: 'Your Trailblazers verification code',
           // email: {
           //   from: "noreply@trailblazers.app", // Change to your domain
           //   subject: "Your Trailblazers verification code",
           // },
-
           autoVerifiedAttributes: ['email'],
         }
       },
@@ -84,73 +90,94 @@ export default $config({
       // },
     });
 
-    // Cognito User Pool Client
-    const userPoolClient = new sst.aws.CognitoUserPoolClient("TrailblazersUserPoolClient", {
-      userPoolId: userPool.id,
-      authFlows: [
-        "ADMIN_NO_SRP_AUTH",
-        "USER_SRP_AUTH", 
-        "USER_PASSWORD_AUTH",
-        "ALLOW_REFRESH_TOKEN_AUTH",
-      ],
-      generateSecret: false, // Set to true for server-side apps
-      
-      // // OAuth settings (optional - for social login)
-      // oauth: {
-      //   flows: ["code"],
-      //   scopes: ["email", "openid", "profile"],
-      //   callbackUrls: [
-      //     $dev ? "http://localhost:3000/api/auth/callback/cognito" : "https://trailblazers.app/api/auth/callback/cognito"
-      //   ],
-      //   logoutUrls: [
-      //     $dev ? "http://localhost:3000" : "https://trailblazers.app"
-      //   ],
-      // },
-      
-      // Token validity
-      accessTokenValidity: 60, // 1 hour
-      idTokenValidity: 60, // 1 hour  
-      refreshTokenValidity: 43200, // 30 days
-    });
+    const userPoolClient = userPool.addClient("TrailblazersApp", {
+      transform: {
+        client: {
+          // "ADMIN_NO_SRP_AUTH" "CUSTOM_AUTH_FLOW_ONLY" "USER_PASSWORD_AUTH" "ALLOW_ADMIN_USER_PASSWORD_AUTH" "ALLOW_CUSTOM_AUTH" "ALLOW_USER_PASSWORD_AUTH" "ALLOW_USER_SRP_AUTH" "ALLOW_REFRESH_TOKEN_AUTH" "ALLOW_USER_AUTH"
+          explicitAuthFlows: [
+            "ADMIN_NO_SRP_AUTH",
+            // "ALLOW_USER_SRP_AUTH", 
+            "USER_PASSWORD_AUTH",
+            // "ALLOW_REFRESH_TOKEN_AUTH",
+          ],
+          generateSecret: false, // Set to true for server-side apps
 
-    // Cognito Identity Pool for AWS credentials
-    const identityPool = new sst.aws.CognitoIdentityPool("TrailblazersIdentityPool", {
-      userPools: [
-        {
-          userPool: userPool.id,
-          client: userPoolClient.id,
+          // Token validity
+          accessTokenValidity: 1, // 1 hour
+          idTokenValidity: 1, // 1 hour  
+          refreshTokenValidity: 30, // 30 days
         },
-      ],
-      permissions: {
-        authenticated: [
-          {
-            actions: [
-              "dynamodb:GetItem",
-              "dynamodb:PutItem", 
-              "dynamodb:UpdateItem",
-              "dynamodb:DeleteItem",
-              "dynamodb:Query",
-              "dynamodb:Scan",
-            ],
-            resources: [table.arn, `${table.arn}/index/*`],
-          },
-        ],
-        unauthenticated: [
-          {
-            actions: [
-              "dynamodb:GetItem",
-              "dynamodb:Query",
-            ],
-            resources: [table.arn, `${table.arn}/index/*`],
-            // conditions: {
-            //   "ForAllValues:StringEquals": {
-            //     "dynamodb:LeadingKeys": ["PUBLIC#"],
-            //   },
-            // },
-          },
-        ],
       },
     });
+
+    // // Cognito User Pool Client
+    // const userPoolClient = new sst.aws.CognitoUserPoolClient("TrailblazersUserPoolClient", {
+    //   userPoolId: userPool.id,
+    //   authFlows: [
+    //     "ADMIN_NO_SRP_AUTH",
+    //     "USER_SRP_AUTH", 
+    //     "USER_PASSWORD_AUTH",
+    //     "ALLOW_REFRESH_TOKEN_AUTH",
+    //   ],
+    //   generateSecret: false, // Set to true for server-side apps
+      
+    //   // // OAuth settings (optional - for social login)
+    //   // oauth: {
+    //   //   flows: ["code"],
+    //   //   scopes: ["email", "openid", "profile"],
+    //   //   callbackUrls: [
+    //   //     $dev ? "http://localhost:3000/api/auth/callback/cognito" : "https://trailblazers.app/api/auth/callback/cognito"
+    //   //   ],
+    //   //   logoutUrls: [
+    //   //     $dev ? "http://localhost:3000" : "https://trailblazers.app"
+    //   //   ],
+    //   // },
+      
+    //   // Token validity
+    //   accessTokenValidity: 60, // 1 hour
+    //   idTokenValidity: 60, // 1 hour  
+    //   refreshTokenValidity: 43200, // 30 days
+    // });
+
+    // // Don't think and Identity Pool is needed
+    // // Cognito Identity Pool for AWS credentials
+    // const identityPool = new sst.aws.CognitoIdentityPool("TrailblazersIdentityPool", {
+    //   userPools: [
+    //     {
+    //       userPool: userPool.id,
+    //       client: userPoolClient.id,
+    //     },
+    //   ],
+    //   permissions: {
+    //     authenticated: [
+    //       {
+    //         actions: [
+    //           "dynamodb:GetItem",
+    //           "dynamodb:PutItem", 
+    //           "dynamodb:UpdateItem",
+    //           "dynamodb:DeleteItem",
+    //           "dynamodb:Query",
+    //           "dynamodb:Scan",
+    //         ],
+    //         resources: [table.arn, `${table.arn}/index/*`],
+    //       },
+    //     ],
+    //     unauthenticated: [
+    //       {
+    //         actions: [
+    //           "dynamodb:GetItem",
+    //           "dynamodb:Query",
+    //         ],
+    //         resources: [table.arn, `${table.arn}/index/*`],
+    //         // conditions: {
+    //         //   "ForAllValues:StringEquals": {
+    //         //     "dynamodb:LeadingKeys": ["PUBLIC#"],
+    //         //   },
+    //         // },
+    //       },
+    //     ],
+    //   },
+    // });
 
     // // API Gateway for backend endpoints (optional - if you need REST API)
     // const api = new sst.aws.ApiGatewayV2("TrailblazersApi", {
@@ -220,7 +247,7 @@ export default $config({
     const nextjs = new sst.aws.Nextjs("TrailblazersWeb", {
       environment: {
         // AWS Configuration
-        AWS_REGION: aws.getRegionOutput().name,
+        // AWS_REGION: aws.getRegionOutput().name,
         
         // DynamoDB
         DYNAMODB_TABLE_NAME: table.name,
@@ -228,10 +255,10 @@ export default $config({
         // Cognito Configuration
         COGNITO_USER_POOL_ID: userPool.id,
         COGNITO_USER_POOL_CLIENT_ID: userPoolClient.id,
-        COGNITO_IDENTITY_POOL_ID: identityPool.id,
+        // COGNITO_IDENTITY_POOL_ID: identityPool.id,
         
         // NextAuth Configuration
-        NEXTAUTH_URL: $dev ? "http://localhost:3000" : "https://trailblazers.app",
+        NEXTAUTH_URL: $dev ? "http://localhost:3000" : "https://clubtrailblazers.com",
         NEXTAUTH_SECRET: new random.RandomPassword("NextAuthSecret", {
           length: 32,
           special: false,
@@ -248,6 +275,8 @@ export default $config({
         APP_NAME: "Trailblazers Check-In System",
         APP_VERSION: "1.0.0",
         NODE_ENV: $dev ? "development" : "production",
+        NEXT_PUBLIC_POOL_ID: userPool.id,
+        NEXT_PUBLIC_POOL_CLIENT_ID: userPoolClient.id,
       },
       
       // Domain configuration (optional)
@@ -258,13 +287,24 @@ export default $config({
       
       // OpenNext configuration
       openNextVersion: "3.0.0",
-      buildCommand: "npm run build",
+      buildCommand: "pnpm run build",
+      dev: {
+        command: 'pnpm run dev:next',
+      },
       
       // Performance optimizations
       server: {
         memory: "1024 MB",
         timeout: "30 seconds",
       },
+      transform: {
+        server: {
+          logging: {
+            format: 'json',
+            retention: '1 month',
+          }
+        }
+      }
       
       // // Edge configuration for global performance
       // edge: false, // Set to true for edge deployment
@@ -325,7 +365,7 @@ export default $config({
       // Cognito Configuration
       userPoolId: userPool.id,
       userPoolClientId: userPoolClient.id,
-      identityPoolId: identityPool.id,
+      // identityPoolId: identityPool.id,
       
       // // S3 Configuration
       // bucketName: bucket.name,

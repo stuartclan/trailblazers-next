@@ -1,5 +1,7 @@
 'use client';
 
+import './card.scss';
+
 import * as React from 'react';
 
 import { cn } from '@/lib/utils/ui';
@@ -31,7 +33,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('card-header flex flex-col space-y-1.5 p-6', className)}
+      className={cn('card__header flex flex-col space-y-1.5 p-6', className)}
       {...props}
     />
   )
@@ -44,12 +46,25 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('card-title text-xl font-semibold leading-none tracking-tight', className)}
+      className={cn('card__title text-primary text-xl font-semibold leading-none tracking-tight', className)}
       {...props}
     />
   )
 );
 CardTitle.displayName = 'CardTitle';
+
+type CardSubTitleProps = React.HTMLAttributes<HTMLHeadingElement>
+
+const CardSubTitle = React.forwardRef<HTMLHeadingElement, CardSubTitleProps>(
+  ({ className, ...props }, ref) => (
+    <p
+      ref={ref}
+      className={cn('text-gray-600 mt-2 font-normal', className)}
+      {...props}
+    />
+  )
+);
+CardSubTitle.displayName = 'CardSubTitle';
 
 type CardDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
 
@@ -57,7 +72,7 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionPr
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn('card-description text-sm text-gray-500', className)}
+      className={cn('card__description text-sm text-gray-500', className)}
       {...props}
     />
   )
@@ -90,4 +105,4 @@ const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
 );
 CardFooter.displayName = 'CardFooter';
 
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter };
+export { Card, CardHeader, CardTitle, CardSubTitle, CardDescription, CardContent, CardFooter };

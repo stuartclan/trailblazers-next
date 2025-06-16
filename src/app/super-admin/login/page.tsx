@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { Card, CardContent, CardHeader, CardSubTitle, CardTitle } from '@/components/atoms/card/card';
 
 import { Alert } from '@/components/atoms/alert/alert';
 import { Button } from '@/components/atoms/button/button';
@@ -26,15 +26,30 @@ export default function SuperAdminLogin() {
     setLoading(true);
     
     // Show progress toast
-    info('Authenticating super admin access...', 'Admin Authentication');
+    info('Authenticating super admin access...', 'Admin authentication');
     
     try {
-      await login(email, password);
+      const res = await login(email, password);
+
+      console.log('DEBUG: login result:', res);
+
+      if (!res.success) {
+        // Shouldn't really get here
+        const errorMessage = 'Login unsuccessful';
+        setError(errorMessage);
+        toastError(errorMessage, 'Admin authentication failed');
+        return;
+      }
+
+      if (res.newPasswordRequired) {
+        router.push('/super-admin/new-password');
+        return;
+      }
       
       // Show success toast
       success(
         'Super admin access granted! Welcome to the admin dashboard.',
-        'Admin Access Granted'
+        'Admin access granted'
       );
       
       // Delay to show success message, then redirect
@@ -46,24 +61,29 @@ export default function SuperAdminLogin() {
       console.error('Super admin login error:', err);
       const errorMessage = err.message || 'Failed to login. Please check your credentials.';
       
-      // Show error in both local state and toast
-      setError(errorMessage);
-      toastError(errorMessage, 'Admin Authentication Failed');
+      // if (errorMessage === 'New password required') {
+      //   router.push('/super-admin/reset');
+      // } else {
+        // Show error in both local state and toast
+        setError(errorMessage);
+        toastError(errorMessage, 'Admin authentication failed');
+      // }
     } finally {
       setLoading(false);
     }
   };
   
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">
-            <h1 className="text-2xl font-bold">Trailblazers Super Admin</h1>
-            <p className="text-gray-600 mt-2 font-normal">Sign in to manage the Trailblazers system</p>
+        <CardHeader className='text-center'>
+          <CardTitle className="text-2xl font-bold">
+            Trailblazers Super Admin
           </CardTitle>
+          <CardSubTitle>
+            Sign in to manage the Trailblazers system
+          </CardSubTitle>
         </CardHeader>
-        
         <CardContent>
           {error && (
             <Alert variant="error" className="mb-6">
@@ -71,10 +91,12 @@ export default function SuperAdminLogin() {
             </Alert>
           )}
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
               label="Admin Email"
               type="email"
+              // Would we want it on?
+              autoComplete='off'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -85,6 +107,7 @@ export default function SuperAdminLogin() {
             <Input
               label="Admin Password"
               type="password"
+              autoComplete='off'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

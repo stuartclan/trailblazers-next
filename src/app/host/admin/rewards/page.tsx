@@ -123,9 +123,9 @@ export default function HostRewards() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <div className="container max-w-4xl">
-        <div className="flex justify-between items-center mb-lg">
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Manage Rewards</h1>
           
           <Link
@@ -136,8 +136,8 @@ export default function HostRewards() {
           </Link>
         </div>
         
-        <div className="card mb-lg">
-          <div className="flex justify-between items-center mb-md">
+        <div className="card mb-6">
+          <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Athletes Eligible for Rewards</h2>
             
             <div className="flex items-center">
@@ -206,8 +206,8 @@ export default function HostRewards() {
         </div>
         
         {/* Host Custom Rewards */}
-        <div className="card mb-lg">
-          <div className="flex justify-between items-center mb-md">
+        <div className="card mb-6">
+          <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Host Custom Rewards</h2>
             
             <Link
@@ -219,7 +219,7 @@ export default function HostRewards() {
           </div>
           
           {hostRewards && hostRewards.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {hostRewards.map((reward) => (
                 <div key={reward.id} className="border rounded-md p-4 hover:bg-gray-50">
                   <div className="flex items-center gap-3">
@@ -236,7 +236,7 @@ export default function HostRewards() {
             </div>
           ) : (
             <div className="text-center py-md">
-              <p className="text-gray-600 mb-md">No custom rewards configured</p>
+              <p className="text-gray-600 mb-4">No custom rewards configured</p>
               <Link
                 href="/host/admin/rewards/custom"
                 className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition-colors"
@@ -249,10 +249,10 @@ export default function HostRewards() {
         
         {/* Global Rewards */}
         <div className="card">
-          <h2 className="text-xl font-bold mb-md">Global Trailblazer Rewards</h2>
+          <h2 className="text-xl font-bold mb-4">Global Trailblazer Rewards</h2>
           
           {globalRewards && globalRewards.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {globalRewards.map((reward) => (
                 <div key={reward.id} className="border rounded-md p-4 hover:bg-gray-50">
                   <div className="flex items-center gap-3">

@@ -155,7 +155,7 @@ export default function HostAdmin() {
   // Password authentication form
   if (showPasswordForm || !isPasswordAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Host Admin Access</CardTitle>
@@ -212,7 +212,7 @@ export default function HostAdmin() {
   }) || [];
   
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen">
       <div className="container max-w-6xl mx-auto px-4 py-8">
         <PageHeader
           title="Host Admin Dashboard"

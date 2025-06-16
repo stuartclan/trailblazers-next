@@ -48,7 +48,7 @@ export default function SelectLocation() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-md">Loading...</h1>
+          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
         </div>
       </div>
     );
@@ -59,11 +59,11 @@ export default function SelectLocation() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-md">Error</h1>
+          <h1 className="text-2xl font-bold mb-4">Error</h1>
           <p className="text-red-500">{locationError?.toString() || 'Failed to load locations'}</p>
           <button 
             onClick={() => router.push('/host/login')}
-            className="mt-lg bg-primary text-white py-2 px-4 rounded hover:bg-primary-dark"
+            className="mt-6 bg-primary text-white py-2 px-4 rounded hover:bg-primary-dark"
           >
             Back to Login
           </button>
@@ -77,8 +77,8 @@ export default function SelectLocation() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center card max-w-md w-full">
-          <h1 className="text-2xl font-bold mb-md">No Locations Found</h1>
-          <p className="mb-lg">
+          <h1 className="text-2xl font-bold mb-4">No Locations Found</h1>
+          <p className="mb-6">
             You don&apos;t have any locations set up yet. Please contact the system administrator.
           </p>
           <button 
@@ -95,18 +95,18 @@ export default function SelectLocation() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="card w-full max-w-md">
-        <div className="text-center mb-lg">
+        <div className="text-center mb-6">
           <h1 className="text-2xl font-bold">Select Location</h1>
-          <p className="text-gray-600 mt-sm">Choose a location to manage check-ins</p>
+          <p className="text-gray-600 mt-2">Choose a location to manage check-ins</p>
         </div>
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-lg" role="alert">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
             <p>{error}</p>
           </div>
         )}
         
-        <div className="flex flex-col gap-md">
+        <div className="flex flex-col gap-4">
           {locations.map((location) => (
             <button
               key={location.id}
@@ -119,7 +119,7 @@ export default function SelectLocation() {
           ))}
         </div>
         
-        <div className="mt-lg text-center">
+        <div className="mt-6 text-center">
           <button 
             onClick={() => router.push('/host/login')}
             className="text-primary hover:underline"

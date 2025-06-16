@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect } from 'react';
 
 // Helper function to load Material Icons stylesheet

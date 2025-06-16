@@ -13,7 +13,7 @@ import {
  */
 export const CheckInPageLoading: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <div className="container max-w-4xl mx-auto px-4 space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -154,7 +154,7 @@ export const AthleteSearchLoading: React.FC = () => {
  */
 export const RewardsPageLoading: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <div className="container max-w-4xl mx-auto px-4 space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -243,7 +243,7 @@ export const RewardsPageLoading: React.FC = () => {
  */
 export const SignupFormLoading: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <div className="container max-w-2xl mx-auto px-4 space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">

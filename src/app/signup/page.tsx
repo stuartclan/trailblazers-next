@@ -249,7 +249,7 @@ export default function Signup() {
   }, []);
   
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <div className="container max-w-2xl mx-auto px-4">
         <PageHeader
           title="Register New Athlete"

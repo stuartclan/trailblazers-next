@@ -131,6 +131,17 @@ The application uses a single-table design in DynamoDB for efficient querying an
 - Rewards
 - Reward Claims
 
+## Create Super Admin
+
+Create the super admin user in Cognito and assign the "super-admins" group. Once that is done, run the following awscli command to update the account and remove the FORCE_CHANGE_PASSWORD:
+```bash
+aws cognito-idp admin-set-user-password \
+  --user-pool-id <your-user-pool-id> \
+  --username <username> \
+  --password <password> \
+  --permanent
+```
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

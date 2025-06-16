@@ -56,7 +56,7 @@ export default function HostLogin() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">
-            <h1 className="text-2xl font-bold">Trailblazers Host Login</h1>
+            <span className="text-2xl font-bold">Trailblazers Host Login</span><br />
             <p className="text-gray-600 mt-2 font-normal">Sign in to manage check-ins</p>
           </CardTitle>
         </CardHeader>
@@ -97,16 +97,6 @@ export default function HostLogin() {
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-          
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <p>
-              For administrator access, please{' '}
-              <a href="/super-admin/login" className="text-primary hover:underline">
-                login here
-              </a>
-              .
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

@@ -1,7 +1,10 @@
-:root {
-  --color-primary: #2563eb;
-  --color-primary-light: #dbeafe;
-  --color-primary-dark: #1e40af;
+@use 'sass:meta';
+// @use "tailwindcss";
+
+@theme {
+  --color-primary: #b73e00;
+  --color-primary-light: #c68565;
+  --color-primary-dark: #8b380d;
   
   --color-secondary: #4b5563;
   --color-secondary-light: #f3f4f6;
@@ -15,12 +18,13 @@
   
   --color-warning: #f59e0b;
   --color-warning-light: #fef3c7;
-  
+}
+:root {
   --color-text: #1f2937;
   --color-text-secondary: #6b7280;
   
-  --color-bg: #ffffff;
-  --color-bg-light: #f9fafb;
+  --color-bg: #343a40;
+  --color-bg-light: #FFFFFF;
   --color-bg-hover: #f3f4f6;
   
   --color-border: #e5e7eb;
@@ -36,12 +40,6 @@
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
   --spacing-3xl: 4rem;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 html,
@@ -95,6 +93,18 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 2px var(--color-primary-light);
 }
 
+h1 {
+  color: #FFF;
+}
+
+h1, h2 {
+  font-family: Impact, DIN Condensed, Charcoal, 'Arial Black', sans-serif;
+  text-transform: uppercase;
+}
+
+/*
+Preferrably refactor these into components
+*/
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -109,75 +119,4 @@ input:focus, select:focus, textarea:focus {
   margin-bottom: var(--spacing-lg);
 }
 
-.text-center {
-  text-align: center;
-}
-
-.flex {
-  display: flex;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.gap-sm {
-  gap: var(--spacing-sm);
-}
-
-.gap-md {
-  gap: var(--spacing-md);
-}
-
-.gap-lg {
-  gap: var(--spacing-lg);
-}
-
-.mb-sm {
-  margin-bottom: var(--spacing-sm);
-}
-
-.mb-md {
-  margin-bottom: var(--spacing-md);
-}
-
-.mb-lg {
-  margin-bottom: var(--spacing-lg);
-}
-
-.mt-sm {
-  margin-top: var(--spacing-sm);
-}
-
-.mt-md {
-  margin-top: var(--spacing-md);
-}
-
-.mt-lg {
-  margin-top: var(--spacing-lg);
-}
-
-/* Responsive utilities */
-@media (max-width: 768px) {
-  .hidden-mobile {
-    display: none;
-  }
-}
-
-@media (min-width: 769px) {
-  .hidden-desktop {
-    display: none;
-  }
-}
+@include meta.load-css('tw');

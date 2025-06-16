@@ -1,13 +1,13 @@
-import '@/styles/globals.css';
+import '@/styles/globals.scss';
 
 import { AuthProvider } from '@/hooks/useAuth';
-import { Inter } from 'next/font/google';
+// import { Inter } from 'next/font/google';
 import type { Metadata } from 'next';
 import { Providers } from './providers';
 import { ToastProvider } from '@/hooks/useToast';
 import { Toaster } from '@/components/molecules/toaster/toaster';
 
-const inter = Inter({ subsets: ['latin'] });
+// const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Trailblazers Check-In System',
@@ -21,7 +21,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      {/* <body className={inter.className}> */}
+      <body className='bg-primary'>
         <Providers>
           <AuthProvider>
             <ToastProvider>

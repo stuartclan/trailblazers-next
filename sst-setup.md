@@ -85,9 +85,9 @@ The SST deployment automatically sets these environment variables:
 DYNAMODB_TABLE_NAME=
 COGNITO_USER_POOL_ID=
 COGNITO_USER_POOL_CLIENT_ID=
-COGNITO_IDENTITY_POOL_ID=
-S3_BUCKET_NAME=
-API_URL=
+# COGNITO_IDENTITY_POOL_ID=
+# S3_BUCKET_NAME=
+# API_URL=
 
 # Manual Configuration
 NEXTAUTH_SECRET=your-secret-here

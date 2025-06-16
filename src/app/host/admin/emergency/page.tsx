@@ -111,16 +111,16 @@ export default function EmergencyContacts() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-md">Loading...</h1>
+          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
         </div>
       </div>
     );
   }
   
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <div className="container max-w-4xl">
-        <div className="flex justify-between items-center mb-lg">
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Emergency Contacts</h1>
           
           <Link
@@ -131,13 +131,13 @@ export default function EmergencyContacts() {
           </Link>
         </div>
         
-        <div className="card mb-lg">
-          <div className="text-center mb-md">
-            <h2 className="text-xl font-bold mb-sm">Emergency Contacts for Recent Check-ins</h2>
+        <div className="card mb-6">
+          <div className="text-center mb-4">
+            <h2 className="text-xl font-bold mb-2">Emergency Contacts for Recent Check-ins</h2>
             <p className="text-gray-600">This page shows emergency contacts for athletes who have checked in recently</p>
           </div>
           
-          <div className="mb-lg">
+          <div className="mb-6">
             <input
               type="text"
               placeholder="Search for athlete..."
@@ -185,7 +185,7 @@ export default function EmergencyContacts() {
         </div>
         
         <div className="bg-yellow-50 border border-yellow-300 rounded-md p-4">
-          <h3 className="text-lg font-medium text-yellow-800 mb-sm">Important Notice</h3>
+          <h3 className="text-lg font-medium text-yellow-800 mb-2">Important Notice</h3>
           <p className="text-yellow-700">
             Emergency contact information should only be used in case of an actual emergency.
             Please respect the privacy of our athletes and their emergency contacts.
