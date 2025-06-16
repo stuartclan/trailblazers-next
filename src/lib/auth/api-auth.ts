@@ -37,8 +37,6 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
     // Get the authorization header
     const authHeader = request.headers.get('authorization');
 
-    console.log('DEBUG: verifying headers:', authHeader);
-    
     if (!authHeader) {
       return { isAuthenticated: false, error: 'No authorization header' };
     }

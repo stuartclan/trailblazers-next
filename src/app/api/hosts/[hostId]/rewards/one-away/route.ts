@@ -6,7 +6,7 @@ import { repositories } from '@/lib/db/repository';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { hostId: string } }
+  { params }: { params: Promise<{ hostId: string }> },
 ) {
   try {
     // Verify authentication
@@ -18,7 +18,7 @@ export async function GET(
       );
     }
     
-    const hostId = params.hostId;
+    const { hostId } = await params;
     
     // Check permissions
     if (!isSuperAdmin(authResult) && isHost(authResult)) {

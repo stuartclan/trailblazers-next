@@ -178,9 +178,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // For simplicity, we're not implementing this here
           reject(new Error('New password required'));
           // resolve({ success: true, newPasswordRequired: true });
-
-          console.log('DEBUG: new password userAttributes:', userAttributes);
-          console.log('DEBUG: new password requiredAttributes:', requiredAttributes);
         },
       });
     });
@@ -204,7 +201,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const confirmNewPassword = async (newPassword: string): Promise<any> => {
     return new Promise((resolve, reject) => {
       const email = user?.email;
-      console.log('DEBUG: confirm email:', email);
       if (!email) {
         reject(new Error('Missing email in state'));
         return;
@@ -231,7 +227,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const confirm = async (verificationCode: string, newPassword: string): Promise<any> => {
     return new Promise((resolve, reject) => {
       const email = user?.email;
-      console.log('DEBUG: confirm email:', email);
       if (!email) {
         reject(new Error('Missing email in state'));
         return;

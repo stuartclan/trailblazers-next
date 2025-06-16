@@ -40,8 +40,6 @@ export default function SuperAdminHosts() {
     refetch: refetchHosts 
   } = useHosts();
   
-  console.log('DEBUG: hosts error:', hostsError);
-
   // Mutations
   const createHost = useCreateHost();
   const deleteHost = useDeleteHost();

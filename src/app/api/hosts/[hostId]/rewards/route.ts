@@ -6,7 +6,7 @@ import { repositories } from '@/lib/db/repository';
 // Get rewards for a host
 export async function GET(
   request: NextRequest,
-  { params }: { params: { hostId: string } }
+  { params }: { params: Promise<{ hostId: string }> },
 ) {
   try {
     // Verify authentication
@@ -18,7 +18,7 @@ export async function GET(
       );
     }
     
-    const hostId = params.hostId;
+    const { hostId } = await params;
     
     // Get host to verify it exists
     const host = await repositories.hosts.getHostById(hostId);
@@ -60,7 +60,7 @@ export async function GET(
 // Create a new reward for a host
 export async function POST(
   request: NextRequest,
-  { params }: { params: { hostId: string } }
+  { params }: { params: Promise<{ hostId: string }> },
 ) {
   try {
     // Verify authentication
@@ -72,7 +72,7 @@ export async function POST(
       );
     }
     
-    const hostId = params.hostId;
+    const { hostId } = await params;
     
     // Get host to verify it exists
     const host = await repositories.hosts.getHostById(hostId);

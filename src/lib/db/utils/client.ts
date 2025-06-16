@@ -7,7 +7,7 @@ let docClient: DynamoDBDocumentClient | null = null;
 export function getDynamoDBClient(): DynamoDBClient {
   if (!dynamoDbClient) {
     dynamoDbClient = new DynamoDBClient({
-      region: process.env.REGION || 'us-east-2',
+      region: process.env.AWS_REGION_NAME || 'us-east-2',
     });
   }
   return dynamoDbClient;

@@ -42,7 +42,22 @@ export default $config({
       transform: {
         userPool: {
           deletionProtection: 'ACTIVE',
-          // TODO: Configure custom email via SES?
+          // ADD CUSTOM ATTRIBUTES SCHEMA
+          schemas: [
+            {
+              attributeDataType: 'String',
+              name: 'hostName',
+              mutable: true,
+              required: false,
+            },
+            {
+              attributeDataType: 'String', 
+              name: 'hostId',
+              mutable: true,
+              required: false,
+            }
+          ],
+              // TODO: Configure custom email via SES?
           // emailConfiguration: {
           //   fromEmailAddress: 'info@clubtrailblazers.com',
           //   emailSendingAccount: 'DEVELOPER',
@@ -247,7 +262,7 @@ export default $config({
     const nextjs = new sst.aws.Nextjs("TrailblazersWeb", {
       environment: {
         // AWS Configuration
-        // AWS_REGION: aws.getRegionOutput().name,
+        AWS_REGION_NAME: aws.getRegionOutput().name, // Reserved and already provided
         
         // DynamoDB
         DYNAMODB_TABLE_NAME: table.name,

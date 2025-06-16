@@ -11,7 +11,7 @@ import { repositories } from '@/lib/db/repository';
 // Get a specific host
 export async function GET(
   request: NextRequest,
-  { params }: { params: { hostId: string } }
+  { params }: { params: Promise<{ hostId: string }> },
 ) {
   try {
     // Verify authentication
@@ -23,7 +23,7 @@ export async function GET(
       );
     }
     
-    const hostId = params.hostId;
+    const { hostId } = await params;
     
     // Get host
     const host = await repositories.hosts.getHostById(hostId);
@@ -64,7 +64,7 @@ export async function GET(
 // Update a host
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { hostId: string } }
+  { params }: { params: Promise<{ hostId: string }> },
 ) {
   try {
     // Verify authentication
@@ -76,7 +76,7 @@ export async function PATCH(
       );
     }
     
-    const hostId = params.hostId;
+    const { hostId } = await params;
     
     // Get host to verify it exists
     const host = await repositories.hosts.getHostById(hostId);
@@ -150,7 +150,7 @@ export async function PATCH(
 // Delete a host
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { hostId: string } }
+  { params }: { params: Promise<{ hostId: string }> },
 ) {
   try {
     // Verify authentication
@@ -170,7 +170,7 @@ export async function DELETE(
       );
     }
     
-    const hostId = params.hostId;
+    const { hostId } = await params;
     
     // Get host to verify it exists and get Cognito ID
     const host = await repositories.hosts.getHostById(hostId);

@@ -6,7 +6,7 @@ import { verifyAuth } from '@/lib/auth/api-auth';
 // Get check-in count for an athlete
 export async function GET(
   request: NextRequest,
-  { params }: { params: { athleteId: string } }
+  { params }: { params: Promise<{ athleteId: string }> },
 ) {
   try {
     // Verify authentication
@@ -18,7 +18,8 @@ export async function GET(
       );
     }
     
-    const athleteId = params.athleteId;
+    // TODO: This seems to be in the wrong place...
+    const { athleteId } = await params;
     
     // Get athlete to verify it exists
     const athlete = await repositories.athletes.getAthleteById(athleteId);

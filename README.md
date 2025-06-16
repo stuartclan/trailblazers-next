@@ -72,7 +72,7 @@ trailblazers-next/
    Create a `.env.local` file in the root directory with the following variables:
    ```
    # AWS Configuration
-   REGION=us-east-1
+   REGION=us-east-2
    
    # Cognito
    USER_POOL_ID=your-user-pool-id

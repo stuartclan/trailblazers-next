@@ -91,7 +91,7 @@ COGNITO_USER_POOL_CLIENT_ID=
 
 # Manual Configuration
 NEXTAUTH_SECRET=your-secret-here
-AWS_REGION=us-east-1
+AWS_REGION=us-east-2
 ```
 
 ### DynamoDB Schema

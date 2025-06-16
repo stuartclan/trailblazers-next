@@ -22,7 +22,7 @@ import {
 // Constants
 const USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
 const USER_POOL_CLIENT_ID = process.env.COGNITO_USER_POOL_CLIENT_ID;
-const REGION = process.env.REGION || 'us-east-1';
+const REGION = process.env.AWS_REGION_NAME || 'us-east-2';
 
 if (!USER_POOL_ID) {
   throw new Error('USER_POOL_ID environment variable is not set');
