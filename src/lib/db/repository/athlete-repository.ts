@@ -40,6 +40,8 @@ export class AthleteRepository {
     const athlete: AthleteEntity = {
       pk: `ATH#${id}`,
       sk: 'METADATA',
+      GSI1PK: 'TYPE#athlete',
+      GSI1SK: `ATH#${id}`,
       GSI2PK: `NAME#${lastName}#${firstName}`,
       GSI2SK: `ATH#${id}`,
       t: 'athlete',
@@ -229,13 +231,13 @@ export class AthleteRepository {
   }> {
     const queryParams: any = {
       TableName: this.tableName,
-      KeyConditionExpression: 'begins_with(pk, :pk) AND sk = :sk',
+      IndexName: 'GSI1',
+      KeyConditionExpression: 'GSI1PK = :typeKey',
+      FilterExpression: 'del <> :deleted',
       ExpressionAttributeValues: {
-        ':pk': 'ATH#',
-        ':sk': 'METADATA',
+        ':typeKey': 'TYPE#athlete',
         ':deleted': true
       },
-      FilterExpression: 'del <> :deleted',
       Limit: limit
     };
     

@@ -28,8 +28,11 @@ export class PetRepository {
     const pet: PetEntity = {
       pk: `PET#${id}`,
       sk: 'METADATA',
-      GSI1PK: `ATH#${data.athleteId}`,
+      GSI1PK: `ATH#${data.athleteId}`, // Keep this for athlete-based queries
       GSI1SK: `PET#${id}`,
+      // Could use GSI2 for type-based queries if needed:
+      GSI2PK: 'TYPE#pet',
+      GSI2SK: `PET#${id}`,
       t: 'pet',
       id,
       c: timestamp,
@@ -172,10 +175,10 @@ export class PetRepository {
   }> {
     const queryParams: any = {
       TableName: this.tableName,
-      KeyConditionExpression: 'begins_with(pk, :pk) AND sk = :sk',
+      IndexName: 'GSI2',
+      KeyConditionExpression: 'GSI2PK = :typeKey',
       ExpressionAttributeValues: {
-        ':pk': 'PET#',
-        ':sk': 'METADATA'
+        ':typeKey': 'TYPE#pet'
       },
       Limit: limit
     };

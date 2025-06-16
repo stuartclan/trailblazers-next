@@ -41,10 +41,14 @@ export class RewardRepository {
       rt: data.type
     };
     
-    // Add host-specific fields if applicable
+    // Set GSI1 based on reward type
     if (data.type === 'host' && data.hostId) {
       reward.hid = data.hostId;
       reward.GSI1PK = `HOST#${data.hostId}`;
+      reward.GSI1SK = `REW#${id}`;
+    } else {
+      // For global and pet rewards, use type-based GSI1
+      reward.GSI1PK = `TYPE#reward#${data.type}`;
       reward.GSI1SK = `REW#${id}`;
     }
     
@@ -82,12 +86,10 @@ export class RewardRepository {
     const response = await this.docClient.send(
       new QueryCommand({
         TableName: this.tableName,
-        KeyConditionExpression: 'begins_with(pk, :pk) AND sk = :sk',
-        FilterExpression: 'rt = :type',
+        IndexName: 'GSI1',
+        KeyConditionExpression: 'GSI1PK = :typeKey',
         ExpressionAttributeValues: {
-          ':pk': 'REW#',
-          ':sk': 'METADATA',
-          ':type': 'global'
+          ':typeKey': 'TYPE#reward#global'
         }
       })
     );
@@ -102,12 +104,10 @@ export class RewardRepository {
     const response = await this.docClient.send(
       new QueryCommand({
         TableName: this.tableName,
-        KeyConditionExpression: 'begins_with(pk, :pk) AND sk = :sk',
-        FilterExpression: 'rt = :type',
+        IndexName: 'GSI1',
+        KeyConditionExpression: 'GSI1PK = :typeKey',
         ExpressionAttributeValues: {
-          ':pk': 'REW#',
-          ':sk': 'METADATA',
-          ':type': 'pet'
+          ':typeKey': 'TYPE#reward#pet'
         }
       })
     );
@@ -257,17 +257,13 @@ export class RewardRepository {
    * Get all rewards (admin function)
    */
   async getAllRewards(): Promise<RewardEntity[]> {
-    const response = await this.docClient.send(
-      new QueryCommand({
-        TableName: this.tableName,
-        KeyConditionExpression: 'begins_with(pk, :pk) AND sk = :sk',
-        ExpressionAttributeValues: {
-          ':pk': 'REW#',
-          ':sk': 'METADATA'
-        }
-      })
-    );
+    // This requires multiple queries since we have different GSI1PK patterns
+    const [globalRewards, petRewards] = await Promise.all([
+      this.getGlobalRewards(),
+      this.getPetRewards()
+    ]);
     
-    return (response.Items as RewardEntity[]) || [];
+    // Note: Host rewards would need to be queried separately by host
+    return [...globalRewards, ...petRewards];
   }
 }

@@ -35,7 +35,9 @@ export class ActivityRepository {
       u: timestamp,
       n: data.name,
       i: data.icon,
-      en: data.enabled !== undefined ? data.enabled : true
+      en: data.enabled !== undefined ? data.enabled : true,
+      GSI1PK: 'TYPE#activity',
+      GSI1SK: `ACT#${id}`
     };
     
     await this.docClient.send(
@@ -46,8 +48,7 @@ export class ActivityRepository {
     );
     
     return activity;
-  }
-  
+  }  
   /**
    * Get an activity by ID
    */
@@ -72,10 +73,10 @@ export class ActivityRepository {
     const response = await this.docClient.send(
       new QueryCommand({
         TableName: this.tableName,
-        KeyConditionExpression: 'begins_with(pk, :pk) AND sk = :sk',
+        IndexName: 'GSI1',
+        KeyConditionExpression: 'GSI1PK = :typeKey',
         ExpressionAttributeValues: {
-          ':pk': 'ACT#',
-          ':sk': 'METADATA'
+          ':typeKey': 'TYPE#activity'
         }
       })
     );

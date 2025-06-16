@@ -38,7 +38,9 @@ export class HostRepository {
       p: hostData.password,
       lids: [],
       disc: hostData.disclaimer || '',
-      cr: []
+      cr: [],
+      GSI1PK: 'TYPE#host',
+      GSI1SK: `HOST#${id}`
     };
 
     await this.docClient.send(
@@ -75,10 +77,10 @@ export class HostRepository {
     const response = await this.docClient.send(
       new QueryCommand({
         TableName: this.tableName,
-        KeyConditionExpression: 'begins_with(pk, :pk) AND sk = :sk',
+        IndexName: 'GSI1',
+        KeyConditionExpression: 'GSI1PK = :typeKey',
         ExpressionAttributeValues: {
-          ':pk': 'HOST#',
-          ':sk': 'METADATA'
+          ':typeKey': 'TYPE#host'
         }
       })
     );

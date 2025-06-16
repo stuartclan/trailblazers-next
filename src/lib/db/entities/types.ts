@@ -15,6 +15,8 @@ export interface HostEntity extends BaseEntity {
   lids: string[]; // location IDs
   disc?: string; // disclaimer text
   cr?: HostReward[]; // custom rewards
+  GSI1PK: string; // 'TYPE#host'
+  GSI1SK: string; // 'HOST#[hostId]'
 }
 
 export interface HostReward {
@@ -39,6 +41,8 @@ export interface ActivityEntity extends BaseEntity {
   n: string; // name
   i: string; // icon (Material UI name)
   en: boolean; // enabled globally
+  GSI1PK: string; // 'TYPE#activity'
+  GSI1SK: string; // 'ACT#[activityId]'
 }
 
 export interface AthleteEntity extends BaseEntity {
@@ -56,6 +60,8 @@ export interface AthleteEntity extends BaseEntity {
   ar?: boolean; // archived reward
   ds: string[]; // host IDs where disclaimer was signed
   del: boolean; // soft delete flag
+  GSI1PK: string; // 'TYPE#athlete'
+  GSI1SK: string; // 'ATH#[athleteId]'
   GSI2PK: string; // NAME#[lastName]#[firstName]
   GSI2SK: string; // ATH#[athleteId]
 }
@@ -66,6 +72,8 @@ export interface PetEntity extends BaseEntity {
   n: string; // pet name
   GSI1PK: string; // ATH#[athleteId]
   GSI1SK: string; // PET#[petId]
+  GSI2PK: string; // TYPE#pet
+  GSI2SK: string; // PET#${petId}
 }
 
 export interface CheckInEntity extends BaseEntity {

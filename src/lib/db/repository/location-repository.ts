@@ -185,10 +185,10 @@ export class LocationRepository {
     const response = await this.docClient.send(
       new QueryCommand({
         TableName: this.tableName,
-        KeyConditionExpression: 'begins_with(pk, :pk) AND sk = :sk',
+        IndexName: 'GSI1',
+        KeyConditionExpression: 'GSI1PK = :typeKey',
         ExpressionAttributeValues: {
-          ':pk': 'LOC#',
-          ':sk': 'METADATA'
+          ':typeKey': 'TYPE#location'
         }
       })
     );
