@@ -50,7 +50,7 @@ export const CheckInPageLoading: React.FC = () => {
  */
 export const HostAdminLoading: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen">
       <div className="container max-w-6xl mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="flex justify-between items-center">

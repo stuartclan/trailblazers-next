@@ -115,6 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(null);
               setIsAuthenticated(false);
             } else {
+              console.log('DEBUG: setting attributes:', userAttributes);
               setUser({
                 email: userAttributes.email,
                 hostId: userAttributes['custom:hostId'],

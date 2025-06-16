@@ -93,7 +93,7 @@ export default function SelectLocation() {
   }
   
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="card w-full max-w-md">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold">Select Location</h1>

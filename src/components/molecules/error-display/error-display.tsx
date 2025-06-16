@@ -31,7 +31,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   showGoHome = true,
 }) => {
   const containerClasses = fullScreen
-    ? 'flex items-center justify-center min-h-screen bg-gray-100'
+    ? 'flex items-center justify-center min-h-screen'
     : 'flex items-center justify-center py-8';
 
   const errorMessage = message || (error instanceof Error ? error.message : error) || 'An unexpected error occurred';

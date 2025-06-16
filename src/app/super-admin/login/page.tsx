@@ -31,8 +31,6 @@ export default function SuperAdminLogin() {
     try {
       const res = await login(email, password);
 
-      console.log('DEBUG: login result:', res);
-
       if (!res.success) {
         // Shouldn't really get here
         const errorMessage = 'Login unsuccessful';

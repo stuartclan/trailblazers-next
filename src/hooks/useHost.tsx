@@ -15,6 +15,10 @@ const fetchHost = async (hostId: string): Promise<HostEntity> => {
 
 const fetchHosts = async (): Promise<HostEntity[]> => {
   const response = await fetch('/api/hosts');
+  if (response.status === 401) {
+    // Need to log-in
+    throw new Error('Login required');
+  }
   if (!response.ok) {
     throw new Error('Failed to fetch hosts');
   }

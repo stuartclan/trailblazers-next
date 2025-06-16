@@ -19,7 +19,7 @@ export const PageLoading: React.FC<PageLoadingProps> = ({
   skeletonType = 'cards',
 }) => {
   const containerClasses = fullScreen
-    ? 'flex items-center justify-center min-h-screen bg-gray-100'
+    ? 'flex items-center justify-center min-h-screen'
     : 'flex items-center justify-center py-8';
 
   if (variant === 'spinner') {

@@ -2,8 +2,8 @@ import { CognitoJwtVerifier } from 'aws-jwt-verify';
 import { NextRequest } from 'next/server';
 
 // Constants
-const USER_POOL_ID = process.env.USER_POOL_ID;
-const USER_POOL_CLIENT_ID = process.env.USER_POOL_CLIENT_ID;
+const USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
+const USER_POOL_CLIENT_ID = process.env.COGNITO_USER_POOL_CLIENT_ID;
 
 // Verify tokens have been set
 if (!USER_POOL_ID) {
@@ -36,6 +36,8 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
   try {
     // Get the authorization header
     const authHeader = request.headers.get('authorization');
+
+    console.log('DEBUG: verifying headers:', authHeader);
     
     if (!authHeader) {
       return { isAuthenticated: false, error: 'No authorization header' };

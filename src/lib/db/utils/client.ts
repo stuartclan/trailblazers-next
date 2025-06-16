@@ -26,7 +26,7 @@ export function getDynamoDBDocumentClient(): DynamoDBDocumentClient {
 }
 
 export const getTableName = (): string => {
-  const tableName = process.env.TABLE_NAME;
+  const tableName = process.env.DYNAMODB_TABLE_NAME;
   if (!tableName) {
     throw new Error('TABLE_NAME environment variable is not set');
   }
