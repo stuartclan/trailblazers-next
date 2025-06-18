@@ -25,11 +25,7 @@ const hostSchema = z.object({
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number'),
-  passwordConfirm: z.string(),
   disclaimer: z.string().optional(),
-}).refine((data) => data.password === data.passwordConfirm, {
-  message: "Passwords don't match",
-  path: ['passwordConfirm'],
 });
 
 type HostFormValues = z.infer<typeof hostSchema>;
@@ -71,7 +67,6 @@ export const HostForm: React.FC<HostFormProps> = ({
       name: defaultValues?.name || '',
       email: defaultValues?.email || '',
       password: defaultValues?.password || '',
-      passwordConfirm: defaultValues?.password || '',
       disclaimer: defaultValues?.disclaimer || '',
     },
   });
@@ -256,33 +251,6 @@ export const HostForm: React.FC<HostFormProps> = ({
                 type="password"
                 error={error}
                 placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
-                disabled={isSubmitting}
-              />
-            )}
-          />
-        )}
-
-        {/* Confirm Password */}
-        {isMobile ? (
-          <MobileFormField
-            type="input"
-            label={isEdit ? "Confirm New Password" : "Confirm Password"}
-            value={watch('passwordConfirm')}
-            onChange={(value) => setValue('passwordConfirm', value)}
-            placeholder={isEdit ? "Confirm new password" : "Confirm password"}
-            required={!isEdit}
-            error={methods.formState.errors.passwordConfirm?.message}
-          />
-        ) : (
-          <FormControl
-            name="passwordConfirm"
-            label={isEdit ? "Confirm New Password" : "Confirm Password"}
-            render={({ field, error }) => (
-              <Input
-                {...field}
-                type="password"
-                error={error}
-                placeholder={isEdit ? "Confirm new password" : "Confirm password"}
                 disabled={isSubmitting}
               />
             )}

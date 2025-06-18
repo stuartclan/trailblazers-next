@@ -9,6 +9,8 @@ import {
 } from 'amazon-cognito-identity-js';
 import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import { useAsync } from 'react-use';
+
 // Get Cognito config from environment variables
 const userPoolId = process.env.NEXT_PUBLIC_POOL_ID || '';
 const userPoolClientId = process.env.NEXT_PUBLIC_POOL_CLIENT_ID || '';
@@ -309,9 +311,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Initialize authentication state
-  useEffect(() => {
-    getSession();
-  }, [getSession]);
+  useAsync(async () => {
+    if (isLoading) {
+      const sess = await getSession();
+    }
+  }, [isLoading]);
 
   return (
     <AuthContext.Provider

@@ -38,7 +38,7 @@ const cognitoClient = new CognitoIdentityProviderClient({ region: REGION });
 /**
  * Create a host user in Cognito
  */
-export async function createHostUser(email: string, tempPassword: string, hostName: string) {
+export async function createHostUser(email: string, tempPassword: string, hostName: string, hostId: string) {
   try {
     // Create the user
     const createUserCommand = new AdminCreateUserCommand({
@@ -58,6 +58,10 @@ export async function createHostUser(email: string, tempPassword: string, hostNa
         {
           Name: 'custom:hostName',
           Value: hostName
+        },
+        {
+          Name: 'custom:hostId',
+          Value: hostId
         }
       ]
     });

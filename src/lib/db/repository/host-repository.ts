@@ -18,19 +18,19 @@ export class HostRepository {
    * Create a new host
    */
   async createHost(hostData: {
+    hostId: string;
     name: string;
     cognitoId: string;
     password: string;
     disclaimer?: string;
   }): Promise<HostEntity> {
-    const id = nanoid();
     const timestamp = Math.floor(Date.now() / 1000);
 
     const host: HostEntity = {
-      pk: `HOST#${id}`,
+      pk: `HOST#${hostData.hostId}`,
       sk: 'METADATA',
       t: 'host',
-      id,
+      id: hostData.hostId,
       c: timestamp,
       u: timestamp,
       n: hostData.name,
@@ -40,7 +40,7 @@ export class HostRepository {
       disc: hostData.disclaimer || '',
       cr: [],
       GSI1PK: 'TYPE#host',
-      GSI1SK: `HOST#${id}`
+      GSI1SK: `COGNITO#${hostData.cognitoId}`
     };
 
     await this.docClient.send(
@@ -134,6 +134,7 @@ export class HostRepository {
    * Delete a host
    */
   async deleteHost(id: string): Promise<void> {
+    // TODO: Delete locations associated with host
     await this.docClient.send(
       new DeleteCommand({
         TableName: this.tableName,
@@ -153,20 +154,19 @@ export class HostRepository {
       new QueryCommand({
         TableName: this.tableName,
         IndexName: 'GSI1',
-        KeyConditionExpression: 'GSI1PK = :cognitoId AND begins_with(GSI1SK, :prefix)',
+        KeyConditionExpression: 'GSI1PK = :typeKey AND GSI1SK = :cognitoId',
         ExpressionAttributeValues: {
+          ':typeKey': 'TYPE#host',
           ':cognitoId': `COGNITO#${cognitoId}`,
-          ':prefix': 'HOST#'
         }
       })
     );
 
-    if (!response.Items || response.Items.length === 0) {
+    if (!response?.Items?.length) {
       return null;
     }
 
-    const hostId = response.Items[0].GSI1SK.split('#')[1];
-    return this.getHostById(hostId);
+    return (response.Items[0] as HostEntity) || null;
   }
 
   /**
