@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isSuperAdmin, verifyAuth } from '@/lib/auth/api-auth';
 
 import { createHostUser } from '@/lib/auth/cognito';
+import { nanoid } from 'nanoid';
 import { repositories } from '@/lib/db/repository';
 
 // List all hosts
@@ -68,9 +69,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Generate the host ID that can be used in cognito and dynamo
+    const hostId = nanoid();
     
     // Create Cognito user for the host
-    const cognitoResult = await createHostUser(body.email, body.password, body.name);
+    const cognitoResult = await createHostUser(body.email, body.password, body.name, hostId);
     if (!cognitoResult.success) {
       return NextResponse.json(
         { error: 'Failed to create Cognito user', details: cognitoResult.error },
@@ -88,11 +92,23 @@ export async function POST(request: NextRequest) {
     }
     
     const host = await repositories.hosts.createHost({
+      hostId,
       name: body.name,
       cognitoId: cognitoUser.Username,
       password: body.password, // This is the admin password, not the Cognito password
       disclaimer: body.disclaimer || ''
     });
+    
+    // Create location
+    const location = await repositories.locations.createLocation({
+      hostId,
+      name: 'Main Location',
+      address: '',
+      activityIds: []
+    });
+    
+    // Update host with new location ID
+    await repositories.hosts.addLocationToHost(hostId, location.id);
     
     return NextResponse.json(host);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
