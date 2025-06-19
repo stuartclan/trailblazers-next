@@ -133,7 +133,7 @@ export default function CheckIn() {
         />
         
         {/* Footer */}
-        <div className="bg-white rounded-lg border p-4">
+        <div className="bg-white rounded-lg border-1 p-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <div>
               <p>Need help? Contact your host administrator.</p>

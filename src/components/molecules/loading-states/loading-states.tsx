@@ -28,7 +28,7 @@ export const CheckInPageLoading: React.FC = () => {
         </div>
         
         {/* Location info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
           <div className="flex items-center space-x-3">
             <Skeleton circle width={20} height={20} />
             <div className="space-y-1 flex-1">
@@ -62,7 +62,7 @@ export const HostAdminLoading: React.FC = () => {
         </div>
         
         {/* Current location info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
           <div className="flex items-center space-x-3">
             <Skeleton circle width={20} height={20} />
             <div className="space-y-1 flex-1">
@@ -75,7 +75,7 @@ export const HostAdminLoading: React.FC = () => {
         {/* Quick stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg p-6 border">
+            <div key={index} className="bg-white rounded-lg p-6 border-1">
               <div className="flex items-center space-x-4">
                 <div className="p-2 bg-gray-100 rounded-lg">
                   <Skeleton circle width={24} height={24} />
@@ -92,7 +92,7 @@ export const HostAdminLoading: React.FC = () => {
         {/* Quick actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg border p-6 space-y-4">
+            <div key={index} className="bg-white rounded-lg border-1 p-6 space-y-4">
               <div className="flex items-center space-x-2">
                 <Skeleton circle width={20} height={20} />
                 <Skeleton variant="text" width="120px" height={20} />
@@ -104,7 +104,7 @@ export const HostAdminLoading: React.FC = () => {
         </div>
         
         {/* Recent check-ins */}
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border-1">
           <div className="p-6 border-b">
             <div className="flex justify-between items-center">
               <Skeleton variant="text" width="150px" height={24} />
@@ -163,7 +163,7 @@ export const RewardsPageLoading: React.FC = () => {
         </div>
         
         {/* Eligible athletes section */}
-        <div className="bg-white rounded-lg border p-6 space-y-4">
+        <div className="bg-white rounded-lg border-1 p-6 space-y-4">
           <div className="flex justify-between items-center">
             <Skeleton variant="text" width="250px" height={24} />
             <div className="flex items-center space-x-2">
@@ -172,7 +172,7 @@ export const RewardsPageLoading: React.FC = () => {
             </div>
           </div>
           
-          <div className="border rounded-md overflow-hidden">
+          <div className="border-1 rounded-md overflow-hidden">
             <div className="grid grid-cols-4 gap-4 p-3 bg-gray-50 border-b">
               <Skeleton variant="text" width="60px" />
               <Skeleton variant="text" width="80px" />
@@ -194,7 +194,7 @@ export const RewardsPageLoading: React.FC = () => {
         </div>
         
         {/* Host custom rewards */}
-        <div className="bg-white rounded-lg border p-6 space-y-4">
+        <div className="bg-white rounded-lg border-1 p-6 space-y-4">
           <div className="flex justify-between items-center">
             <Skeleton variant="text" width="180px" height={24} />
             <Skeleton variant="text" width="120px" height={16} />
@@ -202,7 +202,7 @@ export const RewardsPageLoading: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="border rounded-md p-4">
+              <div key={index} className="border-1 rounded-md p-4">
                 <div className="flex items-center space-x-3">
                   <Skeleton circle width={40} height={40} />
                   <div className="space-y-1">
@@ -216,12 +216,12 @@ export const RewardsPageLoading: React.FC = () => {
         </div>
         
         {/* Global rewards */}
-        <div className="bg-white rounded-lg border p-6 space-y-4">
+        <div className="bg-white rounded-lg border-1 p-6 space-y-4">
           <Skeleton variant="text" width="200px" height={24} />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="border rounded-md p-4">
+              <div key={index} className="border-1 rounded-md p-4">
                 <div className="flex items-center space-x-3">
                   <Skeleton circle width={32} height={32} />
                   <div className="space-y-1">
@@ -256,7 +256,7 @@ export const SignupFormLoading: React.FC = () => {
         
         {/* Form cards */}
         {Array.from({ length: 5 }).map((_, cardIndex) => (
-          <div key={cardIndex} className="bg-white rounded-lg border p-6 space-y-4">
+          <div key={cardIndex} className="bg-white rounded-lg border-1 p-6 space-y-4">
             <div className="flex items-center space-x-2">
               <Skeleton circle width={20} height={20} />
               <Skeleton variant="text" width="150px" height={20} />

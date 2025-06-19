@@ -101,7 +101,7 @@ export default function SelectLocation() {
         </div>
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
+          <div className="bg-red-100 border-1 border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
             <p>{error}</p>
           </div>
         )}
@@ -111,7 +111,7 @@ export default function SelectLocation() {
             <button
               key={location.id}
               onClick={() => handleLocationSelect(location)}
-              className="border border-gray-300 rounded p-4 text-left hover:bg-gray-50 transition-colors"
+              className="border-1 border-gray-300 rounded p-4 text-left hover:bg-gray-50 transition-colors"
             >
               <h3 className="font-medium text-lg">{location.n}</h3>
               <p className="text-gray-600 text-sm">{location.a}</p>

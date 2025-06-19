@@ -176,7 +176,7 @@ export default function HostAdmin() {
                 id="adminPassword"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full p-3 border-1 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 onKeyPress={(e) => e.key === 'Enter' && handleAdminAuth()}
                 autoFocus
               />
@@ -456,7 +456,7 @@ export default function HostAdmin() {
         </Card>
         
         {/* Footer Actions */}
-        <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-white rounded-lg border">
+        <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-white rounded-lg border-1">
           <div className="text-sm text-gray-600">
             <p>Need help? Contact your system administrator.</p>
           </div>

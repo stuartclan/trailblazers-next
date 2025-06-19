@@ -17,7 +17,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       className={cn(
         'card rounded-lg shadow-sm',
         variant === 'default' && 'bg-white',
-        variant === 'outline' && 'border border-gray-200 bg-transparent',
+        variant === 'outline' && 'border-1 border-gray-200 bg-transparent',
         variant === 'filled' && 'bg-gray-50',
         className
       )}
@@ -33,7 +33,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('card__header flex flex-col space-y-1.5 p-6', className)}
+      className={cn('card__header flex flex-row justify-between items-center space-x-1.5 p-6', className)}
       {...props}
     />
   )
@@ -46,7 +46,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('card__title text-primary text-xl font-semibold leading-none tracking-tight', className)}
+      className={cn('card__title text-primary text-xl font-semibold leading-none', className)}
       {...props}
     />
   )

@@ -258,7 +258,7 @@ export default function HostSettings() {
                   id="adminPassword"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md"
+                  className="w-full p-3 border-1 border-gray-300 rounded-md"
                   placeholder="Enter new admin password"
                   autoFocus
                 />
@@ -270,7 +270,7 @@ export default function HostSettings() {
               <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelPasswordEdit}
-                  className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                  className="border-1 border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -314,7 +314,7 @@ export default function HostSettings() {
                   id="disclaimer"
                   value={disclaimer}
                   onChange={(e) => setDisclaimer(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md h-40"
+                  className="w-full p-3 border-1 border-gray-300 rounded-md h-40"
                   placeholder="Enter disclaimer text that athletes will see during registration"
                 />
               </div>
@@ -322,7 +322,7 @@ export default function HostSettings() {
               <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelDisclaimerEdit}
-                  className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                  className="border-1 border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -369,7 +369,7 @@ export default function HostSettings() {
                 id="locationSelect"
                 value={selectedLocation || ''}
                 onChange={handleLocationChange}
-                className="w-full p-3 border border-gray-300 rounded-md"
+                className="w-full p-3 border-1 border-gray-300 rounded-md"
               >
                 <option value="" disabled>Select a location</option>
                 {hostLocations.map(loc => (
@@ -388,7 +388,7 @@ export default function HostSettings() {
                   {activities.map(activity => (
                     <div 
                       key={activity.id}
-                      className={`border rounded-md p-4 cursor-pointer transition-colors ${
+                      className={`border-1 rounded-md p-4 cursor-pointer transition-colors ${
                         selectedActivities.includes(activity.id) 
                           ? 'bg-primary-light border-primary' 
                           : 'hover:bg-gray-50'
@@ -418,7 +418,7 @@ export default function HostSettings() {
               <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelActivitiesEdit}
-                  className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                  className="border-1 border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -441,7 +441,7 @@ export default function HostSettings() {
                     if (!activity) return null;
                     
                     return (
-                      <div key={activity.id} className="border rounded-md p-4">
+                      <div key={activity.id} className="border-1 rounded-md p-4">
                         <div className="flex items-center gap-3">
                           <div className="bg-primary-light p-2 rounded-full">
                             <span className="material-icons text-primary">{activity.i}</span>

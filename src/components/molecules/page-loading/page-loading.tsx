@@ -69,7 +69,7 @@ export const PageLoading: React.FC<PageLoadingProps> = ({
               <Skeleton variant="text" width="50%" height={20} className="mt-2" />
             </div>
             
-            <div className="bg-white rounded-lg border">
+            <div className="bg-white rounded-lg border-1">
               <div className="p-6 border-b">
                 <div className="flex justify-between items-center">
                   <Skeleton variant="text" width="25%" height={24} />

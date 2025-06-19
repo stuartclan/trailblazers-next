@@ -275,7 +275,7 @@ export const HostForm: React.FC<HostFormProps> = ({
 
         {/* Progress indicator for long operations */}
         {isSubmitting && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mt-4 p-4 bg-blue-50 border-1 border-blue-200 rounded-lg">
             <div className="flex items-center space-x-3">
               <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
               <div className="text-sm text-blue-700">

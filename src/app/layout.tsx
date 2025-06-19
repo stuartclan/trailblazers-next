@@ -1,4 +1,4 @@
-import '@/styles/globals.scss';
+import '@/styles/global.scss';
 
 import { AuthProvider } from '@/hooks/useAuth';
 // import { Inter } from 'next/font/google';
@@ -28,8 +28,14 @@ export default function RootLayout({
           <AuthProvider>
             <TooltipProvider delayDuration={100}>
               <ToastProvider>
+                {/* <header>
+                  <div className=''
+                </header> */}
+                {/* <Header /> */}
                 {children}
+                {/* <Footer /> */}
                 <Toaster />
+                {/* <Analytics /> */}
               </ToastProvider>
             </TooltipProvider>
           </AuthProvider>

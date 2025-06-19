@@ -121,7 +121,7 @@ export const CheckInConfirmation: React.FC<CheckInConfirmationProps> = ({
         </div>
 
         {/* Additional Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-4">
+        <div className="bg-blue-50 border-1 border-blue-200 rounded-md p-3 mt-4">
           <p className="text-xs text-blue-700">
             <strong>Note:</strong> You can only check in once per week at each location. 
             Keep track of your progress toward rewards in the host admin area.

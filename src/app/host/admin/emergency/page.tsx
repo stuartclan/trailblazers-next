@@ -143,7 +143,7 @@ export default function EmergencyContacts() {
               placeholder="Search for athlete..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border-1 border-gray-300 rounded-md"
             />
           </div>
           
@@ -184,7 +184,7 @@ export default function EmergencyContacts() {
           )}
         </div>
         
-        <div className="bg-yellow-50 border border-yellow-300 rounded-md p-4">
+        <div className="bg-yellow-50 border-1 border-yellow-300 rounded-md p-4">
           <h3 className="text-lg font-medium text-yellow-800 mb-2">Important Notice</h3>
           <p className="text-yellow-700">
             Emergency contact information should only be used in case of an actual emergency.

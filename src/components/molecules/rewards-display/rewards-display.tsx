@@ -43,7 +43,7 @@ const RewardItem: React.FC<RewardItemProps> = ({
   
   return (
     <div className={cn(
-      'reward-item border rounded-lg p-4 bg-white',
+      'reward-item border-1 rounded-lg p-4 bg-white',
       isClaimed && 'bg-gray-50'
     )}>
       <div className="flex items-start justify-between mb-3">

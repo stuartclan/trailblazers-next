@@ -24,7 +24,7 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = 'ToastViewport';
 
 const toastVariants = cva(
-  'toast data-[swipe=move]:transition-transform group relative pointer-events-auto flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg transition-all data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full data-[state=closed]:slide-out-to-right-full',
+  'toast data-[swipe=move]:transition-transform group relative pointer-events-auto flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border-1 p-4 pr-8 shadow-lg transition-all data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full data-[state=closed]:slide-out-to-right-full',
   {
     variants: {
       variant: {
@@ -63,7 +63,7 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      'toast-action inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-white transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-red-300 group-[.destructive]:hover:border-red-300 group-[.destructive]:hover:bg-red-600 group-[.destructive]:hover:text-gray-50 group-[.destructive]:focus:ring-red-500 group-[.success]:border-green-300 group-[.success]:hover:border-green-300 group-[.success]:hover:bg-green-600 group-[.success]:hover:text-gray-50 group-[.success]:focus:ring-green-500',
+      'toast-action inline-flex h-8 shrink-0 items-center justify-center rounded-md border-1 bg-transparent px-3 text-sm font-medium ring-offset-white transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-red-300 group-[.destructive]:hover:border-red-300 group-[.destructive]:hover:bg-red-600 group-[.destructive]:hover:text-gray-50 group-[.destructive]:focus:ring-red-500 group-[.success]:border-green-300 group-[.success]:hover:border-green-300 group-[.success]:hover:bg-green-600 group-[.success]:hover:text-gray-50 group-[.success]:focus:ring-green-500',
       className
     )}
     {...props}

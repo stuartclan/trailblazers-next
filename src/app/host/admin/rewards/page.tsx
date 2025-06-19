@@ -221,7 +221,7 @@ export default function HostRewards() {
           {hostRewards && hostRewards.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {hostRewards.map((reward) => (
-                <div key={reward.id} className="border rounded-md p-4 hover:bg-gray-50">
+                <div key={reward.id} className="border-1 rounded-md p-4 hover:bg-gray-50">
                   <div className="flex items-center gap-3">
                     <div className="bg-primary-light p-2 rounded-full">
                       <span className="material-icons text-primary">{reward.i}</span>
@@ -254,7 +254,7 @@ export default function HostRewards() {
           {globalRewards && globalRewards.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {globalRewards.map((reward) => (
-                <div key={reward.id} className="border rounded-md p-4 hover:bg-gray-50">
+                <div key={reward.id} className="border-1 rounded-md p-4 hover:bg-gray-50">
                   <div className="flex items-center gap-3">
                     <div className="bg-primary-light p-2 rounded-full">
                       <span className="material-icons text-primary">{reward.i}</span>

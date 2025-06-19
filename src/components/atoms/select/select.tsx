@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils/ui';
 import { Label } from '../label/label';
 
 const selectTriggerVariants = cva(
-  'select-trigger flex h-10 w-full items-center justify-between rounded-md border bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  'select-trigger flex h-10 w-full items-center justify-between rounded-md border-1 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -113,7 +113,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
           
           <SelectPrimitive.Portal>
             <SelectPrimitive.Content
-              className="select-content relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white text-gray-950 shadow-md animate-in fade-in-80"
+              className="select-content relative z-50 min-w-[8rem] overflow-hidden rounded-md border-1 border-gray-200 bg-white text-gray-950 shadow-md animate-in fade-in-80"
               position="popper"
               sideOffset={5}
             >

@@ -96,7 +96,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       
       {/* Search Results */}
       {showResults && !isLoading && searchResults && searchResults.length > 0 && (
-        <div className="border rounded-md overflow-hidden divide-y">
+        <div className="border-1 rounded-md overflow-hidden divide-y">
           {searchResults.map((athlete) => (
             <div
               key={athlete.id}

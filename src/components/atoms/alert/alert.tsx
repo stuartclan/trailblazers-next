@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils/ui';
 import { AlertCircle, CheckCircle, XCircle, Info } from 'lucide-react';
 
 const alertVariants = cva(
-  'alert relative rounded-lg border p-4',
+  'alert relative rounded-lg border-1 p-4',
   {
     variants: {
       variant: {

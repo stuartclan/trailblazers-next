@@ -104,7 +104,7 @@ export default function SuperAdminDashboard() {
             <div className="space-y-sm">
               <Link 
                 href="/super-admin/hosts" 
-                className="block p-4 border rounded-md hover:bg-gray-50 flex justify-between items-center"
+                className="block p-4 border-1 rounded-md hover:bg-gray-50 flex justify-between items-center"
               >
                 <span>Manage Hosts</span>
                 <ChevronRight />
@@ -112,7 +112,7 @@ export default function SuperAdminDashboard() {
               
               <Link 
                 href="/super-admin/hosts/new" 
-                className="block p-4 border rounded-md hover:bg-gray-50 flex justify-between items-center"
+                className="block p-4 border-1 rounded-md hover:bg-gray-50 flex justify-between items-center"
               >
                 <span>Create New Host</span>
                 <Add />
@@ -120,7 +120,7 @@ export default function SuperAdminDashboard() {
               
               <Link 
                 href="/super-admin/locations" 
-                className="block p-4 border rounded-md hover:bg-gray-50 flex justify-between items-center"
+                className="block p-4 border-1 rounded-md hover:bg-gray-50 flex justify-between items-center"
               >
                 <span>Manage Locations</span>
                 <ChevronRight />
@@ -133,7 +133,7 @@ export default function SuperAdminDashboard() {
             <div className="space-y-sm">
               <Link 
                 href="/super-admin/rewards" 
-                className="block p-4 border rounded-md hover:bg-gray-50 flex justify-between items-center"
+                className="block p-4 border-1 rounded-md hover:bg-gray-50 flex justify-between items-center"
               >
                 <span>Global Rewards</span>
                 <ChevronRight />
@@ -141,7 +141,7 @@ export default function SuperAdminDashboard() {
               
               <Link 
                 href="/super-admin/activities" 
-                className="block p-4 border rounded-md hover:bg-gray-50 flex justify-between items-center"
+                className="block p-4 border-1 rounded-md hover:bg-gray-50 flex justify-between items-center"
               >
                 <span>Activities</span>
                 <ChevronRight />
@@ -149,7 +149,7 @@ export default function SuperAdminDashboard() {
               
               <Link 
                 href="/super-admin/settings" 
-                className="block p-4 border rounded-md hover:bg-gray-50 flex justify-between items-center"
+                className="block p-4 border-1 rounded-md hover:bg-gray-50 flex justify-between items-center"
               >
                 <span>System Settings</span>
                 <Settings />
@@ -171,7 +171,7 @@ export default function SuperAdminDashboard() {
             {hosts && hosts.length > 0 ? (
               <div className="space-y-sm">
                 {hosts.slice(0, 5).map((host) => (
-                  <div key={host.id} className="border rounded-md p-4 hover:bg-gray-50">
+                  <div key={host.id} className="border-1 rounded-md p-4 hover:bg-gray-50">
                     <Link 
                       href={`/super-admin/hosts/${host.id}`}
                       className="font-medium text-primary hover:underline"
@@ -199,7 +199,7 @@ export default function SuperAdminDashboard() {
             {athletesData?.athletes && athletesData.athletes.length > 0 ? (
               <div className="space-y-sm">
                 {athletesData.athletes.slice(0, 5).map((athlete) => (
-                  <div key={athlete.id} className="border rounded-md p-4 hover:bg-gray-50">
+                  <div key={athlete.id} className="border-1 rounded-md p-4 hover:bg-gray-50">
                     <Link 
                       href={`/super-admin/athletes/${athlete.id}`}
                       className="font-medium text-primary hover:underline"

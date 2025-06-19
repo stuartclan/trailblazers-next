@@ -14,7 +14,7 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-primary text-white hover:bg-primary-dark',
         destructive: 'bg-red-500 text-white hover:bg-red-600',
-        outline: 'border border-primary text-primary hover:bg-primary-light hover:text-white',
+        outline: 'border-1 border-primary text-primary hover:bg-primary-light hover:text-white',
         secondary: 'bg-secondary text-white hover:bg-secondary-dark',
         ghost: 'hover:bg-gray-100 hover:text-gray-900',
         link: 'text-primary underline-offset-4 hover:underline',
@@ -79,28 +79,28 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       </Comp>
     );
 
-    // Wrap in TouchTarget for enhanced mobile interactions if enabled
-    if (enableTouch && !asChild) {
-      return (
-        <TouchTarget
-          ripple={ripple}
-          haptic={haptic}
-          disabled={disabled}
-          onClick={onClick}
-          className="inline-flex"
-        >
-          <Comp
-            className={cn(buttonVariants({ variant, size, className }))}
-            ref={ref}
-            disabled={disabled}
-            onClick={undefined} // Let TouchTarget handle the click
-            {...props}
-          >
-            {children}
-          </Comp>
-        </TouchTarget>
-      );
-    }
+    // // Wrap in TouchTarget for enhanced mobile interactions if enabled
+    // if (enableTouch && !asChild) {
+    //   return (
+    //     <TouchTarget
+    //       ripple={ripple}
+    //       haptic={haptic}
+    //       disabled={disabled}
+    //       onClick={onClick}
+    //       className="inline-flex"
+    //     >
+    //       <Comp
+    //         className={cn(buttonVariants({ variant, size, className }))}
+    //         ref={ref}
+    //         disabled={disabled}
+    //         onClick={undefined} // Let TouchTarget handle the click
+    //         {...props}
+    //       >
+    //         {children}
+    //       </Comp>
+    //     </TouchTarget>
+    //   );
+    // }
 
     return buttonElement;
   }

@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils/ui';
 import { Label } from '../label/label';
 
 const radioGroupItemVariants = cva(
-  'radio-item aspect-square h-4 w-4 rounded-full border border-gray-300 bg-white text-primary shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  'radio-item aspect-square h-4 w-4 rounded-full border-1 border-gray-300 bg-white text-primary shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {

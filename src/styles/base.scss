@@ -1,6 +1,3 @@
-@use 'sass:meta';
-// @use "tailwindcss";
-
 @theme {
   --color-primary: #b73e00;
   --color-primary-light: #c68565;
@@ -19,6 +16,7 @@
   --color-warning: #f59e0b;
   --color-warning-light: #fef3c7;
 }
+
 :root {
   --color-text: #1f2937;
   --color-text-secondary: #6b7280;
@@ -63,18 +61,18 @@ a:hover {
   text-decoration: underline;
 }
 
-button, 
-.button {
+// .button,
+button {
   cursor: pointer;
-  border: none;
-  // padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--radius-sm);
-  font-weight: 500;
+//   border: none;
+//   padding: var(--spacing-sm) var(--spacing-lg);
+//   border-radius: var(--radius-sm);
+//   font-weight: 500;
   transition: all 0.2s ease;
 }
 
-button:disabled,
-.button:disabled {
+// .button:disabled,
+button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -118,5 +116,3 @@ Preferrably refactor these into components
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
 }
-
-@include meta.load-css('tw');

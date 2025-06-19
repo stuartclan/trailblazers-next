@@ -8,7 +8,7 @@ import { Eye, EyeOff, HelpCircle } from 'lucide-react';
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from '../tooltip/tooltip';
 
 const inputVariants = cva(
-  'input flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  'input flex h-10 w-full rounded-md border-1 bg-white px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -131,7 +131,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 <TooltipTrigger>
                   <HelpCircle className="h-4 w-4" />
                 </TooltipTrigger>
-                <TooltipContent align='end' sideOffset={-5}>
+                <TooltipContent align='end' alignOffset={-4}>
                   <TooltipArrow />
                   {helpText}
                 </TooltipContent>
@@ -146,7 +146,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <p className="-mt-2 mb-2 text-right text-xs text-gray-400">{helpText}</p>
         )}
         {error && (
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="-mt-2 mb-2 text-sm text-red-500">{error}</p>
         )}
       </div>
     );

@@ -80,7 +80,7 @@ export const ActivitySelector: React.FC<ActivitySelectorProps> = ({
               disabled={disabled || !activity.en}
               onClick={() => handleActivityClick(activity.id)}
               className={cn(
-                'flex flex-col items-center justify-center p-4 border rounded-lg transition-all duration-200',
+                'flex flex-col items-center justify-center p-4 border-1 rounded-lg transition-all duration-200',
                 'hover:shadow-md active:scale-98',
                 value === activity.id
                   ? 'bg-primary-light border-primary text-primary shadow-md'

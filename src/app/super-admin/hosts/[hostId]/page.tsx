@@ -129,7 +129,7 @@ export default function SuperAdminHostDetail() {
               <div className="space-y-4">
                 <Skeleton variant="text" width="120px" height={24} />
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded">
+                  <div key={index} className="flex items-center justify-between p-3 border-1 rounded">
                     <div className="space-y-1">
                       <Skeleton variant="text" width="120px" height={16} />
                       <Skeleton variant="text" width="180px" height={14} />
@@ -264,19 +264,19 @@ export default function SuperAdminHostDetail() {
                   <MapPin className="h-5 w-5" />
                   Locations ({locations?.length || 0})
                 </div>
-                <Link href={`/super-admin/hosts/${hostId}/locations/new`}>
-                  <Button size="sm" className="flex items-center gap-1">
-                    <Plus className="h-4 w-4" />
-                    Add Location
-                  </Button>
-                </Link>
               </CardTitle>
+              <Link href={`/super-admin/hosts/${hostId}/locations/new`}>
+                <Button size="sm" className="flex items-center gap-1">
+                  <Plus className="h-4 w-4" />
+                  Add Location
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent>
               {isLoadingLocations ? (
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded animate-pulse">
+                    <div key={index} className="flex items-center justify-between p-3 border-1 rounded animate-pulse">
                       <div className="space-y-1 flex-1">
                         <Skeleton variant="text" width="120px" height={16} />
                         <Skeleton variant="text" width="180px" height={14} />
@@ -303,7 +303,7 @@ export default function SuperAdminHostDetail() {
                   {locations.map((location) => (
                     <div
                       key={location.id}
-                      className="flex items-center justify-between p-3 border rounded hover:bg-gray-50"
+                      className="flex items-center justify-between p-3 border-1 rounded hover:bg-gray-50"
                     >
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{location.n}</h4>

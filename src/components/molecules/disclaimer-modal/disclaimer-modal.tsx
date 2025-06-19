@@ -120,14 +120,14 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
               </p>
             </div>
 
-            <div className="border rounded-md p-4 bg-gray-50 max-h-48 overflow-y-auto">
+            <div className="border-1 rounded-md p-4 bg-gray-50 max-h-48 overflow-y-auto">
               <p className="text-sm text-gray-700 leading-relaxed">
                 {disclaimerText || defaultDisclaimerText}
               </p>
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <div className="bg-red-50 border-1 border-red-200 rounded-md p-3">
                 <p className="text-sm text-red-600">{error}</p>
               </div>
             )}

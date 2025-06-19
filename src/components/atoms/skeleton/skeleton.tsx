@@ -129,7 +129,7 @@ export const SkeletonCard: React.FC<{
   className?: string;
 }> = ({ showAvatar = false, lines = 3, className }) => {
   return (
-    <div className={cn('p-6 bg-white rounded-lg border space-y-4', className)}>
+    <div className={cn('p-6 bg-white rounded-lg border-1 space-y-4', className)}>
       {showAvatar && (
         <div className="flex items-center space-x-3">
           <SkeletonAvatar />
@@ -170,7 +170,7 @@ export const SkeletonActivitySelector: React.FC<{ count?: number }> = ({ count =
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="flex flex-col items-center justify-center p-4 border rounded-lg">
+        <div key={index} className="flex flex-col items-center justify-center p-4 border-1 rounded-lg">
           <Skeleton circle width={48} height={48} className="mb-2" />
           <Skeleton variant="text" width={60} />
         </div>
@@ -184,7 +184,7 @@ export const SkeletonActivitySelector: React.FC<{ count?: number }> = ({ count =
  */
 export const SkeletonSearchResults: React.FC<{ count?: number }> = ({ count = 3 }) => {
   return (
-    <div className="border rounded-md overflow-hidden divide-y">
+    <div className="border-1 rounded-md overflow-hidden divide-y">
       {Array.from({ length: count }).map((_, index) => (
         <div key={index} className="flex items-center p-3">
           <SkeletonAvatar size="sm" />
@@ -203,7 +203,7 @@ export const SkeletonSearchResults: React.FC<{ count?: number }> = ({ count = 3 
  */
 export const SkeletonCheckInFlow: React.FC = () => {
   return (
-    <div className="bg-white rounded-lg border p-6 space-y-6">
+    <div className="bg-white rounded-lg border-1 p-6 space-y-6">
       <div className="space-y-2">
         <Skeleton variant="text" width="40%" height={28} />
         <Skeleton variant="text" width="60%" />
