@@ -27,7 +27,7 @@ const fetchLocations = async (): Promise<LocationEntity[]> => {
   return response.data!;
 };
 
-const fetchLocationsByHost = async (hostId: string): Promise<LocationEntity[]> => {
+export const fetchLocationsByHost = async (hostId: string): Promise<LocationEntity[]> => {
   const response = await apiClient.get<LocationEntity[]>(`/api/hosts/${hostId}/locations`);
   
   if (response.error) {

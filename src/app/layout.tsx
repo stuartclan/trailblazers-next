@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { Providers } from './providers';
 import { ToastProvider } from '@/hooks/useToast';
 import { Toaster } from '@/components/molecules/toaster/toaster';
+import { TooltipProvider } from '@/components/atoms/tooltip/tooltip';
 
 // const inter = Inter({ subsets: ['latin'] });
 
@@ -25,10 +26,12 @@ export default function RootLayout({
       <body className='bg-primary'>
         <Providers>
           <AuthProvider>
-            <ToastProvider>
-              {children}
-              <Toaster />
-            </ToastProvider>
+            <TooltipProvider delayDuration={100}>
+              <ToastProvider>
+                {children}
+                <Toaster />
+              </ToastProvider>
+            </TooltipProvider>
           </AuthProvider>
         </Providers>
       </body>

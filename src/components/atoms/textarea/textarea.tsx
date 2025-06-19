@@ -80,7 +80,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {helpText && !error && (
           <p 
             id={`${textareaId}-description`}
-            className="mt-1 text-sm text-gray-500"
+            className="mb-2 text-right text-xs text-gray-400"
           >
             {helpText}
           </p>

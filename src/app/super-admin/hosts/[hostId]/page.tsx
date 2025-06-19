@@ -208,7 +208,7 @@ export default function SuperAdminHostDetail() {
                   defaultValues={{
                     name: host.n,
                     email: '', // Email can't be changed after creation
-                    password: '', // Password is optional for updates
+                    password: host.p, // Password is optional for updates
                     disclaimer: host.disc || '',
                   }}
                   isEdit={true}

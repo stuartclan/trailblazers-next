@@ -8,7 +8,6 @@ import { Button } from '@/components/atoms/button/button';
 import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
-import { MobileFormField } from '@/components/molecules/mobile-form-field/mobile-form-field';
 import { Textarea } from '@/components/atoms/textarea/textarea';
 import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -47,21 +46,21 @@ export const HostForm: React.FC<HostFormProps> = ({
   onCancel,
 }) => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isMobile, setIsMobile] = React.useState(false);
+  // const [isMobile, setIsMobile] = React.useState(false);
   const { success, error, info } = useToastNotifications();
 
   // Check if we're on mobile
-  React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+  // React.useEffect(() => {
+  //   const checkMobile = () => {
+  //     setIsMobile(window.innerWidth < 768);
+  //   };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  //   checkMobile();
+  //   window.addEventListener('resize', checkMobile);
+  //   return () => window.removeEventListener('resize', checkMobile);
+  // }, []);
 
-  const methods = useForm<HostFormValues>({
+  const form = useForm<HostFormValues>({
     resolver: zodResolver(hostSchema),
     defaultValues: {
       name: defaultValues?.name || '',
@@ -71,7 +70,7 @@ export const HostForm: React.FC<HostFormProps> = ({
     },
   });
 
-  const { watch, setValue, reset } = methods;
+  const { watch, setValue, reset } = form;
 
   // Enhanced form submission with comprehensive toast feedback
   const handleSubmit = async (data: HostFormValues) => {
@@ -167,122 +166,73 @@ export const HostForm: React.FC<HostFormProps> = ({
   };
 
   return (
-    <FormProvider {...methods}>
+    <FormProvider {...form}>
       <Form
-        onSubmit={methods.handleSubmit(handleSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         isSubmitting={isSubmitting}
         className="space-y-6"
       >
         {/* Host Name */}
-        {isMobile ? (
-          <MobileFormField
-            type="input"
-            label="Host Name"
-            value={watch('name')}
-            onChange={(value) => setValue('name', value)}
-            placeholder="Enter host name"
-            required
-            error={methods.formState.errors.name?.message}
-          />
-        ) : (
-          <FormControl
-            name="name"
-            label="Host Name"
-            helpText="The name of the organization or business"
-            render={({ field, error }) => (
-              <Input
-                {...field}
-                type='text'
-                error={error}
-                placeholder="Enter host name"
-                disabled={isSubmitting}
-              />
-            )}
-          />
-        )}
+        <FormControl
+          name="name"
+          label="Host Name"
+          helpText="The name of the organization or business"
+          render={(fieldProps) => (
+            <Input
+              {...fieldProps}
+              type='text'
+              placeholder="Enter host name"
+              disabled={isSubmitting}
+              required
+            />
+          )}
+        />
 
         {/* Email */}
-        {isMobile ? (
-          <MobileFormField
-            type="input"
-            label="Email"
-            value={watch('email')}
-            onChange={(value) => setValue('email', value)}
-            placeholder="Enter email address"
-            required
-            error={methods.formState.errors.email?.message}
-          />
-        ) : (
-          <FormControl
-            name="email"
-            label="Email"
-            helpText="This email will be used for login"
-            render={({ field, error }) => (
-              <Input
-                {...field}
-                type="email"
-                error={error}
-                placeholder="Enter email address"
-                disabled={isEdit || isSubmitting}
-              />
-            )}
-          />
-        )}
+        <FormControl
+          name="email"
+          label="Email"
+          helpText="This email will be used for login"
+          render={(fieldProps) => (
+            <Input
+              {...fieldProps}
+              type="email"
+              placeholder="Enter email address"
+              // disabled={isEdit || isSubmitting}
+              disabled={isSubmitting}
+            />
+          )}
+        />
 
         {/* Password */}
-        {isMobile ? (
-          <MobileFormField
-            type="input"
-            label={isEdit ? "New Password" : "Password"}
-            value={watch('password')}
-            onChange={(value) => setValue('password', value)}
-            placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
-            required={!isEdit}
-            error={methods.formState.errors.password?.message}
-          />
-        ) : (
-          <FormControl
-            name="password"
-            label={isEdit ? "New Password" : "Password"}
-            helpText="At least 8 characters with uppercase, lowercase, and number"
-            render={({ field, error }) => (
-              <Input
-                {...field}
-                type="password"
-                error={error}
-                placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
-                disabled={isSubmitting}
-              />
-            )}
-          />
-        )}
+        <FormControl
+          name="password"
+          label={isEdit ? "New Password" : "Password"}
+          helpText="At least 8 characters with uppercase, lowercase, and number"
+          render={(fieldProps) => (
+            <Input
+              {...fieldProps}
+              type="password"
+              placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
+              disabled={isSubmitting}
+            />
+          )}
+        />
 
         {/* Disclaimer */}
-        {isMobile ? (
-          <MobileFormField
-            type="textarea"
-            label="Disclaimer Text"
-            value={watch('disclaimer') || ''}
-            onChange={(value) => setValue('disclaimer', value)}
-            placeholder="Enter disclaimer text that will be shown to athletes during registration"
-            error={methods.formState.errors.disclaimer?.message}
-          />
-        ) : (
-          <FormControl
-            name="disclaimer"
-            label="Disclaimer Text"
-            helpText="This text will be shown to athletes during registration"
-            render={({ field, error }) => (
-              <Textarea
-                {...field}
-                error={error}
-                placeholder="Enter disclaimer text"
-                rows={5}
-                disabled={isSubmitting}
-              />
-            )}
-          />
-        )}
+        <FormControl
+          name="disclaimer"
+          label="Disclaimer Text"
+          helpText="This text will be shown to athletes during registration"
+          render={(fieldProps) => (
+            <Textarea
+              {...fieldProps}
+              placeholder="Enter disclaimer text"
+              rows={5}
+              disabled={isSubmitting}
+            />
+          )}
+        />
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t">
@@ -293,7 +243,6 @@ export const HostForm: React.FC<HostFormProps> = ({
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="order-3 sm:order-1"
               >
                 Cancel
               </Button>
@@ -306,7 +255,6 @@ export const HostForm: React.FC<HostFormProps> = ({
               type="button"
               onClick={handleReset}
               disabled={isSubmitting}
-              className="order-2"
             >
               Reset Form
             </Button>
@@ -316,7 +264,6 @@ export const HostForm: React.FC<HostFormProps> = ({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="order-1 sm:order-3"
             >
               {isEdit 
                 ? (isSubmitting ? 'Updating Host...' : 'Update Host')

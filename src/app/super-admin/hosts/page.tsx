@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { Edit3, MapPin, Plus, Trash2, Users } from 'lucide-react';
+import { fetchLocationsByHost, useLocationsByHost } from '@/hooks/useLocation';
 import { useCreateHost, useDeleteHost, useHosts } from '@/hooks/useHost';
 import { useEffect, useState } from 'react';
 
@@ -12,8 +13,8 @@ import { HostForm } from '@/components/molecules/host-form/host-form';
 import Link from 'next/link';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
+import { useAsync } from 'react-use';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocationsByHost } from '@/hooks/useLocation';
 import { useRouter } from 'next/navigation';
 import { useToastNotifications } from '@/hooks/useToast';
 
@@ -60,14 +61,13 @@ export default function SuperAdminHosts() {
   }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
   
   // Fetch location counts for each host
-  useEffect(() => {
+  useAsync(async () => {
     if (hosts) {
       const fetchLocationCounts = async () => {
         const hostsWithCounts = await Promise.all(
           hosts.map(async (host) => {
             try {
-              const response = await fetch(`/api/hosts/${host.id}/locations`);
-              const locations = response.ok ? await response.json() : [];
+              const locations = await fetchLocationsByHost(host.id);
               
               return {
                 id: host.id,
@@ -90,7 +90,7 @@ export default function SuperAdminHosts() {
         setHostsWithLocationCounts(hostsWithCounts);
       };
       
-      fetchLocationCounts();
+      await fetchLocationCounts();
     }
   }, [hosts]);
 

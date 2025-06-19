@@ -11,7 +11,7 @@ export async function GET(
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
-    if (!authResult.isAuthenticated) {
+    if (!authResult.isAuthenticated && !isSuperAdmin(authResult)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

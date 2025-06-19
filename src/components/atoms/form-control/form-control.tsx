@@ -69,11 +69,11 @@ export function FormControl<
       defaultValue={defaultValue}
       rules={rules}
       shouldUnregister={shouldUnregister}
-      render={({ field, fieldState, formState }) => 
+      render={({ field, fieldState }) => 
         render({
-          field,
-          fieldState,
-          formState,
+          ...field,
+          // fieldState,
+          // ...field,
           label,
           helpText,
           error: fieldState.error?.message,
