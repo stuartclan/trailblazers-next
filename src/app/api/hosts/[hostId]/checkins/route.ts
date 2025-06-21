@@ -8,6 +8,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ hostId: string }> },
 ) {
+  const { hostId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -17,9 +18,7 @@ export async function GET(
         { status: 401 }
       );
     }
-    
-    const { hostId } = await params;
-    
+
     // Get host to verify it exists
     const host = await repositories.hosts.getHostById(hostId);
     if (!host) {
@@ -28,13 +27,13 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     // If not super-admin, check if user is this host
     if (!isSuperAdmin(authResult) && isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
       const userHost = await repositories.hosts.getHostByCognitoId(cognitoId || '');
-      
+
       if (!userHost || userHost.id !== hostId) {
         return NextResponse.json(
           { error: 'Insufficient permissions' },
@@ -42,18 +41,18 @@ export async function GET(
         );
       }
     }
-    
+
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get('limit') || '50', 10);
-    
+
     // Get check-ins for this host
     const checkIns = await repositories.checkins.getHostCheckIns(hostId, limit);
-    
+
     return NextResponse.json(checkIns);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error(`Error fetching check-ins for host ${params.hostId}:`, error);
+    console.error(`Error fetching check-ins for host ${hostId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch host check-ins' },
       { status: 500 }

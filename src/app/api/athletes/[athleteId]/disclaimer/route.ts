@@ -5,7 +5,7 @@ import { repositories } from '@/lib/db/repository';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { athleteId: string } }
+  { params }: { params: Promise<{ athleteId: string }> }
 ) {
   try {
     // Verify authentication
@@ -16,7 +16,7 @@ export async function POST(
         { status: 401 }
       );
     }
-    
+
     // Ensure user is a host or super-admin
     if (!isHost(authResult) && !isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -24,12 +24,12 @@ export async function POST(
         { status: 403 }
       );
     }
-    
-    const athleteId = params.athleteId;
-    
+
+    const { athleteId } = await params;
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate required fields
     if (!body.hostId) {
       return NextResponse.json(
@@ -37,7 +37,7 @@ export async function POST(
         { status: 400 }
       );
     }
-    
+
     // Check if athlete exists
     const athlete = await repositories.athletes.getAthleteById(athleteId);
     if (!athlete) {
@@ -46,7 +46,7 @@ export async function POST(
         { status: 404 }
       );
     }
-    
+
     // Check if host exists
     const host = await repositories.hosts.getHostById(body.hostId);
     if (!host) {
@@ -55,12 +55,12 @@ export async function POST(
         { status: 404 }
       );
     }
-    
+
     // Add the disclaimer signature
     const updatedAthlete = await repositories.athletes.addDisclaimerSignature(athleteId, body.hostId);
-    
+
     return NextResponse.json(updatedAthlete);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error signing disclaimer:', error);
     return NextResponse.json(

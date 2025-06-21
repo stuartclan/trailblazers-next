@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     // Create Cognito user for the host
     const cognitoResult = await createHostUser(body.email, body.password, body.name, hostId);
     if (!cognitoResult.success) {
-      if ('name' in cognitoResult?.error && cognitoResult?.error?.name === 'UsernameExistsException') {
+      if (cognitoResult.error && typeof cognitoResult.error === 'object' && 'name' in cognitoResult?.error && cognitoResult?.error?.name === 'UsernameExistsException') {
         return NextResponse.json(
           { error: 'Cognito user exists' },
           { status: 500 }

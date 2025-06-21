@@ -5,7 +5,7 @@ import { repositories } from '@/lib/db/repository';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { athleteId: string; hostId: string } }
+  { params }: { params: Promise<{ athleteId: string; hostId: string }> }
 ) {
   try {
     // Verify authentication
@@ -16,7 +16,7 @@ export async function GET(
         { status: 401 }
       );
     }
-    
+
     // Ensure user is a host or super-admin
     if (!isHost(authResult) && !isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -24,9 +24,9 @@ export async function GET(
         { status: 403 }
       );
     }
-    
-    const { athleteId, hostId } = params;
-    
+
+    const { athleteId, hostId } = await params;
+
     // Check if athlete exists
     const athlete = await repositories.athletes.getAthleteById(athleteId);
     if (!athlete) {
@@ -35,7 +35,7 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     // Check if host exists
     const host = await repositories.hosts.getHostById(hostId);
     if (!host) {
@@ -44,12 +44,12 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     // Check if disclaimer has been signed
     const hasSigned = await repositories.athletes.hasSignedDisclaimer(athleteId, hostId);
-    
+
     return NextResponse.json({ hasSigned });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error checking disclaimer status:', error);
     return NextResponse.json(

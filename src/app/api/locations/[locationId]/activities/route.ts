@@ -6,8 +6,9 @@ import { repositories } from '@/lib/db/repository';
 // Get activities for a location
 export async function GET(
   request: NextRequest,
-  { params }: { params: { locationId: string } }
+  { params }: { params: Promise<{ locationId: string }> }
 ) {
+  const { locationId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -17,9 +18,7 @@ export async function GET(
         { status: 401 }
       );
     }
-    
-    const locationId = params.locationId;
-    
+
     // Get location to verify it exists
     const location = await repositories.locations.getLocationById(locationId);
     if (!location) {
@@ -28,13 +27,13 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     // If not super-admin, check if user is associated with this location
     if (!isSuperAdmin(authResult) && isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
       const host = await repositories.hosts.getHostByCognitoId(cognitoId || '');
-      
+
       if (!host || !host.lids.includes(locationId)) {
         return NextResponse.json(
           { error: 'Insufficient permissions' },
@@ -42,17 +41,17 @@ export async function GET(
         );
       }
     }
-    
+
     // Get the activity IDs from the location
     const activityIds = location.acts || [];
-    
+
     // Fetch full activity objects
     const activities = await repositories.activities.getActivitiesByIds(activityIds);
-    
+
     return NextResponse.json(activities);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error(`Error fetching activities for location ${params.locationId}:`, error);
+    console.error(`Error fetching activities for location ${locationId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch location activities' },
       { status: 500 }
@@ -63,8 +62,9 @@ export async function GET(
 // Update activities for a location
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { locationId: string } }
+  { params }: { params: Promise<{ locationId: string }> }
 ) {
+  const { locationId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -74,9 +74,7 @@ export async function PUT(
         { status: 401 }
       );
     }
-    
-    const locationId = params.locationId;
-    
+
     // Get location to verify it exists
     const location = await repositories.locations.getLocationById(locationId);
     if (!location) {
@@ -85,32 +83,32 @@ export async function PUT(
         { status: 404 }
       );
     }
-    
+
     // Check permissions
     let hasPermission = false;
-    
+
     if (isSuperAdmin(authResult)) {
       hasPermission = true;
     } else if (isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
       const host = await repositories.hosts.getHostByCognitoId(cognitoId || '');
-      
+
       if (host && host.lids.includes(locationId)) {
         hasPermission = true;
       }
     }
-    
+
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate required fields
     if (!body.activityIds || !Array.isArray(body.activityIds)) {
       return NextResponse.json(
@@ -118,10 +116,10 @@ export async function PUT(
         { status: 400 }
       );
     }
-    
+
     // Verify all activities exist and are enabled
     const activityIds = body.activityIds;
-    
+
     // Limit to maximum 3 activities
     if (activityIds.length > 3) {
       return NextResponse.json(
@@ -129,7 +127,7 @@ export async function PUT(
         { status: 400 }
       );
     }
-    
+
     // Verify all activities exist and are enabled
     for (const activityId of activityIds) {
       const activity = await repositories.activities.getActivityById(activityId);
@@ -139,7 +137,7 @@ export async function PUT(
           { status: 404 }
         );
       }
-      
+
       if (!activity.en) {
         return NextResponse.json(
           { error: `Activity ${activityId} is not enabled` },
@@ -147,14 +145,14 @@ export async function PUT(
         );
       }
     }
-    
+
     // Update location activities
     const updatedLocation = await repositories.locations.updateLocationActivities(locationId, activityIds);
-    
+
     return NextResponse.json(updatedLocation);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error(`Error updating activities for location ${params.locationId}:`, error);
+    console.error(`Error updating activities for location ${locationId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to update location activities' },
       { status: 500 }

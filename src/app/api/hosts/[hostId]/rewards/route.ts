@@ -8,6 +8,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ hostId: string }> },
 ) {
+  const { hostId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -17,9 +18,7 @@ export async function GET(
         { status: 401 }
       );
     }
-    
-    const { hostId } = await params;
-    
+
     // Get host to verify it exists
     const host = await repositories.hosts.getHostById(hostId);
     if (!host) {
@@ -28,13 +27,13 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     // If not super-admin, check if user is this host
     if (!isSuperAdmin(authResult) && isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
       const userHost = await repositories.hosts.getHostByCognitoId(cognitoId || '');
-      
+
       if (!userHost || userHost.id !== hostId) {
         return NextResponse.json(
           { error: 'Insufficient permissions' },
@@ -42,14 +41,14 @@ export async function GET(
         );
       }
     }
-    
+
     // Get rewards for this host
     const rewards = await repositories.rewards.getHostRewards(hostId);
-    
+
     return NextResponse.json(rewards);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error(`Error fetching rewards for host ${params.hostId}:`, error);
+    console.error(`Error fetching rewards for host ${hostId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch host rewards' },
       { status: 500 }
@@ -62,6 +61,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ hostId: string }> },
 ) {
+  const { hostId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -71,9 +71,7 @@ export async function POST(
         { status: 401 }
       );
     }
-    
-    const { hostId } = await params;
-    
+
     // Get host to verify it exists
     const host = await repositories.hosts.getHostById(hostId);
     if (!host) {
@@ -82,32 +80,32 @@ export async function POST(
         { status: 404 }
       );
     }
-    
+
     // Check permissions
     let hasPermission = false;
-    
+
     if (isSuperAdmin(authResult)) {
       hasPermission = true;
     } else if (isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
       const userHost = await repositories.hosts.getHostByCognitoId(cognitoId || '');
-      
+
       if (userHost && userHost.id === hostId) {
         hasPermission = true;
       }
     }
-    
+
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate required fields
     if (!body.count || !body.name || !body.icon) {
       return NextResponse.json(
@@ -115,7 +113,7 @@ export async function POST(
         { status: 400 }
       );
     }
-    
+
     // Create reward
     const reward = await repositories.rewards.createReward({
       count: body.count,
@@ -124,11 +122,11 @@ export async function POST(
       type: 'host',
       hostId
     });
-    
+
     return NextResponse.json(reward);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error(`Error creating reward for host ${params.hostId}:`, error);
+    console.error(`Error creating reward for host ${hostId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to create host reward' },
       { status: 500 }

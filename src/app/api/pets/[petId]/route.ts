@@ -7,8 +7,9 @@ import { verifyAuth } from '@/lib/auth/api-auth';
 // Get a specific pet
 export async function GET(
   request: NextRequest,
-  { params }: { params: { petId: string } }
+  { params }: { params: Promise<{ petId: string }> }
 ) {
+  const { petId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -18,9 +19,7 @@ export async function GET(
         { status: 401 }
       );
     }
-    
-    const petId = params.petId;
-    
+
     // Get pet
     const pet = await repositories.pets.getPetById(petId);
     if (!pet) {
@@ -29,10 +28,10 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(pet);
   } catch (error: any) {
-    console.error(`Error fetching pet ${params.petId}:`, error);
+    console.error(`Error fetching pet ${petId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch pet' },
       { status: 500 }
@@ -43,8 +42,9 @@ export async function GET(
 // Update a pet
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { petId: string } }
+  { params }: { params: Promise<{ petId: string }> }
 ) {
+  const { petId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -54,9 +54,7 @@ export async function PATCH(
         { status: 401 }
       );
     }
-    
-    const petId = params.petId;
-    
+
     // Get pet to verify it exists
     const pet = await repositories.pets.getPetById(petId);
     if (!pet) {
@@ -65,10 +63,10 @@ export async function PATCH(
         { status: 404 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Only allow updating name for now
     if (!body.name) {
       return NextResponse.json(
@@ -76,7 +74,7 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    
+
     // Check if another pet with the same name already exists for this athlete
     if (body.name !== pet.n) {
       const existingPet = await repositories.pets.getPetByNameAndAthleteId(body.name, pet.aid);
@@ -87,15 +85,15 @@ export async function PATCH(
         );
       }
     }
-    
+
     // Update pet
     const updatedPet = await repositories.pets.updatePet(petId, {
       n: body.name
     });
-    
+
     return NextResponse.json(updatedPet);
   } catch (error: any) {
-    console.error(`Error updating pet ${params.petId}:`, error);
+    console.error(`Error updating pet ${petId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to update pet' },
       { status: 500 }
@@ -106,8 +104,9 @@ export async function PATCH(
 // Delete a pet
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { petId: string } }
+  { params }: { params: Promise<{ petId: string }> }
 ) {
+  const { petId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -117,9 +116,7 @@ export async function DELETE(
         { status: 401 }
       );
     }
-    
-    const petId = params.petId;
-    
+
     // Get pet to verify it exists
     const pet = await repositories.pets.getPetById(petId);
     if (!pet) {
@@ -128,13 +125,13 @@ export async function DELETE(
         { status: 404 }
       );
     }
-    
+
     // Delete pet
     await repositories.pets.deletePet(petId);
-    
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error(`Error deleting pet ${params.petId}:`, error);
+    console.error(`Error deleting pet ${petId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete pet' },
       { status: 500 }

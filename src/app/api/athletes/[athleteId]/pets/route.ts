@@ -6,8 +6,9 @@ import { verifyAuth } from '@/lib/auth/api-auth';
 // Get pets for an athlete
 export async function GET(
   request: NextRequest,
-  { params }: { params: { athleteId: string } }
+  { params }: { params: Promise<{ athleteId: string }> }
 ) {
+  const { athleteId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -17,9 +18,7 @@ export async function GET(
         { status: 401 }
       );
     }
-    
-    const athleteId = params.athleteId;
-    
+
     // Get athlete to verify it exists
     const athlete = await repositories.athletes.getAthleteById(athleteId);
     if (!athlete) {
@@ -28,14 +27,14 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     // Get pets for this athlete
     const pets = await repositories.pets.getPetsByAthleteId(athleteId);
-    
+
     return NextResponse.json(pets);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error(`Error fetching pets for athlete ${params.athleteId}:`, error);
+    console.error(`Error fetching pets for athlete ${athleteId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch athlete pets' },
       { status: 500 }

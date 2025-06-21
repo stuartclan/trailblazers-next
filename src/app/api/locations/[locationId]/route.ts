@@ -7,8 +7,9 @@ import { repositories } from '@/lib/db/repository';
 // Get a specific location
 export async function GET(
   request: NextRequest,
-  { params }: { params: { locationId: string } }
+  { params }: { params: Promise<{ locationId: string }> }
 ) {
+  const { locationId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -18,9 +19,7 @@ export async function GET(
         { status: 401 }
       );
     }
-    
-    const locationId = params.locationId;
-    
+
     // Get location
     const location = await repositories.locations.getLocationById(locationId);
     if (!location) {
@@ -29,13 +28,13 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     // If not super-admin, check if user is associated with this location
     if (!isSuperAdmin(authResult) && isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
       const host = await repositories.hosts.getHostByCognitoId(cognitoId || '');
-      
+
       if (!host || !host.lids.includes(locationId)) {
         return NextResponse.json(
           { error: 'Insufficient permissions' },
@@ -43,10 +42,10 @@ export async function GET(
         );
       }
     }
-    
+
     return NextResponse.json(location);
   } catch (error: any) {
-    console.error(`Error fetching location ${params.locationId}:`, error);
+    console.error(`Error fetching location ${locationId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch location' },
       { status: 500 }
@@ -57,8 +56,9 @@ export async function GET(
 // Update a location
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { locationId: string } }
+  { params }: { params: Promise<{ locationId: string }> }
 ) {
+  const { locationId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -68,7 +68,7 @@ export async function PATCH(
         { status: 401 }
       );
     }
-    
+
     // Only super-admins can update locations
     if (!isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -76,9 +76,7 @@ export async function PATCH(
         { status: 403 }
       );
     }
-    
-    const locationId = params.locationId;
-    
+
     // Check if location exists
     const location = await repositories.locations.getLocationById(locationId);
     if (!location) {
@@ -87,10 +85,10 @@ export async function PATCH(
         { status: 404 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate host ID if it's being updated
     if (body.hostId && body.hostId !== location.hid) {
       const newHost = await repositories.hosts.getHostById(body.hostId);
@@ -100,14 +98,14 @@ export async function PATCH(
           { status: 404 }
         );
       }
-      
+
       // Remove location from old host
       await repositories.hosts.removeLocationFromHost(location.hid, locationId);
-      
+
       // Add location to new host
       await repositories.hosts.addLocationToHost(body.hostId, locationId);
     }
-    
+
     // Update location
     const updatedLocation = await repositories.locations.updateLocation(locationId, {
       n: body.name,
@@ -115,10 +113,10 @@ export async function PATCH(
       hid: body.hostId,
       acts: body.activityIds
     });
-    
+
     return NextResponse.json(updatedLocation);
   } catch (error: any) {
-    console.error(`Error updating location ${params.locationId}:`, error);
+    console.error(`Error updating location ${locationId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to update location' },
       { status: 500 }
@@ -129,8 +127,9 @@ export async function PATCH(
 // Delete a location
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { locationId: string } }
+  { params }: { params: Promise<{ locationId: string }> }
 ) {
+  const { locationId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -140,7 +139,7 @@ export async function DELETE(
         { status: 401 }
       );
     }
-    
+
     // Only super-admins can delete locations
     if (!isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -148,9 +147,7 @@ export async function DELETE(
         { status: 403 }
       );
     }
-    
-    const locationId = params.locationId;
-    
+
     // Check if location exists
     const location = await repositories.locations.getLocationById(locationId);
     if (!location) {
@@ -159,16 +156,16 @@ export async function DELETE(
         { status: 404 }
       );
     }
-    
+
     // Remove location from host
     await repositories.hosts.removeLocationFromHost(location.hid, locationId);
-    
+
     // Delete location
     await repositories.locations.deleteLocation(locationId);
-    
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error(`Error deleting location ${params.locationId}:`, error);
+    console.error(`Error deleting location ${locationId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete location' },
       { status: 500 }

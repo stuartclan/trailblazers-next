@@ -7,8 +7,9 @@ import { repositories } from '@/lib/db/repository';
 // Get a specific athlete
 export async function GET(
   request: NextRequest,
-  { params }: { params: { athleteId: string } }
+  { params }: { params: Promise<{ athleteId: string }> }
 ) {
+  const { athleteId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -18,9 +19,7 @@ export async function GET(
         { status: 401 }
       );
     }
-    
-    const athleteId = params.athleteId;
-    
+
     // Get athlete
     const athlete = await repositories.athletes.getAthleteById(athleteId);
     if (!athlete) {
@@ -29,10 +28,10 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(athlete);
   } catch (error: any) {
-    console.error(`Error fetching athlete ${params.athleteId}:`, error);
+    console.error(`Error fetching athlete ${athleteId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch athlete' },
       { status: 500 }
@@ -43,8 +42,9 @@ export async function GET(
 // Update an athlete
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { athleteId: string } }
+  { params }: { params: Promise<{ athleteId: string }> }
 ) {
+  const { athleteId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -54,9 +54,7 @@ export async function PATCH(
         { status: 401 }
       );
     }
-    
-    const athleteId = params.athleteId;
-    
+
     // Get athlete to verify it exists
     const athlete = await repositories.athletes.getAthleteById(athleteId);
     if (!athlete) {
@@ -65,13 +63,13 @@ export async function PATCH(
         { status: 404 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Create update data object
     const updateData: any = {};
-    
+
     // Allow updating specific fields
     if (body.firstName !== undefined) updateData.fn = body.firstName;
     if (body.lastName !== undefined) updateData.ln = body.lastName;
@@ -82,18 +80,18 @@ export async function PATCH(
     if (body.shirtSize !== undefined) updateData.ss = body.shirtSize;
     if (body.emergencyName !== undefined) updateData.en = body.emergencyName;
     if (body.emergencyPhone !== undefined) updateData.ep = body.emergencyPhone;
-    
+
     // Only super-admins can update legacy count
     if (body.legacyCount !== undefined && isSuperAdmin(authResult)) {
       updateData.lc = body.legacyCount;
     }
-    
+
     // Update athlete
     const updatedAthlete = await repositories.athletes.updateAthlete(athleteId, updateData);
-    
+
     return NextResponse.json(updatedAthlete);
   } catch (error: any) {
-    console.error(`Error updating athlete ${params.athleteId}:`, error);
+    console.error(`Error updating athlete ${athleteId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to update athlete' },
       { status: 500 }
@@ -104,8 +102,9 @@ export async function PATCH(
 // Delete an athlete
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { athleteId: string } }
+  { params }: { params: Promise<{ athleteId: string }> }
 ) {
+  const { athleteId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -115,7 +114,7 @@ export async function DELETE(
         { status: 401 }
       );
     }
-    
+
     // Only super-admins can delete athletes
     if (!isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -123,9 +122,7 @@ export async function DELETE(
         { status: 403 }
       );
     }
-    
-    const athleteId = params.athleteId;
-    
+
     // Get athlete to verify it exists
     const athlete = await repositories.athletes.getAthleteById(athleteId);
     if (!athlete) {
@@ -134,13 +131,13 @@ export async function DELETE(
         { status: 404 }
       );
     }
-    
+
     // Soft delete athlete
     await repositories.athletes.softDeleteAthlete(athleteId);
-    
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error(`Error deleting athlete ${params.athleteId}:`, error);
+    console.error(`Error deleting athlete ${athleteId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete athlete' },
       { status: 500 }

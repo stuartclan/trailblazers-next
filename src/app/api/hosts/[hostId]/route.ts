@@ -13,6 +13,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ hostId: string }> },
 ) {
+  const { hostId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -22,8 +23,6 @@ export async function GET(
         { status: 401 }
       );
     }
-
-    const { hostId } = await params;
 
     // Get host
     const host = await repositories.hosts.getHostById(hostId);
@@ -60,7 +59,7 @@ export async function GET(
 
     return NextResponse.json(host);
   } catch (error: any) {
-    console.error(`Error fetching host ${params.hostId}:`, error);
+    console.error(`Error fetching host ${hostId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch host' },
       { status: 500 }
@@ -73,6 +72,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ hostId: string }> },
 ) {
+  const { hostId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -82,8 +82,6 @@ export async function PATCH(
         { status: 401 }
       );
     }
-
-    const { hostId } = await params;
 
     // Get host to verify it exists
     const host = await repositories.hosts.getHostById(hostId);
@@ -142,11 +140,12 @@ export async function PATCH(
     }
 
     // For security, remove sensitive fields when returning
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { p, ...safeHost } = updatedHost || {};
 
     return NextResponse.json(safeHost);
   } catch (error: any) {
-    console.error(`Error updating host ${params.hostId}:`, error);
+    console.error(`Error updating host ${hostId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to update host' },
       { status: 500 }
@@ -159,6 +158,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ hostId: string }> },
 ) {
+  const { hostId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -177,8 +177,6 @@ export async function DELETE(
       );
     }
 
-    const { hostId } = await params;
-
     // Delete locations for host
     const locations = await repositories.locations.getLocationsByHostId(hostId);
     if (locations?.length) {
@@ -188,7 +186,6 @@ export async function DELETE(
         })
       ]);
     }
-
 
     // Get host to verify it exists and get Cognito ID
     const host = await repositories.hosts.getHostById(hostId);
@@ -209,7 +206,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error(`Error deleting host ${params.hostId}:`, error);
+    console.error(`Error deleting host ${hostId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete host' },
       { status: 500 }
