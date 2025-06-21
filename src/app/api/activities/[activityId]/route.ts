@@ -7,7 +7,7 @@ import { repositories } from '@/lib/db/repository';
 // Get a specific activity
 export async function GET(
   request: NextRequest,
-  { params }: { params: { activityId: string } }
+  { params }: { params: Promise<{ activityId: string }> },
 ) {
   try {
     // Verify authentication
@@ -18,9 +18,9 @@ export async function GET(
         { status: 401 }
       );
     }
-    
-    const activityId = params.activityId;
-    
+
+    const { activityId } = await params;
+
     // Get activity
     const activity = await repositories.activities.getActivityById(activityId);
     if (!activity) {
@@ -29,7 +29,7 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(activity);
   } catch (error: any) {
     console.error(`Error fetching activity ${params.activityId}:`, error);
@@ -43,7 +43,7 @@ export async function GET(
 // Update an activity
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { activityId: string } }
+  { params }: { params: Promise<{ activityId: string }> },
 ) {
   try {
     // Verify authentication
@@ -54,7 +54,7 @@ export async function PATCH(
         { status: 401 }
       );
     }
-    
+
     // Only super-admins can update activities
     if (!isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -62,9 +62,9 @@ export async function PATCH(
         { status: 403 }
       );
     }
-    
-    const activityId = params.activityId;
-    
+
+    const { activityId } = await params;
+
     // Check if activity exists
     const activity = await repositories.activities.getActivityById(activityId);
     if (!activity) {
@@ -73,17 +73,13 @@ export async function PATCH(
         { status: 404 }
       );
     }
-    
+
     // Parse request body
-    const body = await request.json();
-    
+    const updates = await request.json();
+
     // Update activity
-    const updatedActivity = await repositories.activities.updateActivity(activityId, {
-      n: body.name,
-      i: body.icon,
-      en: body.enabled
-    });
-    
+    const updatedActivity = await repositories.activities.updateActivity(activityId, updates);
+
     return NextResponse.json(updatedActivity);
   } catch (error: any) {
     console.error(`Error updating activity ${params.activityId}:`, error);
@@ -97,7 +93,7 @@ export async function PATCH(
 // Delete an activity
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { activityId: string } }
+  { params }: { params: Promise<{ activityId: string }> },
 ) {
   try {
     // Verify authentication
@@ -108,7 +104,7 @@ export async function DELETE(
         { status: 401 }
       );
     }
-    
+
     // Only super-admins can delete activities
     if (!isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -116,9 +112,9 @@ export async function DELETE(
         { status: 403 }
       );
     }
-    
-    const activityId = params.activityId;
-    
+
+    const { activityId } = await params;
+
     // Check if activity exists
     const activity = await repositories.activities.getActivityById(activityId);
     if (!activity) {
@@ -127,14 +123,14 @@ export async function DELETE(
         { status: 404 }
       );
     }
-    
+
     // TODO: Check if activity is in use by any locations
     // This would require scanning all locations for this activity
     // For now, we'll just proceed with deletion
-    
+
     // Delete activity
     await repositories.activities.deleteActivity(activityId);
-    
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error(`Error deleting activity ${params.activityId}:`, error);

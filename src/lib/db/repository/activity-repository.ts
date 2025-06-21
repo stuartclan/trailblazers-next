@@ -25,7 +25,7 @@ export class ActivityRepository {
   }): Promise<ActivityEntity> {
     const id = nanoid();
     const timestamp = Math.floor(Date.now() / 1000);
-    
+
     const activity: ActivityEntity = {
       pk: `ACT#${id}`,
       sk: 'METADATA',
@@ -39,16 +39,16 @@ export class ActivityRepository {
       GSI1PK: 'TYPE#activity',
       GSI1SK: `ACT#${id}`
     };
-    
+
     await this.docClient.send(
       new PutCommand({
         TableName: this.tableName,
         Item: activity
       })
     );
-    
+
     return activity;
-  }  
+  }
   /**
    * Get an activity by ID
    */
@@ -62,10 +62,10 @@ export class ActivityRepository {
         }
       })
     );
-    
+
     return (response.Item as ActivityEntity) || null;
   }
-  
+
   /**
    * Get all activities
    */
@@ -80,40 +80,48 @@ export class ActivityRepository {
         }
       })
     );
-    
+
     let activities = (response.Items as ActivityEntity[]) || [];
-    
+
     // Filter out disabled activities if requested
     if (!includeDisabled) {
       activities = activities.filter(activity => activity.en);
     }
-    
+
     return activities;
   }
-  
+
   /**
-   * Update an activity
-   */
+     * Update an activity
+     */
   async updateActivity(id: string, updateData: Partial<Omit<ActivityEntity, 'pk' | 'sk' | 't' | 'id' | 'c'>>): Promise<ActivityEntity | null> {
     // Create update expression dynamically based on provided fields
-    const updateExpressionParts: string[] = ['SET u = :timestamp'];
+    const updateExpressionParts: string[] = ['SET #u = :timestamp'];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const expressionAttributeValues: Record<string, any> = {
       ':timestamp': Math.floor(Date.now() / 1000)
     };
-    const expressionAttributeNames: Record<string, string> = {};
-    
+    const expressionAttributeNames: Record<string, string> = {
+      '#u': 'u' // Always include the updated timestamp
+    };
+
+    console.log('DEBUG: update activity:', updateData);
+
     // Add each provided field to the update expression
     Object.entries(updateData).forEach(([key, value]) => {
       if (value !== undefined) {
-        updateExpressionParts.push(`#${key} = :${key}`);
-        expressionAttributeValues[`:${key}`] = value;
-        expressionAttributeNames[`#${key}`] = key;
+        // Use expression attribute names for all fields to avoid reserved word conflicts
+        const attributeNamePlaceholder = `#${key}`;
+        const attributeValuePlaceholder = `:${key}`;
+
+        updateExpressionParts.push(`${attributeNamePlaceholder} = ${attributeValuePlaceholder}`);
+        expressionAttributeValues[attributeValuePlaceholder] = value;
+        expressionAttributeNames[attributeNamePlaceholder] = key;
       }
     });
-    
+
     const updateExpression = updateExpressionParts.join(', ');
-    
+
     // Run the update operation
     await this.docClient.send(
       new UpdateCommand({
@@ -128,11 +136,11 @@ export class ActivityRepository {
         ReturnValues: 'ALL_NEW'
       })
     );
-    
+
     // Return the updated activity
     return this.getActivityById(id);
   }
-  
+
   /**
    * Delete an activity
    */
@@ -147,46 +155,46 @@ export class ActivityRepository {
       })
     );
   }
-  
+
   /**
    * Enable an activity
    */
   async enableActivity(id: string): Promise<ActivityEntity | null> {
     return this.updateActivity(id, { en: true });
   }
-  
+
   /**
    * Disable an activity
    */
   async disableActivity(id: string): Promise<ActivityEntity | null> {
     return this.updateActivity(id, { en: false });
   }
-  
+
   /**
    * Get activities by IDs
    */
   async getActivitiesByIds(ids: string[]): Promise<ActivityEntity[]> {
     if (ids.length === 0) return [];
-    
+
     // Use Promise.all to make parallel requests
     const activities = await Promise.all(
       ids.map(id => this.getActivityById(id))
     );
-    
+
     // Filter out any null results
     return activities.filter((activity): activity is ActivityEntity => activity !== null);
   }
-  
+
   /**
    * Create default activities if none exist
    */
   async createDefaultActivitiesIfNoneExist(): Promise<ActivityEntity[]> {
     const existingActivities = await this.getAllActivities(true);
-    
+
     if (existingActivities.length > 0) {
       return existingActivities;
     }
-    
+
     // Define default activities
     const defaultActivities = [
       { name: 'Bike', icon: ActivityIcon.DirectionsBike },
@@ -194,10 +202,10 @@ export class ActivityRepository {
       { name: 'Snow', icon: ActivityIcon.Ice },
       { name: 'Water', icon: ActivityIcon.Waves }
     ];
-    
+
     // Create all default activities
     const createdActivities = await Promise.all(
-      defaultActivities.map(activity => 
+      defaultActivities.map(activity =>
         this.createActivity({
           name: activity.name,
           icon: activity.icon,
@@ -205,7 +213,7 @@ export class ActivityRepository {
         })
       )
     );
-    
+
     return createdActivities;
   }
 }

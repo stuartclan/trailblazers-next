@@ -9,11 +9,11 @@ import { apiClient } from '@/lib/utils/api-client';
 // API client functions using the new authenticated client
 const fetchActivity = async (activityId: string): Promise<ActivityEntity> => {
   const response = await apiClient.get<ActivityEntity>(`/api/activities/${activityId}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -21,21 +21,21 @@ const fetchActivities = async (includeDisabled = false): Promise<ActivityEntity[
   const response = await apiClient.get<ActivityEntity[]>(
     `/api/activities?includeDisabled=${includeDisabled}`
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const fetchLocationActivities = async (locationId: string): Promise<ActivityEntity[]> => {
   const response = await apiClient.get<ActivityEntity[]>(`/api/locations/${locationId}/activities`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -45,11 +45,11 @@ const createActivity = async (data: {
   enabled?: boolean;
 }): Promise<ActivityEntity> => {
   const response = await apiClient.post<ActivityEntity>('/api/activities', data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -61,17 +61,17 @@ const updateActivity = async ({
   data: Partial<Omit<ActivityEntity, 'pk' | 'sk' | 't' | 'id' | 'c'>>;
 }): Promise<ActivityEntity> => {
   const response = await apiClient.patch<ActivityEntity>(`/api/activities/${id}`, data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const deleteActivity = async (id: string): Promise<void> => {
   const response = await apiClient.delete(`/api/activities/${id}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
@@ -79,11 +79,11 @@ const deleteActivity = async (id: string): Promise<void> => {
 
 const createDefaultActivities = async (): Promise<ActivityEntity[]> => {
   const response = await apiClient.post<ActivityEntity[]>('/api/activities/create-defaults');
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -113,7 +113,7 @@ export const useLocationActivities = (locationId: string) => {
 
 export const useCreateActivity = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createActivity,
     onSuccess: () => {
@@ -124,7 +124,7 @@ export const useCreateActivity = () => {
 
 export const useUpdateActivity = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: updateActivity,
     onSuccess: (data) => {
@@ -136,7 +136,7 @@ export const useUpdateActivity = () => {
 
 export const useDeleteActivity = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deleteActivity,
     onSuccess: (_data, variables) => {
@@ -148,7 +148,7 @@ export const useDeleteActivity = () => {
 
 export const useCreateDefaultActivities = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createDefaultActivities,
     onSuccess: () => {

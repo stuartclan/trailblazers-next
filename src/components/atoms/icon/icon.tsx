@@ -7,24 +7,25 @@ import { useMaterialIcons } from '@/lib/utils/material-icons';
 
 export interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
   name: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  color?: 
-    | 'primary' 
-    | 'secondary' 
-    | 'success' 
-    | 'error' 
-    | 'warning' 
-    | 'info'
-    | 'muted'
-    | 'inherit';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  color?:
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info'
+  | 'muted'
+  | 'inherit';
 }
 
 const sizeMap = {
-  xs: 'text-sm',
-  sm: 'text-base',
-  md: 'text-lg',
-  lg: 'text-xl',
-  xl: 'text-2xl',
+  xs: '!text-sm',
+  sm: '!text-base',
+  md: '!text-lg',
+  lg: '!text-xl',
+  xl: '!text-2xl',
+  xxl: '!text-4xl',
 };
 
 const colorMap = {

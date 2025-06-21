@@ -25,12 +25,14 @@ export class LocationRepository {
   }): Promise<LocationEntity> {
     const id = nanoid();
     const timestamp = Math.floor(Date.now() / 1000);
-    
+
     const location: LocationEntity = {
       pk: `LOC#${id}`,
       sk: 'METADATA',
       GSI1PK: `HOST#${data.hostId}`,
       GSI1SK: `LOC#${id}`,
+      GSI2PK: `TYPE#location`,
+      GSI2SK: `LOC#${id}`,
       t: 'location',
       id,
       c: timestamp,
@@ -40,17 +42,17 @@ export class LocationRepository {
       a: data.address,
       acts: data.activityIds || []
     };
-    
+
     await this.docClient.send(
       new PutCommand({
         TableName: this.tableName,
         Item: location
       })
     );
-    
+
     return location;
   }
-  
+
   /**
    * Get a location by ID
    */
@@ -64,10 +66,10 @@ export class LocationRepository {
         }
       })
     );
-    
+
     return (response.Item as LocationEntity) || null;
   }
-  
+
   /**
    * Get all locations for a host
    */
@@ -76,17 +78,18 @@ export class LocationRepository {
       new QueryCommand({
         TableName: this.tableName,
         IndexName: 'GSI1',
-        KeyConditionExpression: 'GSI1PK = :hostId AND begins_with(GSI1SK, :prefix)',
+        // KeyConditionExpression: 'GSI1PK = :hostId AND begins_with(GSI1SK, :prefix)',
+        KeyConditionExpression: 'GSI1PK = :hostId',
         ExpressionAttributeValues: {
           ':hostId': `HOST#${hostId}`,
-          ':prefix': 'LOC#'
+          // ':prefix': 'LOC#'
         }
       })
     );
-    
+
     return (response.Items as LocationEntity[]) || [];
   }
-  
+
   /**
    * Update a location
    */
@@ -98,7 +101,7 @@ export class LocationRepository {
       ':timestamp': Math.floor(Date.now() / 1000)
     };
     const expressionAttributeNames: Record<string, string> = {};
-    
+
     // Add each provided field to the update expression
     Object.entries(updateData).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -107,9 +110,9 @@ export class LocationRepository {
         expressionAttributeNames[`#${key}`] = key;
       }
     });
-    
+
     const updateExpression = updateExpressionParts.join(', ');
-    
+
     // Run the update operation
     await this.docClient.send(
       new UpdateCommand({
@@ -124,11 +127,11 @@ export class LocationRepository {
         ReturnValues: 'ALL_NEW'
       })
     );
-    
+
     // Return the updated location
     return this.getLocationById(id);
   }
-  
+
   /**
    * Delete a location
    */
@@ -143,41 +146,41 @@ export class LocationRepository {
       })
     );
   }
-  
+
   /**
    * Add an activity to a location
    */
   async addActivityToLocation(locationId: string, activityId: string): Promise<LocationEntity | null> {
     const location = await this.getLocationById(locationId);
     if (!location) return null;
-    
+
     // Add activity if not already present
     if (!location.acts.includes(activityId)) {
       const updatedActs = [...location.acts, activityId];
       return this.updateLocation(locationId, { acts: updatedActs });
     }
-    
+
     return location;
   }
-  
+
   /**
    * Remove an activity from a location
    */
   async removeActivityFromLocation(locationId: string, activityId: string): Promise<LocationEntity | null> {
     const location = await this.getLocationById(locationId);
     if (!location) return null;
-    
+
     const updatedActs = location.acts.filter(id => id !== activityId);
     return this.updateLocation(locationId, { acts: updatedActs });
   }
-  
+
   /**
    * Update activities for a location
    */
   async updateLocationActivities(locationId: string, activityIds: string[]): Promise<LocationEntity | null> {
     return this.updateLocation(locationId, { acts: activityIds });
   }
-  
+
   /**
    * Get all locations
    */
@@ -185,14 +188,14 @@ export class LocationRepository {
     const response = await this.docClient.send(
       new QueryCommand({
         TableName: this.tableName,
-        IndexName: 'GSI1',
-        KeyConditionExpression: 'GSI1PK = :typeKey',
+        IndexName: 'GSI2',
+        KeyConditionExpression: 'GSI2PK = :typeKey',
         ExpressionAttributeValues: {
           ':typeKey': 'TYPE#location'
         }
       })
     );
-    
+
     return (response.Items as LocationEntity[]) || [];
   }
 }

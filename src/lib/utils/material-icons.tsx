@@ -7,13 +7,13 @@ export function useMaterialIcons() {
   useEffect(() => {
     // Check if Material Icons is already loaded
     const exists = document.querySelector('link[href*="material-icons"]');
-    
+
     if (!exists) {
       // Create link element for Material Icons
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
-      
+
       // Append to head
       document.head.appendChild(link);
     }
@@ -32,18 +32,19 @@ export enum ActivityIcon {
   Kayaking = 'kayaking',
   Surfing = 'surfing',
   Pool = 'pool',
-  Sailboat = 'sailboat',
+  Sailboat = 'sailing',
   Snowboarding = 'snowboarding',
+  Snowshoeing = 'snowshoeing',
   Ice = 'ac_unit',
   Waves = 'waves',
-  
+
   // Indoor activities
   FitnessCenter = 'fitness_center',
   SportsGymnastics = 'sports_gymnastics',
   SportsTennis = 'sports_tennis',
   SportsBasketball = 'sports_basketball',
   SportsVolleyball = 'sports_volleyball',
-  
+
   // Rewards
   EmojiEvents = 'emoji_events',
   Verified = 'verified',
@@ -68,31 +69,31 @@ export enum IconColor {
 }
 
 // Helper component for displaying Material icons
-export function MaterialIcon({ 
-  icon, 
+export function MaterialIcon({
+  icon,
   color = IconColor.Primary,
   size = 'default'
-}: { 
-  icon: string | ActivityIcon; 
+}: {
+  icon: string | ActivityIcon;
   color?: string | IconColor;
   size?: 'small' | 'default' | 'large';
 }) {
-  const sizeClass = 
-    size === 'small' ? 'text-base' : 
-    size === 'large' ? 'text-3xl' : 
-    'text-2xl';
-  
-  const colorClass = 
+  const sizeClass =
+    size === 'small' ? 'text-base' :
+      size === 'large' ? 'text-3xl' :
+        'text-2xl';
+
+  const colorClass =
     color === IconColor.Primary ? 'text-primary' :
-    color === IconColor.Secondary ? 'text-secondary' :
-    color === IconColor.Success ? 'text-success' :
-    color === IconColor.Warning ? 'text-warning' :
-    color === IconColor.Error ? 'text-error' :
-    color === IconColor.Info ? 'text-info' :
-    color === IconColor.Dark ? 'text-gray-800' :
-    color === IconColor.Light ? 'text-gray-300' :
-    '';
-  
+      color === IconColor.Secondary ? 'text-secondary' :
+        color === IconColor.Success ? 'text-success' :
+          color === IconColor.Warning ? 'text-warning' :
+            color === IconColor.Error ? 'text-error' :
+              color === IconColor.Info ? 'text-info' :
+                color === IconColor.Dark ? 'text-gray-800' :
+                  color === IconColor.Light ? 'text-gray-300' :
+                    '';
+
   return (
     <span className={`material-icons ${sizeClass} ${colorClass}`}>
       {icon}

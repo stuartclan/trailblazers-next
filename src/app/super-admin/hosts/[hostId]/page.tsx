@@ -9,7 +9,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
-import { HostForm } from '@/components/molecules/host-form/host-form';
+import { HostEntity } from '@/lib/db/entities/types';
+import { HostForm } from '@/components/organisms/host-form/host-form';
 import Link from 'next/link';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
@@ -79,7 +80,7 @@ export default function SuperAdminHostDetail() {
 
     try {
       // Only include password if it's provided
-      const updateData: any = {
+      const updateData: Partial<HostEntity> = {
         n: data.name,
         disc: data.disclaimer,
       };

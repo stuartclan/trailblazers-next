@@ -10,7 +10,7 @@ import { ActivitySelector } from '@/components/molecules/activity-selector/activ
 import { Button } from '@/components/atoms/button/button';
 import { CheckInConfirmation } from '@/components/molecules/check-in-confirmation/check-in-confirmation';
 import { DisclaimerModal } from '@/components/molecules/disclaimer-modal/disclaimer-modal';
-import { PetRegistrationForm } from '@/components/molecules/pet-registration-form/pet-registration-form';
+import { PetRegistrationForm } from '@/components/organisms/pet-registration-form/pet-registration-form';
 import { Plus } from 'lucide-react';
 import { SearchResults } from '@/components/molecules/search-results/search-results';
 import { Select } from '@/components/atoms/select/select';
@@ -36,7 +36,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   className,
 }) => {
   const { success, error, info } = useToastNotifications();
-  
+
   // State management
   const [currentStep, setCurrentStep] = React.useState<FlowStep>('search');
   const [selectedAthlete, setSelectedAthlete] = React.useState<AthleteEntity | null>(null);
@@ -85,7 +85,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
         handleProceedToCheckIn();
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAthlete, selectedActivity, hasSignedDisclaimer]);
 
   const handleAthleteSelect = (athlete: AthleteEntity) => {
@@ -259,7 +259,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Select Pet</h3>
-            
+
             {athletePets && athletePets.length > 0 ? (
               <div className="space-y-3">
                 <Select

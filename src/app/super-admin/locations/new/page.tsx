@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
-import { LocationForm } from '@/components/molecules/location-form/location-form';
+import { LocationForm } from '@/components/organisms/location-form/location-form';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useAuth } from '@/hooks/useAuth';

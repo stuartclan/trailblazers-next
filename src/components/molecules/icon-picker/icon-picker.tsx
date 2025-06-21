@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Search, X } from 'lucide-react';
 
 import { ActivityIcon } from '@/lib/utils/material-icons';
+import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Button } from '@/components/atoms/button/button';
 import { Input } from '@/components/atoms/input/input';
 import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
@@ -21,34 +22,38 @@ interface IconPickerProps {
 
 // Popular activity-related Material Icons
 const ACTIVITY_ICONS = [
+    // Defaults
+    { name: ActivityIcon.DirectionsRun, label: 'Run', categories: ['Defaults', 'Outdoor'] },
+    { name: ActivityIcon.DirectionsBike, label: 'Bike', categories: ['Defaults', 'Outdoor'] },
+    { name: ActivityIcon.Hiking, label: 'Hike', categories: ['Defaults', 'Outdoor'] },
+
     // Outdoor activities
-    { name: ActivityIcon.DirectionsBike, label: 'Bike', category: 'Outdoor' },
-    { name: ActivityIcon.DirectionsWalk, label: 'Walk', category: 'Outdoor' },
-    { name: ActivityIcon.DirectionsRun, label: 'Run', category: 'Outdoor' },
-    { name: ActivityIcon.Hiking, label: 'Hiking', category: 'Outdoor' },
-    { name: ActivityIcon.Downhill, label: 'Skiing', category: 'Outdoor' },
-    { name: ActivityIcon.NordicWalking, label: 'Nordic Walking', category: 'Outdoor' },
-    { name: ActivityIcon.Kayaking, label: 'Kayaking', category: 'Water' },
-    { name: ActivityIcon.Surfing, label: 'Surfing', category: 'Water' },
-    { name: ActivityIcon.Pool, label: 'Swimming', category: 'Water' },
-    { name: ActivityIcon.Sailboat, label: 'Sailing', category: 'Water' },
-    { name: ActivityIcon.Snowboarding, label: 'Snowboarding', category: 'Winter' },
-    { name: ActivityIcon.Ice, label: 'Ice Sports', category: 'Winter' },
-    { name: ActivityIcon.Waves, label: 'Water Sports', category: 'Water' },
+    { name: ActivityIcon.DirectionsWalk, label: 'Walk', categories: ['Outdoor'] },
+    // { name: ActivityIcon.NordicWalking, label: 'Nordic Walking', category: 'Outdoor' },
+    { name: ActivityIcon.Ice, label: 'Winter Sports', categories: ['Winter'] },
+    { name: ActivityIcon.Downhill, label: 'Skiing', categories: ['Winter'] },
+    { name: ActivityIcon.Snowboarding, label: 'Snow-boarding', categories: ['Winter'] },
+    { name: ActivityIcon.Snowshoeing, label: 'Snow-shoeing', categories: ['Winter'] },
+    { name: ActivityIcon.Waves, label: 'Water Sports', categories: ['Water'] },
+    { name: ActivityIcon.Kayaking, label: 'Kayaking', categories: ['Water'] },
+    { name: ActivityIcon.Pool, label: 'Swimming', categories: ['Water'] },
+    // { name: ActivityIcon.Surfing, label: 'Surfing', categories: 'Water' },
+    // { name: ActivityIcon.Sailboat, label: 'Sailing', categories: 'Water' },
 
     // Indoor activities
-    { name: ActivityIcon.FitnessCenter, label: 'Gym', category: 'Indoor' },
-    { name: ActivityIcon.SportsGymnastics, label: 'Gymnastics', category: 'Indoor' },
-    { name: ActivityIcon.SportsTennis, label: 'Tennis', category: 'Sports' },
-    { name: ActivityIcon.SportsBasketball, label: 'Basketball', category: 'Sports' },
-    { name: ActivityIcon.SportsVolleyball, label: 'Volleyball', category: 'Sports' },
+    // { name: ActivityIcon.FitnessCenter, label: 'Gym', categories: ['Indoor'] },
+    // { name: ActivityIcon.SportsGymnastics, label: 'Gymnastics', categories: ['Indoor'] },
+    // { name: ActivityIcon.SportsTennis, label: 'Tennis', categories: ['Indoor'] },
+    // { name: ActivityIcon.SportsBasketball, label: 'Basketball', categories: ['Indoor'] },
+    // { name: ActivityIcon.SportsVolleyball, label: 'Volleyball', categories: ['Indoor'] },
 
-    // General
-    { name: ActivityIcon.LocalActivity, label: 'Activity', category: 'General' },
-    { name: ActivityIcon.Star, label: 'Featured', category: 'General' },
+    // Other
+    // { name: ActivityIcon.LocalActivity, label: 'Activity', categories: ['General'] },
+    // { name: ActivityIcon.Star, label: 'Featured', categories: ['General'] },
 ];
 
-const CATEGORIES = ['All', 'Outdoor', 'Water', 'Winter', 'Indoor', 'Sports', 'General'];
+// const CATEGORIES = ['All', 'Outdoor', 'Water', 'Winter', 'Indoor', 'Sports', 'General'];
+const CATEGORIES = ['All', 'Defaults', 'Outdoor', 'Winter', 'Water'];
 
 export const IconPicker: React.FC<IconPickerProps> = ({
     value,
@@ -69,7 +74,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
             icon.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
             icon.name.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesCategory = selectedCategory === 'All' || icon.category === selectedCategory;
+        const matchesCategory = selectedCategory === 'All' || icon.categories.includes(selectedCategory);
 
         return matchesSearch && matchesCategory;
     });
@@ -105,9 +110,10 @@ export const IconPicker: React.FC<IconPickerProps> = ({
                     <div className="flex items-center space-x-3">
                         {selectedIcon ? (
                             <>
-                                <div className="w-8 h-8 bg-primary-light rounded-full flex items-center justify-center">
+                                <ActivityIconCircle activity={{ en: true, i: selectedIcon.name }} size='sm' />
+                                {/* <div className="w-8 h-8 bg-primary-light rounded-full flex items-center justify-center">
                                     <span className="material-icons text-primary">{selectedIcon.name}</span>
-                                </div>
+                                </div> */}
                                 <div>
                                     <span className="font-medium text-gray-900">{selectedIcon.label}</span>
                                     <div className="text-xs text-gray-500">{selectedIcon.category}</div>
@@ -139,6 +145,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
                                 {CATEGORIES.map((category) => (
                                     <button
                                         key={category}
+                                        type='button'
                                         onClick={() => setSelectedCategory(category)}
                                         className={cn(
                                             'px-2 py-1 text-xs rounded-md transition-colors',
@@ -163,29 +170,30 @@ export const IconPicker: React.FC<IconPickerProps> = ({
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                                    {filteredIcons.map((icon) => (
+                                    {filteredIcons.map((icon, idx) => (
                                         <TouchTarget
-                                            key={icon.name}
+                                            key={`${icon.name}-${idx}`}
                                             onClick={() => handleIconSelect(icon.name)}
                                             onMouseEnter={() => setPreviewIcon(icon.name)}
                                             onMouseLeave={() => setPreviewIcon(null)}
                                             className={cn(
                                                 'p-3 rounded-lg border-1 transition-all duration-200 cursor-pointer',
-                                                'hover:border-primary hover:bg-primary-light hover:shadow-md',
+                                                'hover:border-primary hover:bg-gray-100 hover:shadow-md',
                                                 'flex flex-col items-center space-y-1',
                                                 value === icon.name
-                                                    ? 'border-primary bg-primary-light shadow-md'
-                                                    : 'border-gray-200 hover:border-gray-300',
+                                                    ? 'border-primary bg-primary text-white hover:text-primary shadow-md'
+                                                    : 'border-gray-200 hover:border-gray-300 hover:text-primary',
                                                 previewIcon === icon.name && 'transform scale-105'
                                             )}
                                             haptic
                                         >
-                                            <div className={cn(
+                                            <ActivityIconCircle activity={{ en: true, i: icon.name }} size='md' />
+                                            {/* <div className={cn(
                                                 'w-8 h-8 rounded-full flex items-center justify-center transition-colors',
                                                 value === icon.name ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'
                                             )}>
                                                 <span className="material-icons text-sm">{icon.name}</span>
-                                            </div>
+                                            </div> */}
                                             <span className="text-xs text-center leading-tight font-medium">
                                                 {icon.label}
                                             </span>

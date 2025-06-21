@@ -1,10 +1,11 @@
 'use client';
 
-import { Activity as ActivityIcon, Edit3, Plus, Power, PowerOff, Settings, Trash2, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { Edit3, Activity as EmptyActivityIcon, Plus, Settings, Trash2, TrendingUp } from 'lucide-react';
 import { useActivities, useCreateDefaultActivities, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivity';
 import { useEffect, useState } from 'react';
 
+import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
@@ -289,7 +290,7 @@ export default function SuperAdminActivities() {
                 {/* Activities Grid */}
                 {filteredActivities.length === 0 ? (
                     <EmptyState
-                        icon={<ActivityIcon className="h-12 w-12" />}
+                        icon={<EmptyActivityIcon className="h-12 w-12" />}
                         title={filter === 'all' ? "No activities found" : `No ${filter} activities`}
                         description={
                             filter === 'all'
@@ -315,15 +316,7 @@ export default function SuperAdminActivities() {
                                     <CardContent className="p-6">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex items-center space-x-3">
-                                                <div className={`
-                                                    w-12 h-12 rounded-full flex items-center justify-center
-                                                    ${activity.en
-                                                        ? 'bg-primary-light text-primary'
-                                                        : 'bg-gray-200 text-gray-500'
-                                                    }
-                                                `}>
-                                                    <Icon name={activity.i} size="lg" />
-                                                </div>
+                                                <ActivityIconCircle activity={activity} />
                                                 <div>
                                                     <h3 className="text-lg font-semibold text-gray-900">
                                                         {activity.n}

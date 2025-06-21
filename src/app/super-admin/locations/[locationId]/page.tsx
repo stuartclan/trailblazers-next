@@ -10,7 +10,7 @@ import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
-import { LocationForm } from '@/components/molecules/location-form/location-form';
+import { LocationForm } from '@/components/organisms/location-form/location-form';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useActivities } from '@/hooks/useActivity';
