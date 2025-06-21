@@ -9,6 +9,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ activityId: string }> },
 ) {
+  const { activityId } = await params;
+
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -18,8 +20,6 @@ export async function GET(
         { status: 401 }
       );
     }
-
-    const { activityId } = await params;
 
     // Get activity
     const activity = await repositories.activities.getActivityById(activityId);
@@ -32,7 +32,7 @@ export async function GET(
 
     return NextResponse.json(activity);
   } catch (error: any) {
-    console.error(`Error fetching activity ${params.activityId}:`, error);
+    console.error(`Error fetching activity ${activityId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch activity' },
       { status: 500 }
@@ -45,6 +45,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ activityId: string }> },
 ) {
+  const { activityId } = await params;
+
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -63,8 +65,6 @@ export async function PATCH(
       );
     }
 
-    const { activityId } = await params;
-
     // Check if activity exists
     const activity = await repositories.activities.getActivityById(activityId);
     if (!activity) {
@@ -82,7 +82,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedActivity);
   } catch (error: any) {
-    console.error(`Error updating activity ${params.activityId}:`, error);
+    console.error(`Error updating activity ${activityId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to update activity' },
       { status: 500 }
@@ -95,6 +95,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ activityId: string }> },
 ) {
+  const { activityId } = await params;
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -112,8 +113,6 @@ export async function DELETE(
         { status: 403 }
       );
     }
-
-    const { activityId } = await params;
 
     // Check if activity exists
     const activity = await repositories.activities.getActivityById(activityId);
@@ -133,7 +132,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error(`Error deleting activity ${params.activityId}:`, error);
+    console.error(`Error deleting activity ${activityId}:`, error);
     return NextResponse.json(
       { error: error.message || 'Failed to delete activity' },
       { status: 500 }
