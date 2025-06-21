@@ -15,9 +15,9 @@ const labelVariants = cva(
         error: 'text-red-500',
       },
       size: {
-        default: 'text-sm',
-        sm: 'text-xs',
-        lg: 'text-base',
+        default: 'text-base',
+        sm: 'text-sm',
+        lg: 'text-lg',
       },
     },
     defaultVariants: {
@@ -29,7 +29,7 @@ const labelVariants = cva(
 
 interface LabelProps
   extends React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>,
-    VariantProps<typeof labelVariants> {
+  VariantProps<typeof labelVariants> {
   required?: boolean;
 }
 

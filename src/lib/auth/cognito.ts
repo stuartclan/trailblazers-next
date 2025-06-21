@@ -101,62 +101,63 @@ export async function createHostUser(email: string, tempPassword: string, hostNa
   }
 }
 
-/**
- * Create a super-admin user in Cognito
- */
-export async function createSuperAdminUser(email: string, tempPassword: string) {
-  try {
-    // Create the user
-    const createUserCommand = new AdminCreateUserCommand({
-      UserPoolId: USER_POOL_ID,
-      Username: email,
-      TemporaryPassword: tempPassword,
-      MessageAction: 'SUPPRESS', // Don't send welcome email
-      UserAttributes: [
-        {
-          Name: 'email',
-          Value: email
-        },
-        {
-          Name: 'email_verified',
-          Value: 'true'
-        }
-      ]
-    });
+// /**
+//  * Create a super-admin user in Cognito
+//  */
+// // Likely shouldn't be in the code base
+// export async function createSuperAdminUser(email: string, tempPassword: string) {
+//   try {
+//     // Create the user
+//     const createUserCommand = new AdminCreateUserCommand({
+//       UserPoolId: USER_POOL_ID,
+//       Username: email,
+//       TemporaryPassword: tempPassword,
+//       MessageAction: 'SUPPRESS', // Don't send welcome email
+//       UserAttributes: [
+//         {
+//           Name: 'email',
+//           Value: email
+//         },
+//         {
+//           Name: 'email_verified',
+//           Value: 'true'
+//         }
+//       ]
+//     });
 
-    const createUserResult = await cognitoClient.send(createUserCommand);
+//     const createUserResult = await cognitoClient.send(createUserCommand);
 
-    // Set a permanent password (if needed)
-    const setPasswordCommand = new AdminSetUserPasswordCommand({
-      UserPoolId: USER_POOL_ID,
-      Username: email,
-      Password: tempPassword,
-      Permanent: true
-    });
+//     // Set a permanent password (if needed)
+//     const setPasswordCommand = new AdminSetUserPasswordCommand({
+//       UserPoolId: USER_POOL_ID,
+//       Username: email,
+//       Password: tempPassword,
+//       Permanent: true
+//     });
 
-    await cognitoClient.send(setPasswordCommand);
+//     await cognitoClient.send(setPasswordCommand);
 
-    // Add user to 'super-admins' group
-    const addToGroupCommand = new AdminAddUserToGroupCommand({
-      UserPoolId: USER_POOL_ID,
-      Username: email,
-      GroupName: 'super-admins'
-    });
+//     // Add user to 'super-admins' group
+//     const addToGroupCommand = new AdminAddUserToGroupCommand({
+//       UserPoolId: USER_POOL_ID,
+//       Username: email,
+//       GroupName: 'super-admins'
+//     });
 
-    await cognitoClient.send(addToGroupCommand);
+//     await cognitoClient.send(addToGroupCommand);
 
-    return {
-      success: true,
-      user: createUserResult.User
-    };
-  } catch (error) {
-    console.error('Error creating super-admin user:', error);
-    return {
-      success: false,
-      error
-    };
-  }
-}
+//     return {
+//       success: true,
+//       user: createUserResult.User
+//     };
+//   } catch (error) {
+//     console.error('Error creating super-admin user:', error);
+//     return {
+//       success: false,
+//       error
+//     };
+//   }
+// }
 
 /**
  * Delete a user from Cognito
@@ -219,7 +220,7 @@ export async function listUsers(limit = 60, paginationToken?: string) {
     });
 
     const response = await cognitoClient.send(command);
-    
+
     return {
       success: true,
       users: response.Users || [],
@@ -243,29 +244,29 @@ export async function listUsersInGroup(groupName: string, limit = 60, nextToken?
     // TODO: Follow the suggestion below to use AdminListUsersInGroupCommand
     // In a production environment, use the AdminListUsersInGroupCommand for better performance
     const users = await listUsers(limit, nextToken);
-    
+
     if (!users?.success) return users;
-    
+
     // Filter users by checking if they're in the specified group
     const filteredUsers = [];
-    
+
     if (users?.users) {
-        for (const user of users.users) {
-          // TODO: Don't like this loop making a cognito call for each user...?
-          const groupsResponse = await cognitoClient.send(
-            new AdminListGroupsForUserCommand({
-              UserPoolId: USER_POOL_ID,
-              Username: user.Username!
-            })
-          );
-          
-          const userGroups = groupsResponse.Groups || [];
-          if (userGroups.some(group => group.GroupName === groupName)) {
-            filteredUsers.push(user);
-          }
+      for (const user of users.users) {
+        // TODO: Don't like this loop making a cognito call for each user...?
+        const groupsResponse = await cognitoClient.send(
+          new AdminListGroupsForUserCommand({
+            UserPoolId: USER_POOL_ID,
+            Username: user.Username!
+          })
+        );
+
+        const userGroups = groupsResponse.Groups || [];
+        if (userGroups.some(group => group.GroupName === groupName)) {
+          filteredUsers.push(user);
         }
+      }
     }
-    
+
     return {
       success: true,
       users: filteredUsers,
@@ -285,16 +286,16 @@ export async function listUsersInGroup(groupName: string, limit = 60, nextToken?
  */
 export async function createDefaultCognitoGroups() {
   const requiredGroups = ['hosts', 'super-admins'];
-  
+
   try {
     // Get existing groups
     const listGroupsCommand = new ListGroupsCommand({
       UserPoolId: USER_POOL_ID
     });
-    
+
     const existingGroups = await cognitoClient.send(listGroupsCommand);
     const existingGroupNames = (existingGroups.Groups || []).map(g => g.GroupName);
-    
+
     // Create any missing groups
     for (const groupName of requiredGroups) {
       if (!existingGroupNames.includes(groupName)) {
@@ -308,7 +309,7 @@ export async function createDefaultCognitoGroups() {
         console.log(`Created group: ${groupName}`);
       }
     }
-    
+
     return { success: true };
   } catch (error) {
     console.error('Error creating default Cognito groups:', error);
@@ -333,9 +334,9 @@ export async function authenticateUser(username: string, password: string) {
         PASSWORD: password
       }
     });
-    
+
     const response = await cognitoClient.send(command);
-    
+
     return {
       success: true,
       authResult: response.AuthenticationResult
@@ -358,18 +359,18 @@ export async function getUserDetails(username: string) {
       UserPoolId: USER_POOL_ID,
       Username: username
     });
-    
+
     const user = await cognitoClient.send(command);
-    
+
     // Get user groups
     const groupsCommand = new AdminListGroupsForUserCommand({
       UserPoolId: USER_POOL_ID,
       Username: username
     });
-    
+
     const groupsResponse = await cognitoClient.send(groupsCommand);
     const groups = (groupsResponse.Groups || []).map(g => g.GroupName);
-    
+
     return {
       success: true,
       user,
@@ -393,9 +394,9 @@ export async function addCustomAttributes(attributes: SchemaAttributeType[]) {
       UserPoolId: USER_POOL_ID,
       CustomAttributes: attributes
     });
-    
+
     await cognitoClient.send(command);
-    
+
     return { success: true };
   } catch (error) {
     console.error('Error adding custom attributes:', error);
@@ -413,7 +414,7 @@ export async function initializeCognito() {
   try {
     // Create default groups
     await createDefaultCognitoGroups();
-    
+
     // Add custom attributes if needed
     await addCustomAttributes([
       {
@@ -427,7 +428,7 @@ export async function initializeCognito() {
         Mutable: true
       }
     ]);
-    
+
     return { success: true };
   } catch (error) {
     console.error('Error initializing Cognito:', error);

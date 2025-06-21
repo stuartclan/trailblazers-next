@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     // For listing hosts, require super-admin
     if (!isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -24,12 +24,12 @@ export async function GET(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     // Get all hosts
     const hosts = await repositories.hosts.getAllHosts();
-    
+
     return NextResponse.json(hosts);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error fetching hosts:', error);
     return NextResponse.json(
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     // Only super-admins can create hosts
     if (!isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -58,10 +58,10 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate required fields
     if (!body.name || !body.email || !body.password) {
       return NextResponse.json(
@@ -72,16 +72,22 @@ export async function POST(request: NextRequest) {
 
     // Generate the host ID that can be used in cognito and dynamo
     const hostId = nanoid();
-    
+
     // Create Cognito user for the host
     const cognitoResult = await createHostUser(body.email, body.password, body.name, hostId);
     if (!cognitoResult.success) {
+      if ('name' in cognitoResult?.error && cognitoResult?.error?.name === 'UsernameExistsException') {
+        return NextResponse.json(
+          { error: 'Cognito user exists' },
+          { status: 500 }
+        );
+      }
       return NextResponse.json(
         { error: 'Failed to create Cognito user', details: cognitoResult.error },
         { status: 500 }
       );
     }
-    
+
     // Create host in database
     const cognitoUser = cognitoResult.user;
     if (!cognitoUser || !cognitoUser.Username) {
@@ -90,15 +96,15 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
     const host = await repositories.hosts.createHost({
       hostId,
       name: body.name,
       cognitoId: cognitoUser.Username,
-      password: body.password, // This is the admin password, not the Cognito password
+      password: body.adminPassword, // This is the admin password, not the Cognito password
       disclaimer: body.disclaimer || ''
     });
-    
+
     // Create location
     const location = await repositories.locations.createLocation({
       hostId,
@@ -106,12 +112,12 @@ export async function POST(request: NextRequest) {
       address: '',
       activityIds: []
     });
-    
+
     // Update host with new location ID
     await repositories.hosts.addLocationToHost(hostId, location.id);
-    
+
     return NextResponse.json(host);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error creating host:', error);
     return NextResponse.json(

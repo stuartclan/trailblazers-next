@@ -43,7 +43,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   user: null,
   login: async () => ({}),
-  logout: () => {},
+  logout: () => { },
   confirmNewPassword: async () => ({}),
   confirm: async () => ({}),
   changePassword: async () => ({}),
@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const userAttributes: Record<string, string> | undefined = attributes?.reduce((acc, attr) => {
               return { ...acc, [attr.getName()]: attr.getValue() };
             }, {});
-            
+
             if (!userAttributes) {
               console.error('User attributes: is empty', err);
               setUser(null);
@@ -136,7 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setIsAuthenticated(true);
             }
           }
-          
+
           setIsLoading(false);
           resolve(session);
         });
@@ -192,7 +192,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       cognitoUser.signOut();
       setIsAuthenticated(false);
       setUser(null);
-      
+
       // Clear any localStorage that might be storing the host ID or location ID
       localStorage.removeItem('currentHostId');
       localStorage.removeItem('currentLocationId');
@@ -265,7 +265,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (err) {
           reject(err);
         } else {
-          resolve({success: true});
+          resolve({ success: true });
         }
       })
     });
@@ -274,27 +274,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Get user group
   const getUserGroup = (): string | null => {
     if (!isAuthenticated || !user) return null;
-    
+
     try {
       // Groups are encoded in the ID token
       const cognitoUser = getCurrentUser();
       if (!cognitoUser) return null;
-      
+
       // Get the current session
       let tokenResult: string | null = null;
-      
+
       cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
         if (err || !session) return null;
-        
+
         const idToken = session.getIdToken();
         const payload = idToken.decodePayload();
-        
+
         // Cognito stores groups in 'cognito:groups'
         if (payload['cognito:groups'] && Array.isArray(payload['cognito:groups'])) {
           tokenResult = payload['cognito:groups'][0] || null;
         }
       });
-      
+
       return tokenResult;
     } catch (error) {
       console.error('Error getting user group:', error);
@@ -305,7 +305,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Get host ID
   const getHostId = (): string | null => {
     if (!isAuthenticated || !user) return null;
-    
+
     // If user has a hostId attribute, return it
     return user.hostId || null;
   };

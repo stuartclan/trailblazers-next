@@ -1,0 +1,53 @@
+{
+  "root": true,
+  "extends": [
+    "next",
+    "next/core-web-vitals"
+  ],
+  "ignorePatterns": [
+    "!**/*",
+    ".next/**/*",
+    ".open-next/**/*",
+    ".sst/**/*",
+    "sst.config.ts"
+  ],
+  "plugins": [],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "extends": [
+        "./.eslintconfig.base",
+        "./.eslintconfig.react",
+        "./.eslintconfig.ts",
+        "plugin:prettier/recommended"
+      ],
+      "rules": {
+        "curly": ["error", "all"],
+        // @TODO: Consider changing the severity of these rules.
+        "react/no-array-index-key": "warn",
+        "@typescript-eslint/triple-slash-reference": "warn",
+        // Exceptions while codebase is new.
+        // @TODO: Come up with a plan for other apps like Contentful Plugins, etc.
+        "i18next/no-literal-string": [
+          "warn",
+          { "words": { "exclude": ["Placeholder"] } }
+        ],
+        // Rules that don't play nice with NX
+        // @TODO: Examine how to get these working.
+        "deprecation/deprecation": "off",
+        "import/no-extraneous-dependencies": "off",
+        "import/order": "off",
+        "import/no-unresolved": "off"
+      }
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "extends": [
+        "./.eslintconfig.base",
+        "./.eslintconfig.react",
+        "./.eslintconfig.ts",
+        "plugin:prettier/recommended"
+      ]
+    }
+  ]
+}

@@ -4,10 +4,13 @@ import * as React from 'react';
 
 import { FormProvider, useForm } from 'react-hook-form';
 
+import { Alert } from '@/components/atoms/alert/alert';
+import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
+import { Label } from '@/components/atoms/label/label';
 import { Textarea } from '@/components/atoms/textarea/textarea';
 import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -17,13 +20,21 @@ import { zodResolver } from '@hookform/resolvers/zod';
 // Define host form schema
 const hostSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().readonly(),
+  // email: z.string().email('Please enter a valid email address'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .regex(/[0-9]/, 'Password must contain at least one number')
+    .optional()
+    .or(z.literal('')),
+  adminPassword: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .optional()
+    .or(z.literal('')),
   disclaimer: z.string().optional(),
 });
 
@@ -54,7 +65,7 @@ export const HostForm: React.FC<HostFormProps> = ({
   //   const checkMobile = () => {
   //     setIsMobile(window.innerWidth < 768);
   //   };
-    
+
   //   checkMobile();
   //   window.addEventListener('resize', checkMobile);
   //   return () => window.removeEventListener('resize', checkMobile);
@@ -66,6 +77,7 @@ export const HostForm: React.FC<HostFormProps> = ({
       name: defaultValues?.name || '',
       email: defaultValues?.email || '',
       password: defaultValues?.password || '',
+      adminPassword: !isEdit ? defaultValues?.adminPassword || '' : '',
       disclaimer: defaultValues?.disclaimer || '',
     },
   });
@@ -84,24 +96,23 @@ export const HostForm: React.FC<HostFormProps> = ({
     );
 
     try {
-      // Validate password strength visually for user
-      if (!isEdit || data.password) {
-        info('Validating password requirements...', 'Validation');
-      }
+      // // Validate password strength visually for user
+      // if (!isEdit || data.password) {
+      //   info('Validating password requirements...', 'Validation');
+      // }
 
       // Show data validation step
       info('Validating form data...', 'Validation');
 
       // Call the submission handler
       await onSubmit(data);
-      
+
       // Show detailed success toast with next steps
       const successAction = isEdit ? 'updated' : 'created';
       success(
-        `Host "${data.name}" has been ${successAction} successfully! ${
-          isEdit 
-            ? 'Changes are now active.' 
-            : 'You can now login with your credentials.'
+        `Host "${data.name}" has been ${successAction} successfully! ${isEdit
+          ? 'Changes are now active.'
+          : 'You can now login with your credentials.'
         }`,
         `Host ${isEdit ? 'Updated' : 'Created'}`
       );
@@ -116,13 +127,16 @@ export const HostForm: React.FC<HostFormProps> = ({
 
     } catch (err) {
       console.error('Host form submission error:', err);
-      
+
       // Provide specific error messaging based on error type
       let errorMessage = `Failed to ${isEdit ? 'update' : 'create'} host`;
       let errorTitle = `Host ${isEdit ? 'Update' : 'Creation'} Failed`;
-      
+
       if (err instanceof Error) {
-        if (err.message.includes('email')) {
+        if (err.message === 'Cognito user exists') {
+          errorMessage = 'Email address is already associated with a host';
+          errorTitle = 'Email exists';
+        } else if (err.message.includes('email')) {
           errorMessage = 'Email address is already in use or invalid';
           errorTitle = 'Email Conflict';
         } else if (err.message.includes('password')) {
@@ -135,9 +149,9 @@ export const HostForm: React.FC<HostFormProps> = ({
           errorMessage = err.message;
         }
       }
-      
+
       error(errorMessage, errorTitle);
-      
+
       // Provide recovery suggestions
       setTimeout(() => {
         info(
@@ -145,7 +159,7 @@ export const HostForm: React.FC<HostFormProps> = ({
           'Next Steps'
         );
       }, 2000);
-      
+
     } finally {
       setIsSubmitting(false);
     }
@@ -172,11 +186,21 @@ export const HostForm: React.FC<HostFormProps> = ({
         isSubmitting={isSubmitting}
         className="space-y-6"
       >
+        {/* TODO: Fix this error handling */}
+        {/* {form.formState?.errors && (
+          <Alert variant='error' title='There were errors with your submission'>
+            {form.formState?.errors?.name?.message}
+            {form.formState?.errors?.email?.message}
+            {form.formState?.errors?.password?.message}
+            {form.formState?.errors?.disclaimer?.message}
+          </Alert>
+        )} */}
+
         {/* Host Name */}
         <FormControl
           name="name"
-          label="Host Name"
-          helpText="The name of the organization or business"
+          label="Host name"
+          // helpText="The name of the organization or business"
           render={(fieldProps) => (
             <Input
               {...fieldProps}
@@ -189,31 +213,61 @@ export const HostForm: React.FC<HostFormProps> = ({
         />
 
         {/* Email */}
-        <FormControl
-          name="email"
-          label="Email"
-          helpText="This email will be used for login"
-          render={(fieldProps) => (
-            <Input
-              {...fieldProps}
-              type="email"
-              placeholder="Enter email address"
-              // disabled={isEdit || isSubmitting}
-              disabled={isSubmitting}
-            />
-          )}
-        />
+        {!isEdit ? (
+          <FormControl
+            name="email"
+            label="Email"
+            // helpText="This email will be used for login"
+            render={(fieldProps) => (
+              <Input
+                {...fieldProps}
+                type="email"
+                description='The email address that will be used to log into the check-in app'
+                placeholder="Enter email address"
+                // readOnly={isEdit}
+                // disabled={isEdit || isSubmitting}
+                disabled={isSubmitting}
+                required
+              />
+            )}
+          />
+        ) : (
+          <div className="text-sm text-gray-500">
+            <Label>Email</Label>
+            <Alert variant='default'>
+              <span className='text-gray-500'>If you need to change the email address associated with the host, please contact Club Trailblazers.</span>
+            </Alert>
+          </div>
+        )}
 
         {/* Password */}
+        {!isEdit && (
+          <FormControl
+            name="password"
+            label="Cognito password"
+            helpText="At least 8 characters with uppercase, lowercase, and number. This is the password to log into a device for a host."
+            render={(fieldProps) => (
+              <Input
+                {...fieldProps}
+                type="password"
+                placeholder="Enter cognito password"
+                disabled={isSubmitting}
+              />
+            )}
+          />
+        )}
+
+        {/* Admin Password */}
         <FormControl
-          name="password"
-          label={isEdit ? "New Password" : "Password"}
-          helpText="At least 8 characters with uppercase, lowercase, and number"
+          name="adminPassword"
+          label="Admin password"
+          // helpText="This is the shared password to access the admin dashboard"
           render={(fieldProps) => (
             <Input
               {...fieldProps}
               type="password"
-              placeholder={isEdit ? "Enter new password (leave blank to keep current)" : "Enter password"}
+              description='This is the shared password to access the admin dashboard'
+              placeholder={isEdit ? "Enter new admin password (leave blank to keep current)" : "Enter admin password"}
               disabled={isSubmitting}
             />
           )}
@@ -222,11 +276,12 @@ export const HostForm: React.FC<HostFormProps> = ({
         {/* Disclaimer */}
         <FormControl
           name="disclaimer"
-          label="Disclaimer Text"
-          helpText="This text will be shown to athletes during registration"
+          label="Disclaimer text"
+          // helpText="This text will be shown to athletes during registration or their first check-in"
           render={(fieldProps) => (
             <Textarea
               {...fieldProps}
+              description="This text will be shown to athletes during registration or their first check-in"
               placeholder="Enter disclaimer text"
               rows={5}
               disabled={isSubmitting}
@@ -248,7 +303,7 @@ export const HostForm: React.FC<HostFormProps> = ({
               </Button>
             </TouchTarget>
           )}
-          
+
           <TouchTarget>
             <Button
               variant="outline"
@@ -259,13 +314,13 @@ export const HostForm: React.FC<HostFormProps> = ({
               Reset Form
             </Button>
           </TouchTarget>
-          
+
           <TouchTarget>
             <Button
               type="submit"
               disabled={isSubmitting}
             >
-              {isEdit 
+              {isEdit
                 ? (isSubmitting ? 'Updating Host...' : 'Update Host')
                 : (isSubmitting ? 'Creating Host...' : 'Create Host')
               }

@@ -27,14 +27,14 @@ export interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
  * Form component with built-in support for success and error messages
  */
 const Form = React.forwardRef<HTMLFormElement, FormProps>(
-  ({ 
-    className, 
-    children, 
-    successMessage, 
-    errorMessage, 
+  ({
+    className,
+    children,
+    successMessage,
+    errorMessage,
     isSubmitting,
     isSuccess,
-    ...props 
+    ...props
   }, ref) => {
     return (
       <form
@@ -56,7 +56,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
             </div>
           </div>
         )}
-        
+
         {errorMessage && (
           <div className="rounded-md bg-red-50 p-4 mb-4">
             <div className="flex">
@@ -71,8 +71,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
             </div>
           </div>
         )}
-        
-        <div className={cn(isSubmitting && 'opacity-70 pointer-events-none')}>
+
+        <div className={cn('flex flex-col space-y-4', isSubmitting && 'opacity-70 pointer-events-none')}>
           {children}
         </div>
       </form>

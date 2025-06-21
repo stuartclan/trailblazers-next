@@ -1,7 +1,7 @@
 'use client';
 
+import { Activity, Edit3, MapPin, Plus, Settings, Trash2, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Edit3, MapPin, Plus, Settings, Trash2, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useHost, useUpdateHost } from '@/hooks/useHost';
 import { useParams, useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocationActivities } from '@/hooks/useActivity';
 import { useLocationsByHost } from '@/hooks/useLocation';
 import { useToastNotifications } from '@/hooks/useToast';
 
@@ -22,28 +23,35 @@ export default function SuperAdminHostDetail() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
   const { success, error, info } = useToastNotifications();
-  
+
   const hostId = params.hostId as string;
   const [isEditing, setIsEditing] = useState(false);
-  
+
   // Data fetching
-  const { 
-    data: host, 
-    isLoading: isLoadingHost, 
+  const {
+    data: host,
+    isLoading: isLoadingHost,
     error: hostError,
-    refetch: refetchHost 
+    refetch: refetchHost
   } = useHost(hostId);
-  
-  const { 
-    data: locations, 
-    isLoading: isLoadingLocations, 
+
+  const {
+    data: locations,
+    isLoading: isLoadingLocations,
     error: locationsError,
-    refetch: refetchLocations 
+    refetch: refetchLocations
   } = useLocationsByHost(hostId);
-  
+
+  // const {
+  //   data: activities,
+  //   isLoading: isLoadingActivities,
+  //   error: activitiesError,
+  //   refetch: refetchActivities
+  // } = useLocationActivities(locations);
+
   // Mutations
   const updateHost = useUpdateHost();
-  
+
   // Check authentication and admin status
   useEffect(() => {
     if (!isAuthLoading) {
@@ -51,46 +59,50 @@ export default function SuperAdminHostDetail() {
         router.push('/super-admin/login');
         return;
       }
-      
+
       const userGroup = getUserGroup();
       if (userGroup !== 'super-admins') {
         router.push('/super-admin/login');
       }
     }
   }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
-  
+
   // Handle host update
   const handleUpdateHost = async (data: {
     name: string;
     email: string;
-    password?: string;
+    // password?: string;
+    adminPassword?: string;
     disclaimer?: string;
   }) => {
     info('Updating host information...', 'Host Update');
-    
+
     try {
       // Only include password if it's provided
       const updateData: any = {
         n: data.name,
         disc: data.disclaimer,
       };
-      
-      if (data.password) {
-        updateData.p = data.password;
+
+      if (data.email) {
+        updateData.e = data.email;
       }
-      
+      if (data.adminPassword) {
+        updateData.p = data.adminPassword;
+      }
+
       await updateHost.mutateAsync({
         id: hostId,
         data: updateData
       });
-      
+
       success(
         `Host "${data.name}" updated successfully!`,
         'Host Updated'
       );
-      
+
       setIsEditing(false);
-      
+
     } catch (err) {
       console.error('Host update error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to update host';
@@ -98,7 +110,7 @@ export default function SuperAdminHostDetail() {
       throw err; // Let the form handle the error state
     }
   };
-  
+
   // Loading state
   if (isAuthLoading || isLoadingHost) {
     return (
@@ -111,7 +123,7 @@ export default function SuperAdminHostDetail() {
             </div>
             <Skeleton width={100} height={40} variant="rounded" />
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="p-6">
               <div className="space-y-4">
@@ -124,7 +136,7 @@ export default function SuperAdminHostDetail() {
                 ))}
               </div>
             </Card>
-            
+
             <Card className="p-6">
               <div className="space-y-4">
                 <Skeleton variant="text" width="120px" height={24} />
@@ -144,7 +156,7 @@ export default function SuperAdminHostDetail() {
       </div>
     );
   }
-  
+
   // Error state
   if (hostError) {
     return (
@@ -157,7 +169,7 @@ export default function SuperAdminHostDetail() {
       />
     );
   }
-  
+
   // Host not found
   if (!host) {
     return (
@@ -169,7 +181,7 @@ export default function SuperAdminHostDetail() {
       />
     );
   }
-  
+
   return (
     <div className="min-h-screen">
       <div className="container max-w-4xl mx-auto px-4 py-8">
@@ -192,7 +204,7 @@ export default function SuperAdminHostDetail() {
             </Button>
           }
         />
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Host Information */}
           <Card>
@@ -207,8 +219,9 @@ export default function SuperAdminHostDetail() {
                 <HostForm
                   defaultValues={{
                     name: host.n,
-                    email: '', // Email can't be changed after creation
-                    password: host.p, // Password is optional for updates
+                    email: host.e, // Email can't be changed after creation
+                    // password: host.p, // Password is optional for updates
+                    adminPassword: host.p, // Password is optional for updates
                     disclaimer: host.disc || '',
                   }}
                   isEdit={true}
@@ -221,26 +234,26 @@ export default function SuperAdminHostDetail() {
                     <label className="text-sm font-medium text-gray-700">Host Name</label>
                     <p className="text-gray-900">{host.n}</p>
                   </div>
-                  
+
                   <div>
                     <label className="text-sm font-medium text-gray-700">Cognito ID</label>
                     <p className="text-gray-600 text-sm font-mono">{host.cid}</p>
                   </div>
-                  
+
                   <div>
                     <label className="text-sm font-medium text-gray-700">Created</label>
                     <p className="text-gray-600">
                       {new Date(host.c * 1000).toLocaleDateString()}
                     </p>
                   </div>
-                  
+
                   <div>
                     <label className="text-sm font-medium text-gray-700">Last Updated</label>
                     <p className="text-gray-600">
                       {new Date(host.u * 1000).toLocaleDateString()}
                     </p>
                   </div>
-                  
+
                   <div>
                     <label className="text-sm font-medium text-gray-700">Disclaimer</label>
                     <div className="mt-1 p-3 bg-gray-50 rounded-md">
@@ -255,7 +268,7 @@ export default function SuperAdminHostDetail() {
               )}
             </CardContent>
           </Card>
-          
+
           {/* Locations */}
           <Card>
             <CardHeader>
@@ -312,7 +325,7 @@ export default function SuperAdminHostDetail() {
                           {location.acts?.length || 0} activities
                         </p>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2">
                         <Link href={`/super-admin/locations/${location.id}`}>
                           <Button variant="outline" size="sm">
@@ -327,7 +340,7 @@ export default function SuperAdminHostDetail() {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Host Statistics */}
         <Card className="mt-6">
           <CardHeader>
@@ -344,21 +357,21 @@ export default function SuperAdminHostDetail() {
                 </div>
                 <div className="text-sm text-gray-600">Total Locations</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">
                   {locations?.reduce((sum, loc) => sum + (loc.acts?.length || 0), 0) || 0}
                 </div>
                 <div className="text-sm text-gray-600">Total Activities</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">
                   {host.cr?.length || 0}
                 </div>
                 <div className="text-sm text-gray-600">Custom Rewards</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">
                   {host.disc ? 'Yes' : 'No'}

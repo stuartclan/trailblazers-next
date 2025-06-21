@@ -10,6 +10,7 @@ export interface BaseEntity {
 export interface HostEntity extends BaseEntity {
   t: 'host';
   n: string; // name
+  e: string; // email
   cid: string; // Cognito ID
   p: string; // admin password
   lids: string[]; // location IDs
@@ -17,6 +18,28 @@ export interface HostEntity extends BaseEntity {
   cr?: HostReward[]; // custom rewards
   GSI1PK: string; // 'TYPE#host'
   GSI1SK: string; // 'HOST#[hostId]'
+}
+
+export interface ErrorCognito {
+  error: string;
+  details?: {
+    name?: string;
+    // other props as necessary
+  }
+  // {
+  //   "error": "Failed to create Cognito user",
+  //   "details": {
+  //       "name": "UsernameExistsException",
+  //       "$fault": "client",
+  //       "$metadata": {
+  //           "httpStatusCode": 400,
+  //           "requestId": "b65204f4-0454-4103-b8de-01a3bc3a8113",
+  //           "attempts": 1,
+  //           "totalRetryDelay": 0
+  //       },
+  //       "__type": "UsernameExistsException"
+  //   }
+  // }
 }
 
 export interface HostReward {

@@ -1,29 +1,29 @@
 // src/hooks/useHost.tsx
 'use client';
 
+import type { ErrorCognito, HostEntity } from '@/lib/db/entities/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { HostEntity } from '@/lib/db/entities/types';
 import { apiClient } from '@/lib/utils/api-client';
 
 // API client functions using the new authenticated client
 const fetchHost = async (hostId: string): Promise<HostEntity> => {
   const response = await apiClient.get<HostEntity>(`/api/hosts/${hostId}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const fetchHosts = async (): Promise<HostEntity[]> => {
   const response = await apiClient.get<HostEntity[]>('/api/hosts');
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -31,14 +31,15 @@ const createHost = async (data: {
   name: string;
   email: string;
   password: string;
+  adminPassword: string;
   disclaimer?: string;
 }): Promise<HostEntity> => {
   const response = await apiClient.post<HostEntity>('/api/hosts', data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -50,17 +51,17 @@ const updateHost = async ({
   data: Partial<Omit<HostEntity, 'pk' | 'sk' | 't' | 'id' | 'c'>>;
 }): Promise<HostEntity> => {
   const response = await apiClient.patch<HostEntity>(`/api/hosts/${id}`, data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const deleteHost = async (id: string): Promise<void> => {
   const response = await apiClient.delete(`/api/hosts/${id}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
@@ -78,14 +79,14 @@ const addCustomReward = async ({
   };
 }): Promise<HostEntity> => {
   const response = await apiClient.post<HostEntity>(
-    `/api/hosts/${hostId}/rewards`, 
+    `/api/hosts/${hostId}/rewards`,
     rewardData
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -97,11 +98,11 @@ const removeCustomReward = async ({
   rewardId: string;
 }): Promise<HostEntity> => {
   const response = await apiClient.delete<HostEntity>(`/api/hosts/${hostId}/rewards/${rewardId}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -123,7 +124,7 @@ export const useHosts = () => {
 
 export const useCreateHost = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createHost,
     onSuccess: () => {
@@ -134,7 +135,7 @@ export const useCreateHost = () => {
 
 export const useUpdateHost = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: updateHost,
     onSuccess: (data) => {
@@ -146,7 +147,7 @@ export const useUpdateHost = () => {
 
 export const useDeleteHost = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deleteHost,
     onSuccess: (_data, variables) => {
@@ -158,7 +159,7 @@ export const useDeleteHost = () => {
 
 export const useAddCustomReward = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: addCustomReward,
     onSuccess: (data) => {
@@ -169,7 +170,7 @@ export const useAddCustomReward = () => {
 
 export const useRemoveCustomReward = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: removeCustomReward,
     onSuccess: (data) => {

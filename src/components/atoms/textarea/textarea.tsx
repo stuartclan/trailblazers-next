@@ -28,44 +28,50 @@ const textareaVariants = cva(
 
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-    VariantProps<typeof textareaVariants> {
+  VariantProps<typeof textareaVariants> {
   label?: string;
+  description?: string;
   helpText?: string;
   error?: string;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ 
-    className, 
-    variant, 
-    size, 
-    label, 
-    helpText, 
-    error, 
+  ({
+    className,
+    variant,
+    size,
+    label,
+    description,
+    helpText,
+    error,
     id,
     required,
-    ...props 
+    ...props
   }, ref) => {
     // Generate ID unconditionally to avoid React Hook conditional call warning
     const generatedId = React.useId();
     // Then use the provided ID if available, otherwise use the generated one
     const textareaId = id || generatedId;
-    
+
     // Handle variant choice based on error state
     const textareaVariant = error ? 'error' : variant;
 
     return (
-      <div className="textarea-wrapper mb-4">
+      <div className="textarea-wrapper flex flex-col space-y-1">
         {label && (
-          <Label 
+          <Label
             htmlFor={textareaId}
             required={required}
-            className="mb-2 block"
+            className={cn('leading-none', error ? 'text-red-500' : 'text-gray-900')}
           >
             {label}
           </Label>
         )}
-        
+
+        {description && (
+          <p className="text-sm text-gray-500">{description}</p>
+        )}
+
         <textarea
           id={textareaId}
           className={cn(
@@ -76,20 +82,20 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           aria-describedby={error ? `${textareaId}-error` : helpText ? `${textareaId}-description` : undefined}
           {...props}
         />
-        
+
         {helpText && !error && (
-          <p 
+          <p
             id={`${textareaId}-description`}
-            className="mb-2 text-right text-xs text-gray-400"
+            className="mb-2 text-xs text-gray-400"
           >
             {helpText}
           </p>
         )}
-        
+
         {error && (
-          <p 
+          <p
             id={`${textareaId}-error`}
-            className="mt-1 text-sm text-red-500"
+            className="mb-2 text-sm text-red-500"
           >
             {error}
           </p>

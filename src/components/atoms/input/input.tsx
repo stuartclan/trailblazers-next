@@ -31,7 +31,7 @@ const inputVariants = cva(
 
 export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof inputVariants> {
+  VariantProps<typeof inputVariants> {
   label?: string;
   description?: string;
   error?: string;
@@ -41,27 +41,27 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ 
-    className, 
-    variant, 
-    size, 
-    label, 
-    description, 
-    error, 
-    type = 'text', 
-    leftIcon, 
-    rightIcon, 
+  ({
+    className,
+    variant,
+    size,
+    label,
+    description,
+    error,
+    type = 'text',
+    leftIcon,
+    rightIcon,
     id,
     required,
     helpText,
-    ...props 
+    ...props
   }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
     // Generate ID unconditionally to avoid React Hook conditional call warning
     const generatedId = React.useId();
     // Then use the provided ID if available, otherwise use the generated one
     const inputId = id || generatedId;
-    
+
     // When the type is password, we need to handle the show/hide functionality
     const togglePassword = () => {
       setShowPassword(prev => !prev);
@@ -69,11 +69,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     // Determine the effective type for password fields
     const effectiveType = type === 'password' && showPassword ? 'text' : type;
-    
+
     // Generate a password toggle icon if needed
     const passwordToggle = type === 'password' ? (
-      <button 
-        type="button" 
+      <button
+        type="button"
         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
         onClick={togglePassword}
         tabIndex={-1}
@@ -81,33 +81,33 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </button>
     ) : null;
-    
+
     // Handle variant choice based on error state
     const inputVariant = error ? 'error' : variant;
-    
+
     return (
-      <div className="input-wrapper space-y-2">
+      <div className="input-wrapper flex flex-col space-y-1">
         {label && (
-          <Label 
-            htmlFor={inputId} 
-            className={error ? 'text-red-500' : ''}
+          <Label
+            htmlFor={inputId}
+            className={cn('leading-none', error ? 'text-red-500' : 'text-gray-900')}
           >
             {label}
             {required && <span className="text-red-500 ml-1">*</span>}
           </Label>
         )}
-        
+
         {description && (
-          <p className="text-xs text-gray-500">{description}</p>
+          <p className="text-sm text-gray-500">{description}</p>
         )}
-        
+
         <div className="relative">
           {leftIcon && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
               {leftIcon}
             </div>
           )}
-          
+
           <input
             id={inputId}
             type={effectiveType}
@@ -119,7 +119,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             {...props}
           />
-          
+
           {rightIcon && !passwordToggle && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
               {rightIcon}
@@ -138,15 +138,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               </Tooltip>
             </div>
           )} */}
-          
+
           {passwordToggle}
         </div>
-        
+
         {helpText && !error && (
-          <p className="-mt-2 mb-2 text-right text-xs text-gray-400">{helpText}</p>
+          <p className="-mt-2 mb-2 text-xs text-gray-400">{helpText}</p>
         )}
         {error && (
-          <p className="-mt-2 mb-2 text-sm text-red-500">{error}</p>
+          <p className="mb-2 text-sm text-red-500">{error}</p>
         )}
       </div>
     );

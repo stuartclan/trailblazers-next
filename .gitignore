@@ -11,4 +11,11 @@ node_modules
 # open-next
 .open-next
 
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
 certificates

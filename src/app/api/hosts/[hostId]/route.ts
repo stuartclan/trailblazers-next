@@ -22,9 +22,9 @@ export async function GET(
         { status: 401 }
       );
     }
-    
+
     const { hostId } = await params;
-    
+
     // Get host
     const host = await repositories.hosts.getHostById(hostId);
     if (!host) {
@@ -33,13 +33,15 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
+    const isSuper = isSuperAdmin(authResult);
+
     // If not super-admin, only allow hosts to view their own data
-    if (!isSuperAdmin(authResult)) {
+    if (!isSuper) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
       const userHost = await repositories.hosts.getHostByCognitoId(cognitoId || '');
-      
+
       if (!userHost || userHost.id !== hostId) {
         return NextResponse.json(
           { error: 'Insufficient permissions' },
@@ -47,11 +49,16 @@ export async function GET(
         );
       }
     }
-    
-    // For security, remove sensitive fields when returning
-    const { p, ...safeHost } = host;
-    
-    return NextResponse.json(safeHost);
+
+    // Could secure the admin password if we wanted...
+    // const { p, ...safeHost } = host;
+
+    // return NextResponse.json({
+    //   ...safeHost,
+    //   ...isSuper && { p },
+    // });
+
+    return NextResponse.json(host);
   } catch (error: any) {
     console.error(`Error fetching host ${params.hostId}:`, error);
     return NextResponse.json(
@@ -75,9 +82,9 @@ export async function PATCH(
         { status: 401 }
       );
     }
-    
+
     const { hostId } = await params;
-    
+
     // Get host to verify it exists
     const host = await repositories.hosts.getHostById(hostId);
     if (!host) {
@@ -86,35 +93,35 @@ export async function PATCH(
         { status: 404 }
       );
     }
-    
+
     // Check permissions - allow super-admins and the host itself
     let hasPermission = false;
-    
+
     if (isSuperAdmin(authResult)) {
       hasPermission = true;
     } else if (isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
       const userHost = await repositories.hosts.getHostByCognitoId(cognitoId || '');
-      
+
       if (userHost && userHost.id === hostId) {
         hasPermission = true;
       }
     }
-    
+
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Super-admins can update any field, hosts can only update certain fields
     let updateData: any = {};
-    
+
     if (isSuperAdmin(authResult)) {
       // Allow updating any field except id
       updateData = { ...body };
@@ -123,20 +130,20 @@ export async function PATCH(
       if (body.p !== undefined) updateData.p = body.p;
       if (body.disc !== undefined) updateData.disc = body.disc;
     }
-    
+
     // Update host in database
     const updatedHost = await repositories.hosts.updateHost(hostId, updateData);
-    
+
     // If name was updated, also update in Cognito
     if (isSuperAdmin(authResult) && body.n && body.n !== host.n && host.cid) {
       await updateUserAttributes(host.cid, {
         'custom:hostName': body.n
       });
     }
-    
+
     // For security, remove sensitive fields when returning
     const { p, ...safeHost } = updatedHost || {};
-    
+
     return NextResponse.json(safeHost);
   } catch (error: any) {
     console.error(`Error updating host ${params.hostId}:`, error);
@@ -161,7 +168,7 @@ export async function DELETE(
         { status: 401 }
       );
     }
-    
+
     // Only super-admins can delete hosts
     if (!isSuperAdmin(authResult)) {
       return NextResponse.json(
@@ -169,9 +176,20 @@ export async function DELETE(
         { status: 403 }
       );
     }
-    
+
     const { hostId } = await params;
-    
+
+    // Delete locations for host
+    const locations = await repositories.locations.getLocationsByHostId(hostId);
+    if (locations?.length) {
+      await Promise.all([
+        ...locations.map((location) => {
+          return repositories.locations.deleteLocation(location.id);
+        })
+      ]);
+    }
+
+
     // Get host to verify it exists and get Cognito ID
     const host = await repositories.hosts.getHostById(hostId);
     if (!host) {
@@ -180,15 +198,15 @@ export async function DELETE(
         { status: 404 }
       );
     }
-    
+
     // Delete host from database
     await repositories.hosts.deleteHost(hostId);
-    
+
     // Delete Cognito user
     if (host.cid) {
       await deleteUser(host.cid);
     }
-    
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error(`Error deleting host ${params.hostId}:`, error);

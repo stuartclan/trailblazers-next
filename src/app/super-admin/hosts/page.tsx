@@ -29,22 +29,22 @@ export default function SuperAdminHosts() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
   const { success, error, info } = useToastNotifications();
-  
+
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [hostsWithLocationCounts, setHostsWithLocationCounts] = useState<HostWithLocations[]>([]);
-  
+
   // Data fetching
-  const { 
-    data: hosts, 
-    isLoading: isLoadingHosts, 
+  const {
+    data: hosts,
+    isLoading: isLoadingHosts,
     error: hostsError,
-    refetch: refetchHosts 
+    refetch: refetchHosts
   } = useHosts();
-  
+
   // Mutations
   const createHost = useCreateHost();
   const deleteHost = useDeleteHost();
-  
+
   // Check authentication and admin status
   useEffect(() => {
     if (!isAuthLoading) {
@@ -52,14 +52,14 @@ export default function SuperAdminHosts() {
         router.push('/super-admin/login');
         return;
       }
-      
+
       const userGroup = getUserGroup();
       if (userGroup !== 'super-admins') {
         router.push('/super-admin/login');
       }
     }
   }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
-  
+
   // Fetch location counts for each host
   useAsync(async () => {
     if (hosts) {
@@ -68,7 +68,7 @@ export default function SuperAdminHosts() {
           hosts.map(async (host) => {
             try {
               const locations = await fetchLocationsByHost(host.id);
-              
+
               return {
                 id: host.id,
                 name: host.n,
@@ -86,10 +86,10 @@ export default function SuperAdminHosts() {
             }
           })
         );
-        
+
         setHostsWithLocationCounts(hostsWithCounts);
       };
-      
+
       await fetchLocationCounts();
     }
   }, [hosts]);
@@ -97,26 +97,27 @@ export default function SuperAdminHosts() {
   if (hostsError?.message === 'Login required') {
     router.push('/super-admin/login');
   }
-  
+
   // Handle host creation
   const handleCreateHost = async (data: {
     name: string;
     email: string;
     password: string;
+    adminPassword: string;
     disclaimer?: string;
   }) => {
     info('Creating host account...', 'Host Creation');
-    
+
     try {
       await createHost.mutateAsync(data);
-      
+
       success(
         `Host "${data.name}" created successfully! They can now log in with their email and password.`,
         'Host Created'
       );
-      
+
       setShowCreateForm(false);
-      
+
     } catch (err) {
       console.error('Host creation error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to create host';
@@ -124,30 +125,30 @@ export default function SuperAdminHosts() {
       throw err; // Let the form handle the error state
     }
   };
-  
+
   // Handle host deletion
   const handleDeleteHost = async (hostId: string, hostName: string) => {
     if (!confirm(`Are you sure you want to delete "${hostName}"? This action cannot be undone.`)) {
       return;
     }
-    
+
     info(`Deleting host "${hostName}"...`, 'Host Deletion');
-    
+
     try {
       await deleteHost.mutateAsync(hostId);
-      
+
       success(
         `Host "${hostName}" has been deleted successfully.`,
         'Host Deleted'
       );
-      
+
     } catch (err) {
       console.error('Host deletion error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete host';
       error(errorMessage, 'Deletion Failed');
     }
   };
-  
+
   // Loading state
   if (isAuthLoading || isLoadingHosts) {
     return (
@@ -157,7 +158,7 @@ export default function SuperAdminHosts() {
             <Skeleton variant="text" width="200px" height={32} />
             <Skeleton width={120} height={40} variant="rounded" />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, index) => (
               <Card key={index} className="p-6">
@@ -180,7 +181,7 @@ export default function SuperAdminHosts() {
       </div>
     );
   }
-  
+
   // Error state
   if (hostsError) {
     return (
@@ -193,7 +194,7 @@ export default function SuperAdminHosts() {
       />
     );
   }
-  
+
   return (
     <div className="min-h-screen">
       <div className="container max-w-6xl mx-auto px-4 py-8">
@@ -214,7 +215,7 @@ export default function SuperAdminHosts() {
             </Button>
           }
         />
-        
+
         {/* Create Host Form */}
         {showCreateForm && (
           <Card className="mb-6">
@@ -229,7 +230,7 @@ export default function SuperAdminHosts() {
             </CardContent>
           </Card>
         )}
-        
+
         {/* Hosts Grid */}
         {hostsWithLocationCounts.length === 0 ? (
           <EmptyState
@@ -257,7 +258,7 @@ export default function SuperAdminHosts() {
                         Created: {new Date(host.createdAt * 1000).toLocaleDateString()}
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <Link href={`/super-admin/hosts/${host.id}`}>
                         <Button variant="ghost" size="sm">
@@ -274,7 +275,7 @@ export default function SuperAdminHosts() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="flex space-x-2">
                     <Link href={`/super-admin/hosts/${host.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">
@@ -292,7 +293,7 @@ export default function SuperAdminHosts() {
             ))}
           </div>
         )}
-        
+
         {/* Summary Stats */}
         {hostsWithLocationCounts.length > 0 && (
           <Card className="mt-8">
@@ -307,14 +308,14 @@ export default function SuperAdminHosts() {
                   </div>
                   <div className="text-sm text-gray-600">Total Hosts</div>
                 </div>
-                
+
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">
                     {hostsWithLocationCounts.reduce((sum, host) => sum + host.locationCount, 0)}
                   </div>
                   <div className="text-sm text-gray-600">Total Locations</div>
                 </div>
-                
+
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">
                     {(hostsWithLocationCounts.reduce((sum, host) => sum + host.locationCount, 0) / hostsWithLocationCounts.length).toFixed(1)}

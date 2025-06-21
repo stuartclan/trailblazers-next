@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils/ui';
 import { AlertCircle, CheckCircle, XCircle, Info } from 'lucide-react';
 
 const alertVariants = cva(
-  'alert relative rounded-lg border-1 p-4',
+  'alert relative rounded-md border-1 p-4',
   {
     variants: {
       variant: {
@@ -25,7 +25,7 @@ const alertVariants = cva(
 
 export interface AlertProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {
+  VariantProps<typeof alertVariants> {
   icon?: React.ReactNode;
   title?: string;
   onClose?: () => void;
@@ -36,7 +36,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
     // Default icons based on variant
     const getDefaultIcon = () => {
       if (icon) return icon;
-      
+
       switch (variant) {
         case 'info':
           return <Info className="h-5 w-5" />;
@@ -50,7 +50,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
           return null;
       }
     };
-    
+
     return (
       <div
         ref={ref}
