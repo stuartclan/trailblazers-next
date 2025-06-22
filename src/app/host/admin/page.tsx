@@ -30,7 +30,7 @@ import { useRouter } from 'next/navigation';
 export default function HostAdmin() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  
+
   // Get current host and location from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
@@ -38,34 +38,34 @@ export default function HostAdmin() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  
+
   // Data fetching with error handling
-  const { 
-    data: host, 
-    isLoading: isLoadingHost, 
+  const {
+    data: host,
+    isLoading: isLoadingHost,
     error: hostError,
-    refetch: refetchHost 
+    refetch: refetchHost
   } = useHost(hostId || '');
-  
-  const { 
-    data: location, 
-    isLoading: isLoadingLocation, 
+
+  const {
+    data: location,
+    isLoading: isLoadingLocation,
     error: locationError,
-    refetch: refetchLocation 
-  } = useLocation(locationId || '');
-  
-  const { 
-    data: recentCheckIns, 
+    refetch: refetchLocation
+  } = useLocation(hostId || '', locationId || '');
+
+  const {
+    data: recentCheckIns,
     isLoading: isLoadingCheckIns,
     error: checkInsError,
-    refetch: refetchCheckIns 
+    refetch: refetchCheckIns
   } = useHostCheckIns(hostId || '', 10);
-  
+
   // Initialize host/location from localStorage
   useEffect(() => {
     const savedHostId = localStorage.getItem('currentHostId');
     const savedLocationId = localStorage.getItem('currentLocationId');
-    
+
     if (savedHostId && savedLocationId) {
       setHostId(savedHostId);
       setLocationId(savedLocationId);
@@ -73,14 +73,14 @@ export default function HostAdmin() {
       router.push('/host/select-location');
     }
   }, [router]);
-  
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
       router.push('/host/login');
     }
   }, [isAuthenticated, isAuthLoading, router]);
-  
+
   // Check admin password authentication
   useEffect(() => {
     if (hostId) {
@@ -92,11 +92,11 @@ export default function HostAdmin() {
       }
     }
   }, [hostId]);
-  
+
   // Handle admin password authentication
   const handleAdminAuth = () => {
     if (!host) return;
-    
+
     if (adminPassword === host.p) {
       setIsPasswordAuthenticated(true);
       setShowPasswordForm(false);
@@ -106,7 +106,7 @@ export default function HostAdmin() {
       setPasswordError('Incorrect password');
     }
   };
-  
+
   // Handle logout
   const handleLogout = () => {
     if (hostId) {
@@ -114,19 +114,19 @@ export default function HostAdmin() {
     }
     router.push('/checkin');
   };
-  
+
   // Handle retry for failed requests
   const handleRetry = () => {
     refetchHost();
     refetchLocation();
     refetchCheckIns();
   };
-  
+
   // Loading state - use skeleton instead of spinner
   if (isAuthLoading || isLoadingHost || isLoadingLocation) {
     return <HostAdminLoading />;
   }
-  
+
   // Error state
   if (hostError || locationError) {
     return (
@@ -139,7 +139,7 @@ export default function HostAdmin() {
       />
     );
   }
-  
+
   // Missing data state
   if (!host || !location) {
     return (
@@ -151,7 +151,7 @@ export default function HostAdmin() {
       />
     );
   }
-  
+
   // Password authentication form
   if (showPasswordForm || !isPasswordAuthenticated) {
     return (
@@ -166,7 +166,7 @@ export default function HostAdmin() {
                 {passwordError}
               </Alert>
             )}
-            
+
             <div>
               <label htmlFor="adminPassword" className="block text-sm font-medium text-gray-700 mb-2">
                 Enter Admin Password
@@ -181,7 +181,7 @@ export default function HostAdmin() {
                 autoFocus
               />
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="outline"
@@ -203,14 +203,14 @@ export default function HostAdmin() {
       </div>
     );
   }
-  
+
   // Get today's check-ins count
   const todayCheckIns = recentCheckIns?.filter(checkIn => {
     const checkInDate = new Date(checkIn.c * 1000);
     const today = new Date();
     return checkInDate.toDateString() === today.toDateString();
   }) || [];
-  
+
   return (
     <div className="min-h-screen">
       <div className="container max-w-6xl mx-auto px-4 py-8">
@@ -233,7 +233,7 @@ export default function HostAdmin() {
             </Button>
           }
         />
-        
+
         {/* Current Location Info */}
         <Alert variant="info" className="mb-6">
           <MapPin className="h-4 w-4" />
@@ -242,7 +242,7 @@ export default function HostAdmin() {
             <p className="text-sm text-gray-600">{location.a}</p>
           </div>
         </Alert>
-        
+
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -258,7 +258,7 @@ export default function HostAdmin() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="flex items-center p-6">
               <div className="p-2 bg-green-100 rounded-lg mr-4">
@@ -272,7 +272,7 @@ export default function HostAdmin() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="flex items-center p-6">
               <div className="p-2 bg-purple-100 rounded-lg mr-4">
@@ -286,7 +286,7 @@ export default function HostAdmin() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="flex items-center p-6">
               <div className="p-2 bg-orange-100 rounded-lg mr-4">
@@ -301,7 +301,7 @@ export default function HostAdmin() {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="hover:shadow-lg transition-shadow">
@@ -322,7 +322,7 @@ export default function HostAdmin() {
               </Link>
             </CardContent>
           </Card>
-          
+
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
@@ -341,7 +341,7 @@ export default function HostAdmin() {
               </Link>
             </CardContent>
           </Card>
-          
+
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
@@ -361,7 +361,7 @@ export default function HostAdmin() {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Recent Check-ins */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -389,10 +389,10 @@ export default function HostAdmin() {
               </div>
             ) : checkInsError ? (
               <Alert variant="error">
-                Failed to load recent check-ins. 
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                Failed to load recent check-ins.
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={refetchCheckIns}
                   className="ml-2"
                 >
@@ -402,8 +402,8 @@ export default function HostAdmin() {
             ) : recentCheckIns && recentCheckIns.length > 0 ? (
               <div className="space-y-3">
                 {recentCheckIns.map((checkIn) => (
-                  <div 
-                    key={checkIn.id} 
+                  <div
+                    key={checkIn.id}
                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                   >
                     <div className="flex items-center gap-3">
@@ -429,7 +429,7 @@ export default function HostAdmin() {
                     </div>
                   </div>
                 ))}
-                
+
                 <div className="pt-4 border-t">
                   <Link href="/host/admin/check-ins">
                     <Button variant="outline" className="w-full">
@@ -454,7 +454,7 @@ export default function HostAdmin() {
             )}
           </CardContent>
         </Card>
-        
+
         {/* Footer Actions */}
         <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-white rounded-lg border-1">
           <div className="text-sm text-gray-600">
@@ -466,8 +466,8 @@ export default function HostAdmin() {
                 Back to Check-in
               </Button>
             </Link>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={handleLogout}
               className="text-red-600 hover:text-red-700"

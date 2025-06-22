@@ -31,6 +31,7 @@ export enum ActivityIcon {
   NordicWalking = 'nordic_walking',
   Kayaking = 'kayaking',
   Surfing = 'surfing',
+  Rowing = 'rowing',
   Pool = 'pool',
   Sailboat = 'sailing',
   Snowboarding = 'snowboarding',

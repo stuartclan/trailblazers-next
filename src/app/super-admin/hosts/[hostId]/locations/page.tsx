@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { Edit3, MapPin, Plus, Trash2, Users } from 'lucide-react';
 import { useDeleteLocation, useLocations } from '@/hooks/useLocation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
@@ -13,10 +14,10 @@ import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
 import { useHosts } from '@/hooks/useHost';
-import { useRouter } from 'next/navigation';
 import { useToastNotifications } from '@/hooks/useToast';
 
 export default function SuperAdminLocations() {
+    const { hostId } = useParams();
     const router = useRouter();
     const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
     const { success, error, info } = useToastNotifications();
@@ -139,7 +140,7 @@ export default function SuperAdminLocations() {
                     ]}
                     actions={
                         <Button
-                            onClick={() => router.push('/super-admin/locations/new')}
+                            onClick={() => router.push(`/super-admin/hosts/${hostId}/locations/new`)}
                             className="flex items-center gap-2"
                         >
                             <Plus className="h-4 w-4" />
@@ -155,11 +156,11 @@ export default function SuperAdminLocations() {
                         title="No locations found"
                         description="Get started by creating your first location."
                         actionLabel="Create Location"
-                        onAction={() => router.push('/super-admin/locations/new')}
+                        onAction={() => router.push(`/super-admin/hosts/${hostId}/locations/new`)}
                     />
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {locations.map((location) => (
+                        {locations.sort((a, b) => a.c - b.c).map((location) => (
                             <Card key={location.id} className="hover:shadow-lg transition-shadow">
                                 <CardContent className="p-6">
                                     <div className="flex items-start justify-between mb-4">
@@ -183,7 +184,7 @@ export default function SuperAdminLocations() {
                                         </div>
 
                                         <div className="flex items-center space-x-2">
-                                            <Link href={`/super-admin/locations/${location.id}`}>
+                                            <Link href={`/super-admin/hosts/${hostId}/locations/${location.id}`}>
                                                 <Button variant="ghost" size="sm">
                                                     <Edit3 className="h-4 w-4" />
                                                 </Button>
@@ -200,12 +201,12 @@ export default function SuperAdminLocations() {
                                     </div>
 
                                     <div className="flex space-x-2">
-                                        <Link href={`/super-admin/locations/${location.id}`} className="flex-1">
+                                        <Link href={`/super-admin/hosts/${hostId}/locations/${location.id}`} className="flex-1">
                                             <Button variant="outline" size="sm" className="w-full">
                                                 Edit
                                             </Button>
                                         </Link>
-                                        <Link href={`/super-admin/locations/${location.id}/activities`} className="flex-1">
+                                        <Link href={`/super-admin/hosts/${hostId}/locations/${location.id}/activities`} className="flex-1">
                                             <Button variant="outline" size="sm" className="w-full">
                                                 Activities
                                             </Button>

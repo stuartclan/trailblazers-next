@@ -1,7 +1,7 @@
 'use client';
 
-import { Activity, Edit3, MapPin, Plus, Settings, Trash2, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { Edit3, MapPin, Plus, Settings, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useHost, useUpdateHost } from '@/hooks/useHost';
 import { useParams, useRouter } from 'next/navigation';
@@ -15,7 +15,6 @@ import Link from 'next/link';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocationActivities } from '@/hooks/useActivity';
 import { useLocationsByHost } from '@/hooks/useLocation';
 import { useToastNotifications } from '@/hooks/useToast';
 
@@ -328,7 +327,7 @@ export default function SuperAdminHostDetail() {
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        <Link href={`/super-admin/locations/${location.id}`}>
+                        <Link href={`/super-admin/hosts/${hostId}/locations/${location.id}`}>
                           <Button variant="outline" size="sm">
                             <Edit3 className="h-4 w-4" />
                           </Button>

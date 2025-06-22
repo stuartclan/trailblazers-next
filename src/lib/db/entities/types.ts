@@ -57,6 +57,8 @@ export interface LocationEntity extends BaseEntity {
   acts: string[]; // activity IDs
   GSI1PK: string; // HOST#[hostId]
   GSI1SK: string; // LOC#[locationId]
+  GSI2PK: string; // TYPE#location
+  GSI2SK: string; // LOC#[locationId]
 }
 
 export interface ActivityEntity extends BaseEntity {

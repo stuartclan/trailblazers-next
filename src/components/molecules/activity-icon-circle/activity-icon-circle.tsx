@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils/ui";
 interface ActivityIconCircleProps {
     activity: Partial<ActivityEntity>;
     size?: 'sm' | 'md' | 'lg';
-    variant?: 'default';
+    variant?: 'default' | 'ghost';
 }
 
 const sizeMapper: Record<string, { size: string, iconSize: IconProps['size'] }> = {
@@ -15,14 +15,19 @@ const sizeMapper: Record<string, { size: string, iconSize: IconProps['size'] }> 
     lg: { size: 'w-16 h-16', iconSize: 'xxl' },
 }
 
-export const ActivityIconCircle = ({ activity, size = 'md' }: ActivityIconCircleProps) => {
+const styles = {
+    'default': 'bg-primary text-white',
+    'ghost': 'bg-gray-200 text-gray-500',
+}
+
+export const ActivityIconCircle = ({ activity, size = 'md', variant = 'default' }: ActivityIconCircleProps) => {
     const { size: wrapperSize, iconSize } = sizeMapper[size];
     return (
         <div className={cn('rounded-full flex items-center justify-center',
-            activity.en ? 'bg-primary-light text-white' : 'bg-gray-200 text-gray-500',
+            activity.en ? styles[variant] : styles['ghost'],
             wrapperSize,
         )}>
-            <Icon name={activity.i} size={iconSize} />
+            <Icon name={activity.i || ''} size={iconSize} />
         </div>
     )
 }

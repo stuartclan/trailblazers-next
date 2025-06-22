@@ -32,6 +32,7 @@ export async function GET(
     if (!isSuperAdmin(authResult) && isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
+      // Could pull hostId from url param, but this authorizes the host with the cognito user
       const host = await repositories.hosts.getHostByCognitoId(cognitoId || '');
 
       if (!host || !host.lids.includes(locationId)) {

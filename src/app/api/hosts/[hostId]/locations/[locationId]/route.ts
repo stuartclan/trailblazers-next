@@ -33,6 +33,7 @@ export async function GET(
     if (!isSuperAdmin(authResult) && isHost(authResult)) {
       // Get the host associated with the Cognito user
       const cognitoId = authResult.userId;
+      // Could use hostId param, but this validates with cognito user
       const host = await repositories.hosts.getHostByCognitoId(cognitoId || '');
 
       if (!host || !host.lids.includes(locationId)) {
@@ -89,28 +90,27 @@ export async function PATCH(
     // Parse request body
     const body = await request.json();
 
-    // Validate host ID if it's being updated
-    if (body.hostId && body.hostId !== location.hid) {
-      const newHost = await repositories.hosts.getHostById(body.hostId);
-      if (!newHost) {
-        return NextResponse.json(
-          { error: 'New host not found' },
-          { status: 404 }
-        );
-      }
+    // // Validate host ID if it's being updated
+    // if (body.hostId && hostId !== location.hid) {
+    //   const newHost = await repositories.hosts.getHostById(body.hostId);
+    //   if (!newHost) {
+    //     return NextResponse.json(
+    //       { error: 'New host not found' },
+    //       { status: 404 }
+    //     );
+    //   }
 
-      // Remove location from old host
-      await repositories.hosts.removeLocationFromHost(location.hid, locationId);
+    //   // Remove location from old host
+    //   await repositories.hosts.removeLocationFromHost(location.hid, locationId);
 
-      // Add location to new host
-      await repositories.hosts.addLocationToHost(body.hostId, locationId);
-    }
+    //   // Add location to new host
+    //   await repositories.hosts.addLocationToHost(body.hostId, locationId);
+    // }
 
     // Update location
     const updatedLocation = await repositories.locations.updateLocation(locationId, {
       n: body.name,
       a: body.address,
-      hid: body.hostId,
       acts: body.activityIds
     });
 

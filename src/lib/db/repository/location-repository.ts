@@ -93,7 +93,7 @@ export class LocationRepository {
   /**
    * Update a location
    */
-  async updateLocation(id: string, updateData: Partial<Omit<LocationEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'GSI1PK' | 'GSI1SK'>>): Promise<LocationEntity | null> {
+  async updateLocation(id: string, updateData: Partial<Omit<LocationEntity, 'pk' | 'sk' | 't' | 'id' | 'hid' | 'c' | 'GSI1PK' | 'GSI1SK'>>): Promise<LocationEntity | null> {
     // Create update expression dynamically based on provided fields
     const updateExpressionParts: string[] = ['SET u = :timestamp'];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

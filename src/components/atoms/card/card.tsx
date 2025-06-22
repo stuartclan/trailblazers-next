@@ -27,13 +27,19 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 );
 Card.displayName = 'Card';
 
-type CardHeaderProps = React.HTMLAttributes<HTMLDivElement>
+interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  row?: boolean;
+}
 
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
-  ({ className, ...props }, ref) => (
+  ({ className, row, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('card__header flex flex-row justify-between items-center space-x-1.5 p-6', className)}
+      className={cn(
+        'card__header flex justify-between items-center space-x-1.5 p-6',
+        className,
+        row ? 'flex-row' : 'flex-col'
+      )}
       {...props}
     />
   )

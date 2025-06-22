@@ -14,43 +14,43 @@ export default function HostSettings() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
   const { success, error, info } = useToastNotifications();
-  
+
   // Get current host and location from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
-  
+
   // Get host data
   const { data: host } = useHost(hostId || '');
-  
+
   // Get locations for this host
   const { data: hostLocations } = useLocationsByHost(hostId || '');
-  
+
   // Get current location
-  const { data: location } = useLocation(locationId || '');
-  
+  const { data: location } = useLocation(hostId || '', locationId || '');
+
   // Get all activities
   const { data: activities } = useActivities(true); // include disabled
-  
+
   // Form state
   const [adminPassword, setAdminPassword] = useState('');
   const [disclaimer, setDisclaimer] = useState('');
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  
+
   // UI state
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isEditingDisclaimer, setIsEditingDisclaimer] = useState(false);
   const [isEditingActivities, setIsEditingActivities] = useState(false);
-  
+
   // Mutations
   const updateHost = useUpdateHost();
   const updateLocationActivities = useUpdateLocationActivities();
-  
+
   // Load host/location from localStorage on component mount
   useEffect(() => {
     const savedHostId = localStorage.getItem('currentHostId');
     const savedLocationId = localStorage.getItem('currentLocationId');
-    
+
     if (savedHostId && savedLocationId) {
       setHostId(savedHostId);
       setLocationId(savedLocationId);
@@ -60,28 +60,28 @@ export default function HostSettings() {
       router.push('/host/select-location');
     }
   }, [router]);
-  
+
   // Load host data into form
   useEffect(() => {
     if (host) {
       setDisclaimer(host.disc || '');
     }
   }, [host]);
-  
+
   // Load location activities
   useEffect(() => {
     if (location) {
       setSelectedActivities(location.acts || []);
     }
   }, [location]);
-  
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/host/login');
     }
   }, [isAuthenticated, isLoading, router]);
-  
+
   // Check if admin password is already authenticated
   useEffect(() => {
     if (hostId) {
@@ -91,86 +91,87 @@ export default function HostSettings() {
       }
     }
   }, [hostId, router]);
-  
+
   // Handle password update
   const handlePasswordUpdate = async () => {
     if (!hostId || !adminPassword) {
       error('Please enter a new password');
       return;
     }
-    
+
     if (adminPassword.length < 6) {
       error('Password must be at least 6 characters long');
       return;
     }
-    
+
     try {
       info('Updating admin password...');
-      
+
       await updateHost.mutateAsync({
         id: hostId,
         data: {
           p: adminPassword
         }
       });
-      
+
       success('Admin password updated successfully');
       setIsEditingPassword(false);
       setAdminPassword('');
-      
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update password';
       error(errorMessage);
     }
   };
-  
+
   // Handle disclaimer update
   const handleDisclaimerUpdate = async () => {
     if (!hostId) return;
-    
+
     try {
       info('Updating disclaimer...');
-      
+
       await updateHost.mutateAsync({
         id: hostId,
         data: {
           disc: disclaimer
         }
       });
-      
+
       success('Disclaimer updated successfully');
       setIsEditingDisclaimer(false);
-      
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update disclaimer';
       error(errorMessage);
     }
   };
-  
+
   // Handle activities update
   const handleActivitiesUpdate = async () => {
     if (!selectedLocation) {
       error('Please select a location');
       return;
     }
-    
+
     try {
       info('Updating location activities...');
-      
+
       await updateLocationActivities.mutateAsync({
+        hostId: hostId || '',
         locationId: selectedLocation,
         activityIds: selectedActivities
       });
-      
+
       success('Activities updated successfully');
       setIsEditingActivities(false);
-      
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update activities';
       error(errorMessage);
     }
   };
-  
+
   // Handle activity toggle
   const handleActivityToggle = (activityId: string) => {
     if (selectedActivities.includes(activityId)) {
@@ -185,12 +186,12 @@ export default function HostSettings() {
       }
     }
   };
-  
+
   // Handle location change
   const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLocationId = e.target.value;
     setSelectedLocation(newLocationId);
-    
+
     // Load activities for this location
     const loc = hostLocations?.find(l => l.id === newLocationId);
     if (loc) {
@@ -198,26 +199,26 @@ export default function HostSettings() {
       info(`Switched to location: ${loc.n}`);
     }
   };
-  
+
   const handleCancelPasswordEdit = () => {
     setIsEditingPassword(false);
     setAdminPassword('');
   };
-  
+
   const handleCancelDisclaimerEdit = () => {
     setIsEditingDisclaimer(false);
     if (host) {
       setDisclaimer(host.disc || '');
     }
   };
-  
+
   const handleCancelActivitiesEdit = () => {
     setIsEditingActivities(false);
     if (location) {
       setSelectedActivities(location.acts || []);
     }
   };
-  
+
   // Show loading state
   if (isLoading) {
     return (
@@ -228,13 +229,13 @@ export default function HostSettings() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen py-8">
       <div className="container max-w-4xl">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Host Settings</h1>
-          
+
           <Link
             href="/host/admin"
             className="text-primary hover:underline"
@@ -242,11 +243,11 @@ export default function HostSettings() {
             Back to Admin
           </Link>
         </div>
-        
+
         {/* Admin Password Section */}
         <div className="card mb-6">
           <h2 className="text-xl font-bold mb-4">Admin Password</h2>
-          
+
           {isEditingPassword ? (
             <div>
               <div className="mb-4">
@@ -266,7 +267,7 @@ export default function HostSettings() {
                   Must be at least 6 characters long
                 </p>
               </div>
-              
+
               <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelPasswordEdit}
@@ -274,7 +275,7 @@ export default function HostSettings() {
                 >
                   Cancel
                 </button>
-                
+
                 <button
                   onClick={handlePasswordUpdate}
                   disabled={!adminPassword || updateHost.isPending}
@@ -289,7 +290,7 @@ export default function HostSettings() {
               <p className="text-gray-600 mb-4">
                 The admin password is used to access the host admin area. This is different from your login credentials.
               </p>
-              
+
               <button
                 onClick={() => setIsEditingPassword(true)}
                 className="text-primary hover:underline"
@@ -299,11 +300,11 @@ export default function HostSettings() {
             </div>
           )}
         </div>
-        
+
         {/* Disclaimer Section */}
         <div className="card mb-6">
           <h2 className="text-xl font-bold mb-4">Disclaimer</h2>
-          
+
           {isEditingDisclaimer ? (
             <div>
               <div className="mb-4">
@@ -318,7 +319,7 @@ export default function HostSettings() {
                   placeholder="Enter disclaimer text that athletes will see during registration"
                 />
               </div>
-              
+
               <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelDisclaimerEdit}
@@ -326,7 +327,7 @@ export default function HostSettings() {
                 >
                   Cancel
                 </button>
-                
+
                 <button
                   onClick={handleDisclaimerUpdate}
                   disabled={updateHost.isPending}
@@ -345,7 +346,7 @@ export default function HostSettings() {
                   <p className="text-gray-500 italic">No disclaimer text set</p>
                 )}
               </div>
-              
+
               <button
                 onClick={() => setIsEditingDisclaimer(true)}
                 className="text-primary hover:underline"
@@ -355,11 +356,11 @@ export default function HostSettings() {
             </div>
           )}
         </div>
-        
+
         {/* Activities Section */}
         <div className="card">
           <h2 className="text-xl font-bold mb-4">Allowed Activities</h2>
-          
+
           {hostLocations && hostLocations.length > 1 && (
             <div className="mb-6">
               <label htmlFor="locationSelect" className="block text-sm font-medium text-gray-700 mb-2">
@@ -378,29 +379,27 @@ export default function HostSettings() {
               </select>
             </div>
           )}
-          
+
           {isEditingActivities ? (
             <div>
               <p className="text-gray-600 mb-4">Select up to 3 activities that are available at this location:</p>
-              
+
               {activities && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                   {activities.map(activity => (
-                    <div 
+                    <div
                       key={activity.id}
-                      className={`border-1 rounded-md p-4 cursor-pointer transition-colors ${
-                        selectedActivities.includes(activity.id) 
-                          ? 'bg-primary-light border-primary' 
-                          : 'hover:bg-gray-50'
-                      }`}
+                      className={`border-1 rounded-md p-4 cursor-pointer transition-colors ${selectedActivities.includes(activity.id)
+                        ? 'bg-primary-light border-primary'
+                        : 'hover:bg-gray-50'
+                        }`}
                       onClick={() => handleActivityToggle(activity.id)}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${
-                          selectedActivities.includes(activity.id)
-                            ? 'bg-primary text-white'
-                            : 'bg-gray-200'
-                        }`}>
+                        <div className={`p-2 rounded-full ${selectedActivities.includes(activity.id)
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-200'
+                          }`}>
                           <span className="material-icons">{activity.i}</span>
                         </div>
                         <div>
@@ -414,7 +413,7 @@ export default function HostSettings() {
                   ))}
                 </div>
               )}
-              
+
               <div className="flex justify-end gap-4">
                 <button
                   onClick={handleCancelActivitiesEdit}
@@ -422,7 +421,7 @@ export default function HostSettings() {
                 >
                   Cancel
                 </button>
-                
+
                 <button
                   onClick={handleActivitiesUpdate}
                   disabled={!selectedLocation || updateLocationActivities.isPending}
@@ -439,7 +438,7 @@ export default function HostSettings() {
                   {selectedActivities.map(activityId => {
                     const activity = activities.find(a => a.id === activityId);
                     if (!activity) return null;
-                    
+
                     return (
                       <div key={activity.id} className="border-1 rounded-md p-4">
                         <div className="flex items-center gap-3">
@@ -457,7 +456,7 @@ export default function HostSettings() {
               ) : (
                 <p className="text-gray-600 italic mb-4">No activities selected for this location</p>
               )}
-              
+
               <button
                 onClick={() => setIsEditingActivities(true)}
                 className="text-primary hover:underline"

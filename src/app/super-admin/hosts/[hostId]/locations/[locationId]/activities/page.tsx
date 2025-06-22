@@ -1,11 +1,12 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Check, MapPin, X } from 'lucide-react';
+import { Check, TargetIcon, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useUpdateLocationActivities } from '@/hooks/useLocation';
 import { useParams, useRouter } from 'next/navigation';
 
+import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
@@ -13,17 +14,21 @@ import { ErrorDisplay } from '@/components/molecules/error-display/error-display
 import { Icon } from '@/components/atoms/icon/icon';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
+import { cn } from '@/lib/utils/ui';
 import { useActivities } from '@/hooks/useActivity';
 import { useAuth } from '@/hooks/useAuth';
 import { useToastNotifications } from '@/hooks/useToast';
 
 export default function SuperAdminLocationActivities() {
-    const params = useParams();
+    const { hostId: hostIdParam, locationId: locationIdParam } = useParams();
     const router = useRouter();
     const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
     const { success, error, info } = useToastNotifications();
 
-    const locationId = params.locationId as string;
+    const locationId = Array.isArray(locationIdParam) ? locationIdParam[0] : locationIdParam || '';
+    const hostId = Array.isArray(hostIdParam) ? hostIdParam[0] : hostIdParam || '';
+    const baseUrl = `/super-admin/hosts/${hostId}/locations`;
+
     const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,13 +38,13 @@ export default function SuperAdminLocationActivities() {
         isLoading: isLoadingLocation,
         error: locationError,
         refetch: refetchLocation
-    } = useLocation(locationId);
+    } = useLocation(hostId || '', locationId || '');
 
     const {
         data: activities,
         isLoading: isLoadingActivities,
         error: activitiesError,
-    } = useActivities(false); // Only enabled activities
+    } = useActivities(true); // Include disabled activities
 
     // Mutations
     const updateLocationActivities = useUpdateLocationActivities();
@@ -91,6 +96,7 @@ export default function SuperAdminLocationActivities() {
 
         try {
             await updateLocationActivities.mutateAsync({
+                hostId,
                 locationId,
                 activityIds: selectedActivityIds,
             });
@@ -164,7 +170,7 @@ export default function SuperAdminLocationActivities() {
                 message="Unable to load location or activities. Please try again."
                 error={locationError || activitiesError}
                 onRetry={refetchLocation}
-                onGoHome={() => router.push('/super-admin/locations')}
+                onGoHome={() => router.push(baseUrl)}
             />
         );
     }
@@ -175,7 +181,7 @@ export default function SuperAdminLocationActivities() {
             <ErrorDisplay
                 title="Location Not Found"
                 message="The requested location could not be found."
-                onGoHome={() => router.push('/super-admin/locations')}
+                onGoHome={() => router.push(baseUrl)}
                 showRetry={false}
             />
         );
@@ -189,8 +195,8 @@ export default function SuperAdminLocationActivities() {
                     description="Assign up to 3 activities for this location"
                     breadcrumbs={[
                         { label: 'Dashboard', href: '/super-admin' },
-                        { label: 'Locations', href: '/super-admin/locations' },
-                        { label: location.n, href: `/super-admin/locations/${locationId}` },
+                        { label: 'Locations', href: baseUrl },
+                        { label: location.n, href: `${baseUrl}/${locationId}` },
                         { label: 'Activities', current: true }
                     ]}
                     actions={
@@ -230,7 +236,8 @@ export default function SuperAdminLocationActivities() {
                                     return activity ? (
                                         <Badge
                                             key={activityId}
-                                            variant="default"
+                                            variant={activity.en ? 'default' : 'ghost'}
+                                            size='lg'
                                             className="flex items-center gap-1"
                                         >
                                             <Icon name={activity.i} size="xs" />
@@ -259,20 +266,20 @@ export default function SuperAdminLocationActivities() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <MapPin className="h-5 w-5" />
+                            <TargetIcon className="h-5 w-5" />
                             Available Activities
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         {!activities || activities.length === 0 ? (
                             <EmptyState
-                                icon={<MapPin className="h-8 w-8" />}
+                                icon={<TargetIcon className="h-8 w-8" />}
                                 title="No activities available"
                                 description="No enabled activities found. Contact an administrator to create activities."
                             />
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {activities.map((activity) => {
+                                {activities.sort((a, b) => a.c - b.c).map((activity) => {
                                     const isSelected = selectedActivityIds.includes(activity.id);
                                     const isDisabledDueToLimit = !isSelected && selectedActivityIds.length >= 3;
 
@@ -291,16 +298,11 @@ export default function SuperAdminLocationActivities() {
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-3">
-                                                    <div className={`
-                                                        w-10 h-10 rounded-full flex items-center justify-center
-                                                        ${isSelected ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'}
-                                                    `}>
-                                                        <Icon name={activity.i} size="md" />
-                                                    </div>
+                                                    <ActivityIconCircle activity={activity} size="md" variant={isSelected ? 'default' : 'ghost'} />
                                                     <div>
-                                                        <h3 className="font-medium">{activity.n}</h3>
+                                                        <h3 className={cn('font-medium', isSelected ? 'text-white' : 'text-gray-900')}>{activity.n}</h3>
                                                         <Badge
-                                                            variant={activity.en ? "success" : "outline"}
+                                                            variant={activity.en ? "success" : 'destructive'}
                                                             size="sm"
                                                         >
                                                             {activity.en ? "Enabled" : "Disabled"}
@@ -364,7 +366,7 @@ export default function SuperAdminLocationActivities() {
                                     Unsaved Changes
                                 </h3>
                                 <p className="mt-1 text-sm text-yellow-700">
-                                    You have unsaved changes to the activity assignments. Click "Save Changes" to apply them or "Reset" to revert.
+                                    You have unsaved changes to the activity assignments. Click &quot;Save Changes&quot; to apply them or &quot;Reset&quot; to revert.
                                 </p>
                             </div>
                         </div>

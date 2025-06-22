@@ -31,6 +31,7 @@ export default function SuperAdminHosts() {
   const { success, error, info } = useToastNotifications();
 
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isLoadingHostLocations, setIsLoadingHostLocations] = useState(true);
   const [hostsWithLocationCounts, setHostsWithLocationCounts] = useState<HostWithLocations[]>([]);
 
   // Data fetching
@@ -58,7 +59,8 @@ export default function SuperAdminHosts() {
         router.push('/super-admin/login');
       }
     }
-  }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isAuthLoading]);
 
   // Fetch location counts for each host
   useAsync(async () => {
@@ -91,6 +93,8 @@ export default function SuperAdminHosts() {
       };
 
       await fetchLocationCounts();
+      setIsLoadingHostLocations(false);
+
     }
   }, [hosts]);
 
@@ -150,7 +154,7 @@ export default function SuperAdminHosts() {
   };
 
   // Loading state
-  if (isAuthLoading || isLoadingHosts) {
+  if (isAuthLoading || isLoadingHosts || isLoadingHostLocations) {
     return (
       <div className="min-h-screen">
         <div className="container max-w-6xl mx-auto px-4 py-8 space-y-6">

@@ -16,21 +16,21 @@ import { useRouter } from 'next/navigation';
 export default function CheckIn() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
-  
+
   // Get current host and location from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
-  
+
   // Fetch host and location data
   const { data: host, isLoading: isLoadingHost, error: hostError } = useHost(hostId || '');
-  const { data: location, isLoading: isLoadingLocation, error: locationError } = useLocation(locationId || '');
-  
+  const { data: location, isLoading: isLoadingLocation, error: locationError } = useLocation(hostId || '', locationId || '');
+
   // Load host/location from localStorage on component mount
   useEffect(() => {
     const savedHostId = localStorage.getItem('currentHostId');
     const savedLocationId = localStorage.getItem('currentLocationId');
-    
+
     if (savedHostId && savedLocationId) {
       setHostId(savedHostId);
       setLocationId(savedLocationId);
@@ -39,36 +39,36 @@ export default function CheckIn() {
       router.push('/host/select-location');
     }
   }, [router]);
-  
+
   // Mark as ready when we have all the data
   useEffect(() => {
     if (host && location && !isLoadingHost && !isLoadingLocation) {
       setIsReady(true);
     }
   }, [host, location, isLoadingHost, isLoadingLocation]);
-  
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/host/login');
     }
   }, [isAuthenticated, isLoading, router]);
-  
+
   // Handle navigation to athlete registration
   const handleNewAthlete = () => {
     router.push('/signup');
   };
-  
+
   // Handle changing location
   const handleChangeLocation = () => {
     router.push('/host/select-location');
   };
-  
+
   // Show skeleton loading state instead of spinner
   if (isLoading || isLoadingHost || isLoadingLocation || !isReady) {
     return <CheckInPageLoading />;
   }
-  
+
   // Show error state
   if (hostError || locationError || !host || !location) {
     return (
@@ -76,9 +76,9 @@ export default function CheckIn() {
         title="Configuration Error"
         message={
           hostError ? "Failed to load host information" :
-          locationError ? "Failed to load location information" :
-          !host ? "Host not found" :
-          "Location not found"
+            locationError ? "Failed to load location information" :
+              !host ? "Host not found" :
+                "Location not found"
         }
         error={hostError || locationError}
         onRetry={() => window.location.reload()}
@@ -86,18 +86,18 @@ export default function CheckIn() {
       />
     );
   }
-  
+
   return (
     <div className="min-h-screen py-8">
       <div className="container max-w-4xl mx-auto px-4">
-        
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Trailblazers Check-In</h1>
             <p className="text-gray-600 mt-1">Welcome to {host.n}</p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
@@ -113,7 +113,7 @@ export default function CheckIn() {
             </Link>
           </div>
         </div>
-        
+
         {/* Location Info */}
         <Alert variant="info" className="mb-6">
           <div className="flex items-center justify-between">
@@ -123,7 +123,7 @@ export default function CheckIn() {
             </div>
           </div>
         </Alert>
-        
+
         {/* Main Check-in Flow */}
         <CheckInFlow
           host={host}
@@ -131,7 +131,7 @@ export default function CheckIn() {
           onNewAthlete={handleNewAthlete}
           className="mb-6"
         />
-        
+
         {/* Footer */}
         <div className="bg-white rounded-lg border-1 p-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">

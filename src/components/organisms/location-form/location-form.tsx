@@ -8,7 +8,6 @@ import { Button } from '@/components/atoms/button/button';
 import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
-import { Select } from '@/components/atoms/select/select';
 import { Textarea } from '@/components/atoms/textarea/textarea';
 import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -18,21 +17,21 @@ import { zodResolver } from '@hookform/resolvers/zod';
 // Define location form schema
 const locationSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
-    address: z.string().min(5, 'Address must be at least 5 characters'),
-    hostId: z.string().min(1, 'Please select a host'),
+    address: z.string().min(5, 'Address must be at least 5 characters').optional().or(z.literal('')),
+    // hostId: z.string().min(1, 'Please select a host'),
 });
 
 type LocationFormValues = z.infer<typeof locationSchema>;
 
-interface HostOption {
-    value: string;
-    label: string;
-}
+// interface HostOption {
+//     value: string;
+//     label: string;
+// }
 
 interface LocationFormProps {
     onSubmit: (data: LocationFormValues) => Promise<void>;
     defaultValues?: Partial<LocationFormValues>;
-    hosts: HostOption[];
+    // hosts: HostOption[];
     isEdit?: boolean;
     onCancel?: () => void;
 }
@@ -43,7 +42,7 @@ interface LocationFormProps {
 export const LocationForm: React.FC<LocationFormProps> = ({
     onSubmit,
     defaultValues,
-    hosts = [],
+    // hosts = [],
     isEdit = false,
     onCancel,
 }) => {
@@ -55,7 +54,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
         defaultValues: {
             name: defaultValues?.name || '',
             address: defaultValues?.address || '',
-            hostId: defaultValues?.hostId || '',
+            // hostId: defaultValues?.hostId || '',
         },
     });
 
@@ -105,10 +104,11 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             let errorTitle = `Location ${isEdit ? 'Update' : 'Creation'} Failed`;
 
             if (err instanceof Error) {
-                if (err.message.includes('host')) {
-                    errorMessage = 'Selected host is invalid or no longer exists';
-                    errorTitle = 'Host Error';
-                } else if (err.message.includes('name')) {
+                // if (err.message.includes('host')) {
+                //     errorMessage = 'Selected host is invalid or no longer exists';
+                //     errorTitle = 'Host Error';
+                // } else if (err.message.includes('name')) {
+                if (err.message.includes('name')) {
                     errorMessage = 'Location name is already in use or invalid';
                     errorTitle = 'Name Conflict';
                 } else if (err.message.includes('network')) {
@@ -171,7 +171,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                 />
 
                 {/* Host Selection */}
-                <FormControl
+                {/* <FormControl
                     name="hostId"
                     label="Host"
                     render={(fieldProps) => (
@@ -183,15 +183,15 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                             required
                         />
                     )}
-                />
+                /> */}
 
-                {isEdit && (
+                {/* {isEdit && (
                     <div className="text-sm text-gray-500">
                         <span className="text-gray-600">
                             Note: Host cannot be changed for existing locations. Create a new location if you need to assign it to a different host.
                         </span>
                     </div>
-                )}
+                )} */}
 
                 {/* Address */}
                 <FormControl
@@ -203,7 +203,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                             placeholder="Enter the complete address for this location"
                             rows={3}
                             disabled={isSubmitting}
-                            required
+                        // required
                         />
                     )}
                 />

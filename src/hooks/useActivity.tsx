@@ -29,8 +29,8 @@ const fetchActivities = async (includeDisabled = false): Promise<ActivityEntity[
   return response.data!;
 };
 
-const fetchLocationActivities = async (locationId: string): Promise<ActivityEntity[]> => {
-  const response = await apiClient.get<ActivityEntity[]>(`/api/locations/${locationId}/activities`);
+const fetchLocationActivities = async (hostId: string, locationId: string): Promise<ActivityEntity[]> => {
+  const response = await apiClient.get<ActivityEntity[]>(`/api/hosts/${hostId}/locations/${locationId}/activities`);
 
   if (response.error) {
     throw new Error(response.error);
@@ -103,10 +103,10 @@ export const useActivities = (includeDisabled = false) => {
   });
 };
 
-export const useLocationActivities = (locationId: string) => {
+export const useLocationActivities = (hostId: string, locationId: string) => {
   return useQuery({
     queryKey: ['activities', 'location', locationId],
-    queryFn: () => fetchLocationActivities(locationId),
+    queryFn: () => fetchLocationActivities(hostId, locationId),
     enabled: !!locationId,
   });
 };

@@ -1,9 +1,10 @@
 'use client';
 
-import { Activity, Calendar, MapPin, TrendingUp, Users } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Activity, MapPin, TrendingUp, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { HostEntity, LocationEntity } from '@/lib/db/entities/types';
 import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 
 import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
@@ -15,13 +16,11 @@ import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useHosts } from '@/hooks/useHost';
 import { useLocations } from '@/hooks/useLocation';
-import { useRouter } from 'next/navigation';
-import { useToastNotifications } from '@/hooks/useToast';
 
 // TODO: Not sure the purpose of this page
 
 // Mock analytics data - in a real implementation, this would come from API calls
-const generateMockAnalytics = (locations: any[], hosts: any[]) => {
+const generateMockAnalytics = (locations: LocationEntity[], hosts: HostEntity[]) => {
     if (!locations || locations.length === 0) return null;
 
     // Generate mock data for demonstration
@@ -78,9 +77,10 @@ const generateMockAnalytics = (locations: any[], hosts: any[]) => {
 };
 
 export default function SuperAdminLocationAnalytics() {
+    const { hostId } = useParams();
     const router = useRouter();
     const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
-    const { success, error, info } = useToastNotifications();
+    // const { success, error, info } = useToastNotifications();
 
     const [selectedHost, setSelectedHost] = useState<string>('all');
     const [selectedPeriod, setSelectedPeriod] = useState<string>('30d');
@@ -184,7 +184,7 @@ export default function SuperAdminLocationAnalytics() {
                         description="Analyze location performance and usage statistics"
                         breadcrumbs={[
                             { label: 'Dashboard', href: '/super-admin' },
-                            { label: 'Locations', href: '/super-admin/locations' },
+                            { label: 'Locations', href: `/super-admin/hosts/${hostId}/locations` },
                             { label: 'Analytics', current: true }
                         ]}
                     />
@@ -194,15 +194,15 @@ export default function SuperAdminLocationAnalytics() {
                         title="No location data available"
                         description="Create some locations and collect check-in data to see analytics."
                         actionLabel="Go to Locations"
-                        onAction={() => router.push('/super-admin/locations')}
+                        onAction={() => router.push(`/super-admin/hosts/${hostId}/locations`)}
                     />
                 </div>
             </div>
         );
     }
 
-    // Chart colors
-    const chartColors = ['#b73e00', '#c68565', '#8b380d', '#f59e0b', '#10b981'];
+    // // Chart colors
+    // const chartColors = ['#b73e00', '#c68565', '#8b380d', '#f59e0b', '#10b981'];
 
     return (
         <div className="min-h-screen">
@@ -212,7 +212,7 @@ export default function SuperAdminLocationAnalytics() {
                     description="Analyze location performance and usage statistics"
                     breadcrumbs={[
                         { label: 'Dashboard', href: '/super-admin' },
-                        { label: 'Locations', href: '/super-admin/locations' },
+                        { label: 'Locations', href: `/super-admin/hosts/${hostId}/locations` },
                         { label: 'Analytics', current: true }
                     ]}
                     actions={
@@ -314,7 +314,7 @@ export default function SuperAdminLocationAnalytics() {
                 {/* Charts Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     {/* Weekly Trends Chart */}
-                    <Card>
+                    {/* <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <TrendingUp className="h-5 w-5" />
@@ -345,10 +345,10 @@ export default function SuperAdminLocationAnalytics() {
                                 </LineChart>
                             </ResponsiveContainer>
                         </CardContent>
-                    </Card>
+                    </Card> */}
 
                     {/* Host Performance Chart */}
-                    <Card>
+                    {/* <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <MapPin className="h-5 w-5" />
@@ -366,7 +366,7 @@ export default function SuperAdminLocationAnalytics() {
                                 </BarChart>
                             </ResponsiveContainer>
                         </CardContent>
-                    </Card>
+                    </Card> */}
                 </div>
 
                 {/* Location Performance Table */}
@@ -424,7 +424,7 @@ export default function SuperAdminLocationAnalytics() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() => router.push(`/super-admin/locations/${location.id}`)}
+                                                        onClick={() => router.push(`/super-admin/hosts/${hostId}/locations/${location.id}`)}
                                                     >
                                                         View Details
                                                     </Button>

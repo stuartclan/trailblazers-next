@@ -1,15 +1,17 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Edit3, MapPin, Settings, Trash2 } from 'lucide-react';
+import { Edit3, MapPin, Settings, TargetIcon, Trash2 } from 'lucide-react';
 import { useDeleteLocation, useLocation, useUpdateLocation } from '@/hooks/useLocation';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
+import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
+import { Label } from '@/components/atoms/label/label';
 import { LocationForm } from '@/components/organisms/location-form/location-form';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
@@ -19,13 +21,17 @@ import { useHosts } from '@/hooks/useHost';
 import { useToastNotifications } from '@/hooks/useToast';
 
 export default function SuperAdminLocationEdit() {
-    const params = useParams();
+    const { hostId: hostIdParam, locationId: locationIdParam } = useParams();
     const router = useRouter();
     const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
     const { success, error, info } = useToastNotifications();
 
-    const locationId = params.locationId as string;
     const [isEditing, setIsEditing] = useState(false);
+
+    const locationId = Array.isArray(locationIdParam) ? locationIdParam[0] : locationIdParam || '';
+    const hostId = Array.isArray(hostIdParam) ? hostIdParam[0] : hostIdParam || '';
+
+    const baseUrl = `/super-admin/hosts/${hostId}/locations`;
 
     // Data fetching
     const {
@@ -33,7 +39,7 @@ export default function SuperAdminLocationEdit() {
         isLoading: isLoadingLocation,
         error: locationError,
         refetch: refetchLocation
-    } = useLocation(locationId);
+    } = useLocation(hostId || '', locationId || '');
 
     const {
         data: hosts,
@@ -76,11 +82,12 @@ export default function SuperAdminLocationEdit() {
         try {
             await updateLocation.mutateAsync({
                 id: locationId,
+                hostId,
                 data: {
                     n: data.name,
                     a: data.address,
                     // Note: hostId changes are handled in the API if different
-                    hid: data.hostId,
+                    // hid: hostId,
                 }
             });
 
@@ -110,7 +117,7 @@ export default function SuperAdminLocationEdit() {
         info(`Deleting location "${location.n}"...`, 'Location Deletion');
 
         try {
-            await deleteLocation.mutateAsync(locationId);
+            await deleteLocation.mutateAsync({ hostId, id: locationId });
 
             success(
                 `Location "${location.n}" has been deleted successfully.`,
@@ -118,7 +125,7 @@ export default function SuperAdminLocationEdit() {
             );
 
             // Redirect to locations list
-            router.push('/super-admin/locations');
+            router.push(baseUrl);
 
         } catch (err) {
             console.error('Location deletion error:', err);
@@ -183,7 +190,7 @@ export default function SuperAdminLocationEdit() {
                 message="Unable to load the location information. Please try again."
                 error={locationError || hostsError}
                 onRetry={refetchLocation}
-                onGoHome={() => router.push('/super-admin/locations')}
+                onGoHome={() => router.push(baseUrl)}
             />
         );
     }
@@ -194,7 +201,7 @@ export default function SuperAdminLocationEdit() {
             <ErrorDisplay
                 title="Location Not Found"
                 message="The requested location could not be found."
-                onGoHome={() => router.push('/super-admin/locations')}
+                onGoHome={() => router.push(baseUrl)}
                 showRetry={false}
             />
         );
@@ -223,7 +230,7 @@ export default function SuperAdminLocationEdit() {
                     description="Manage location settings and activities"
                     breadcrumbs={[
                         { label: 'Dashboard', href: '/super-admin' },
-                        { label: 'Locations', href: '/super-admin/locations' },
+                        { label: 'Locations', href: baseUrl },
                         { label: location.n, current: true }
                     ]}
                     actions={
@@ -309,42 +316,44 @@ export default function SuperAdminLocationEdit() {
 
                     {/* Assigned Activities */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center justify-between">
+                        <CardHeader row>
+                            <CardTitle className="flex w-full items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <MapPin className="h-5 w-5" />
+                                    <TargetIcon className="h-5 w-5" />
                                     Assigned Activities ({assignedActivities.length})
                                 </div>
-                                <Button
-                                    onClick={() => router.push(`/super-admin/locations/${locationId}/activities`)}
-                                    size="sm"
-                                    variant="outline"
-                                >
-                                    Manage Activities
-                                </Button>
                             </CardTitle>
+                            <Button
+                                onClick={() => router.push(`${baseUrl}/${locationId}/activities`)}
+                                size="sm"
+                                variant="outline"
+                                className='text-nowrap'
+                            >
+                                Manage Activities
+                            </Button>
                         </CardHeader>
                         <CardContent>
                             {assignedActivities.length === 0 ? (
                                 <EmptyState
-                                    icon={<MapPin className="h-8 w-8" />}
+                                    icon={<TargetIcon className="h-8 w-8" />}
                                     title="No activities assigned"
                                     description="This location doesn't have any activities assigned yet."
                                     actionLabel="Assign Activities"
-                                    onAction={() => router.push(`/super-admin/locations/${locationId}/activities`)}
+                                    onAction={() => router.push(`${baseUrl}/${locationId}/activities`)}
                                 />
                             ) : (
                                 <div className="grid grid-cols-2 gap-3">
                                     {assignedActivities.map((activity) => (
                                         <div
                                             key={activity.id}
-                                            className="flex items-center p-3 border-1 rounded-md hover:bg-gray-50"
+                                            className="flex items-center space-x-2 p-3 border-1 rounded-md hover:bg-gray-50"
                                         >
-                                            <span className="material-icons text-primary mr-2">
+                                            <ActivityIconCircle activity={activity} size='sm' />
+                                            {/* <span className="material-icons text-primary mr-2">
                                                 {activity.i}
-                                            </span>
-                                            <div className="flex-1">
-                                                <p className="font-medium text-sm">{activity.n}</p>
+                                            </span> */}
+                                            <div className="flex-1 flex flex-col items-start space-y-1">
+                                                <Label size="md">{activity.n}</Label>
                                                 <Badge
                                                     variant={activity.en ? "success" : "outline"}
                                                     size="sm"

@@ -105,8 +105,6 @@ export class ActivityRepository {
       '#u': 'u' // Always include the updated timestamp
     };
 
-    console.log('DEBUG: update activity:', updateData);
-
     // Add each provided field to the update expression
     Object.entries(updateData).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -197,10 +195,9 @@ export class ActivityRepository {
 
     // Define default activities
     const defaultActivities = [
+      { name: 'Run', icon: ActivityIcon.DirectionsRun },
       { name: 'Bike', icon: ActivityIcon.DirectionsBike },
-      { name: 'Shoe', icon: ActivityIcon.DirectionsWalk },
-      { name: 'Snow', icon: ActivityIcon.Ice },
-      { name: 'Water', icon: ActivityIcon.Waves }
+      { name: 'Hike', icon: ActivityIcon.Hiking },
     ];
 
     // Create all default activities

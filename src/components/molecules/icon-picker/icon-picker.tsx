@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 
+import { ACTIVITY_CATEGORIES, AVAILABLE_ACTIVITIES } from '@/lib/utils/activity-helper';
 import { Search, X } from 'lucide-react';
 
-import { ActivityIcon } from '@/lib/utils/material-icons';
 import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Button } from '@/components/atoms/button/button';
 import { Input } from '@/components/atoms/input/input';
@@ -20,41 +20,6 @@ interface IconPickerProps {
     className?: string;
 }
 
-// Popular activity-related Material Icons
-const ACTIVITY_ICONS = [
-    // Defaults
-    { name: ActivityIcon.DirectionsRun, label: 'Run', categories: ['Defaults', 'Outdoor'] },
-    { name: ActivityIcon.DirectionsBike, label: 'Bike', categories: ['Defaults', 'Outdoor'] },
-    { name: ActivityIcon.Hiking, label: 'Hike', categories: ['Defaults', 'Outdoor'] },
-
-    // Outdoor activities
-    { name: ActivityIcon.DirectionsWalk, label: 'Walk', categories: ['Outdoor'] },
-    // { name: ActivityIcon.NordicWalking, label: 'Nordic Walking', category: 'Outdoor' },
-    { name: ActivityIcon.Ice, label: 'Winter Sports', categories: ['Winter'] },
-    { name: ActivityIcon.Downhill, label: 'Skiing', categories: ['Winter'] },
-    { name: ActivityIcon.Snowboarding, label: 'Snow-boarding', categories: ['Winter'] },
-    { name: ActivityIcon.Snowshoeing, label: 'Snow-shoeing', categories: ['Winter'] },
-    { name: ActivityIcon.Waves, label: 'Water Sports', categories: ['Water'] },
-    { name: ActivityIcon.Kayaking, label: 'Kayaking', categories: ['Water'] },
-    { name: ActivityIcon.Pool, label: 'Swimming', categories: ['Water'] },
-    // { name: ActivityIcon.Surfing, label: 'Surfing', categories: 'Water' },
-    // { name: ActivityIcon.Sailboat, label: 'Sailing', categories: 'Water' },
-
-    // Indoor activities
-    // { name: ActivityIcon.FitnessCenter, label: 'Gym', categories: ['Indoor'] },
-    // { name: ActivityIcon.SportsGymnastics, label: 'Gymnastics', categories: ['Indoor'] },
-    // { name: ActivityIcon.SportsTennis, label: 'Tennis', categories: ['Indoor'] },
-    // { name: ActivityIcon.SportsBasketball, label: 'Basketball', categories: ['Indoor'] },
-    // { name: ActivityIcon.SportsVolleyball, label: 'Volleyball', categories: ['Indoor'] },
-
-    // Other
-    // { name: ActivityIcon.LocalActivity, label: 'Activity', categories: ['General'] },
-    // { name: ActivityIcon.Star, label: 'Featured', categories: ['General'] },
-];
-
-// const CATEGORIES = ['All', 'Outdoor', 'Water', 'Winter', 'Indoor', 'Sports', 'General'];
-const CATEGORIES = ['All', 'Defaults', 'Outdoor', 'Winter', 'Water'];
-
 export const IconPicker: React.FC<IconPickerProps> = ({
     value,
     onChange,
@@ -69,7 +34,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
     const [previewIcon, setPreviewIcon] = React.useState<string | null>(null);
 
     // Filter icons based on search and category
-    const filteredIcons = ACTIVITY_ICONS.filter(icon => {
+    const filteredIcons = AVAILABLE_ACTIVITIES.filter(icon => {
         const matchesSearch = searchTerm === '' ||
             icon.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
             icon.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -87,7 +52,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
     };
 
     // Get the currently selected icon
-    const selectedIcon = ACTIVITY_ICONS.find(icon => icon.name === value);
+    const selectedIcon = AVAILABLE_ACTIVITIES.find(icon => icon.name === value);
 
     return (
         <div className={cn('space-y-2', className)}>
@@ -116,7 +81,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
                                 </div> */}
                                 <div>
                                     <span className="font-medium text-gray-900">{selectedIcon.label}</span>
-                                    <div className="text-xs text-gray-500">{selectedIcon.category}</div>
+                                    <div className="text-xs text-gray-500">{selectedIcon.categories.join(', ')}</div>
                                 </div>
                             </>
                         ) : (
@@ -142,7 +107,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 
                             {/* Category Filter */}
                             <div className="flex flex-wrap gap-1">
-                                {CATEGORIES.map((category) => (
+                                {ACTIVITY_CATEGORIES.map((category) => (
                                     <button
                                         key={category}
                                         type='button'

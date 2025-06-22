@@ -55,3 +55,69 @@ export async function GET(
     );
   }
 }
+
+// Create a new location
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ hostId: string }> },
+) {
+  const { hostId } = await params;
+  try {
+    // Verify authentication
+    const authResult = await verifyAuth(request);
+    if (!authResult.isAuthenticated) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Only super-admins can create locations
+    if (!isSuperAdmin(authResult)) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
+    }
+
+    // Parse request body
+    const body = await request.json();
+
+    // Validate required fields
+    if (!body.name) {
+      return NextResponse.json(
+        { error: 'Name is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if host exists
+    const host = await repositories.hosts.getHostById(hostId);
+    if (!host) {
+      return NextResponse.json(
+        { error: 'Host not found' },
+        { status: 404 }
+      );
+    }
+
+    // Create location
+    const location = await repositories.locations.createLocation({
+      hostId: hostId,
+      name: body.name,
+      address: body.address,
+      activityIds: body.activityIds || []
+    });
+
+    // Update host with new location ID
+    await repositories.hosts.addLocationToHost(hostId, location.id);
+
+    return NextResponse.json(location);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error('Error creating location:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to create location' },
+      { status: 500 }
+    );
+  }
+}

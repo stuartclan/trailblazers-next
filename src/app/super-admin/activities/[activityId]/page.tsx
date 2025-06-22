@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Edit3, MapPin, Settings, Trash2, TrendingUp } from 'lucide-react';
+import { Edit3, MapPin, Settings, TargetIcon, Trash2, TrendingUp } from 'lucide-react';
 import { useActivity, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivity';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -382,7 +382,7 @@ export default function SuperAdminActivityDetail() {
                 <Card className="mt-6">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <MapPin className="h-5 w-5" />
+                            <TargetIcon className="h-5 w-5" />
                             Activity Management
                         </CardTitle>
                     </CardHeader>
@@ -424,7 +424,7 @@ export default function SuperAdminActivityDetail() {
                                         Edit Activity Details
                                     </Button>
 
-                                    {usage.count > 0 && (
+                                    {/* {usage.count > 0 && (
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -434,7 +434,7 @@ export default function SuperAdminActivityDetail() {
                                             <MapPin className="h-4 w-4 mr-2" />
                                             View Using Locations
                                         </Button>
-                                    )}
+                                    )} */}
 
                                     <Button
                                         variant="outline"

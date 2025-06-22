@@ -7,33 +7,33 @@ import type { LocationEntity } from '@/lib/db/entities/types';
 import { apiClient } from '@/lib/utils/api-client';
 
 // API client functions using the new authenticated client
-const fetchLocation = async (locationId: string): Promise<LocationEntity> => {
-  const response = await apiClient.get<LocationEntity>(`/api/locations/${locationId}`);
-  
+const fetchLocation = async (hostId: string, locationId: string): Promise<LocationEntity> => {
+  const response = await apiClient.get<LocationEntity>(`/api/hosts/${hostId}/locations/${locationId}`);
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const fetchLocations = async (): Promise<LocationEntity[]> => {
   const response = await apiClient.get<LocationEntity[]>('/api/locations');
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 export const fetchLocationsByHost = async (hostId: string): Promise<LocationEntity[]> => {
   const response = await apiClient.get<LocationEntity[]>(`/api/hosts/${hostId}/locations`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -43,63 +43,73 @@ const createLocation = async (data: {
   address: string;
   activityIds?: string[];
 }): Promise<LocationEntity> => {
-  const response = await apiClient.post<LocationEntity>('/api/locations', data);
-  
+  const response = await apiClient.post<LocationEntity>(`/api/hosts/${data.hostId}/locations`, data);
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const updateLocation = async ({
   id,
+  hostId,
   data,
 }: {
   id: string;
+  hostId: string;
   data: Partial<Omit<LocationEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'GSI1PK' | 'GSI1SK'>>;
 }): Promise<LocationEntity> => {
-  const response = await apiClient.patch<LocationEntity>(`/api/locations/${id}`, data);
-  
+  const response = await apiClient.patch<LocationEntity>(`/api/hosts/${hostId}/locations/${id}`, data);
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
-const deleteLocation = async (id: string): Promise<void> => {
-  const response = await apiClient.delete(`/api/locations/${id}`);
-  
+const deleteLocation = async ({
+  id,
+  hostId,
+}: {
+  id: string;
+  hostId: string;
+}): Promise<void> => {
+  const response = await apiClient.delete(`/api/hosts/${hostId}/locations/${id}`);
+
   if (response.error) {
     throw new Error(response.error);
   }
 };
 
 const updateLocationActivities = async ({
+  hostId,
   locationId,
   activityIds,
 }: {
+  hostId: string;
   locationId: string;
   activityIds: string[];
 }): Promise<LocationEntity> => {
   const response = await apiClient.put<LocationEntity>(
-    `/api/locations/${locationId}/activities`, 
+    `/api/hosts/${hostId}/locations/${locationId}/activities`,
     { activityIds }
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 // React Query Hooks
-export const useLocation = (locationId: string) => {
+export const useLocation = (hostId: string, locationId: string) => {
   return useQuery({
     queryKey: ['locations', locationId],
-    queryFn: () => fetchLocation(locationId),
+    queryFn: () => fetchLocation(hostId, locationId),
     enabled: !!locationId,
   });
 };
@@ -121,7 +131,7 @@ export const useLocationsByHost = (hostId: string) => {
 
 export const useCreateLocation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createLocation,
     onSuccess: (data) => {
@@ -133,7 +143,7 @@ export const useCreateLocation = () => {
 
 export const useUpdateLocation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: updateLocation,
     onSuccess: (data) => {
@@ -146,7 +156,7 @@ export const useUpdateLocation = () => {
 
 export const useDeleteLocation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deleteLocation,
     onSuccess: (_data, variables) => {
@@ -155,7 +165,7 @@ export const useDeleteLocation = () => {
       if (location) {
         queryClient.invalidateQueries({ queryKey: ['locations', 'host', location.hid] });
       }
-      
+
       queryClient.invalidateQueries({ queryKey: ['locations', variables] });
       queryClient.invalidateQueries({ queryKey: ['locations'] });
     },
@@ -164,7 +174,7 @@ export const useDeleteLocation = () => {
 
 export const useUpdateLocationActivities = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: updateLocationActivities,
     onSuccess: (data) => {

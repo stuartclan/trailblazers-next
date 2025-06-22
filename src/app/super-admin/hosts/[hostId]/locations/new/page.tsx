@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { useParams, useRouter } from 'next/navigation';
 
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import { LocationForm } from '@/components/organisms/location-form/location-form';
@@ -10,13 +11,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCreateLocation } from '@/hooks/useLocation';
 import { useEffect } from 'react';
 import { useHosts } from '@/hooks/useHost';
-import { useRouter } from 'next/navigation';
 import { useToastNotifications } from '@/hooks/useToast';
 
 export default function SuperAdminNewLocation() {
+    const { hostId } = useParams();
     const router = useRouter();
     const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
     const { success, error, info } = useToastNotifications();
+
+    const baseUrl = `/super-admin/hosts/${hostId}/locations`;
 
     // Data fetching
     const {
@@ -48,7 +51,6 @@ export default function SuperAdminNewLocation() {
     const handleCreateLocation = async (data: {
         name: string;
         address: string;
-        hostId: string;
     }) => {
         info('Creating location...', 'Location Creation');
 
@@ -56,7 +58,7 @@ export default function SuperAdminNewLocation() {
             const newLocation = await createLocation.mutateAsync({
                 name: data.name,
                 address: data.address,
-                hostId: data.hostId,
+                hostId: hostId as string,
                 activityIds: [], // Start with no activities
             });
 
@@ -66,7 +68,7 @@ export default function SuperAdminNewLocation() {
             );
 
             // Redirect to the new location's edit page
-            router.push(`/super-admin/locations/${newLocation.id}`);
+            router.push(`/super-admin/hosts/${hostId}/locations/${newLocation.id}`);
 
         } catch (err) {
             console.error('Location creation error:', err);
@@ -78,7 +80,7 @@ export default function SuperAdminNewLocation() {
 
     // Handle cancel
     const handleCancel = () => {
-        router.push('/super-admin/locations');
+        router.push(baseUrl);
     };
 
     // Loading state
@@ -119,7 +121,7 @@ export default function SuperAdminNewLocation() {
                 message="Unable to load the hosts. Please try again."
                 error={hostsError}
                 onRetry={refetchHosts}
-                onGoHome={() => router.push('/super-admin/locations')}
+                onGoHome={() => router.push(baseUrl)}
             />
         );
     }
@@ -138,7 +140,7 @@ export default function SuperAdminNewLocation() {
                     description="Add a new location for a host"
                     breadcrumbs={[
                         { label: 'Dashboard', href: '/super-admin' },
-                        { label: 'Locations', href: '/super-admin/locations' },
+                        { label: 'Locations', href: baseUrl },
                         { label: 'New Location', current: true }
                     ]}
                 />

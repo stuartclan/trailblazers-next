@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { Edit3, Activity as EmptyActivityIcon, Plus, Settings, Trash2, TrendingUp } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/atoms/tooltip/tooltip';
 import { useActivities, useCreateDefaultActivities, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivity';
 import { useEffect, useState } from 'react';
 
@@ -10,7 +11,6 @@ import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
-import { Icon } from '@/components/atoms/icon/icon';
 import Link from 'next/link';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
@@ -308,7 +308,8 @@ export default function SuperAdminActivities() {
                     />
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredActivities.map((activity) => {
+                        {filteredActivities.sort((a, b) => a.c - b.c).map((activity) => {
+                            // TODO: Sorting by created date. Could add a sort order and leverage drag-n-drop... For now, just manually manipulate "c" in Dynamo
                             const usage = getActivityUsage(activity.id);
 
                             return (
@@ -357,15 +358,22 @@ export default function SuperAdminActivities() {
                                                     Edit
                                                 </Button>
                                             </Link>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleDeleteActivity(activity.id, activity.n)}
-                                                className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
-                                                disabled={usage.count > 0}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleDeleteActivity(activity.id, activity.n)}
+                                                        className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                                                        disabled={usage.count > 0}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent align='end' hidden={usage.count === 0}>
+                                                    {usage.count > 0 ? 'Cannot delete activity in use' : 'Delete activity'}
+                                                </TooltipContent>
+                                            </Tooltip>
                                         </div>
                                     </CardContent>
                                 </Card>

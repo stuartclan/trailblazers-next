@@ -33,30 +33,38 @@ TooltipTrigger.displayName = 'Trigger';
 const TooltipContent = React.forwardRef<
   React.ComponentRef<typeof TooltipPrimitives.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitives.Content>
->(({ className, ...props }, ref) => (
-  <TooltipPrimitives.Content
-    ref={ref}
-    className={cn(
-      'px-2 py-1 text-sm bg-black/50 text-white rounded-md',
-      className
-    )}
-    // forceMount
-    {...props}
-  />
+>(({ className, children, ...props }, ref) => (
+  <TooltipPrimitives.Portal
+  // forceMount
+  >
+    <TooltipPrimitives.Content
+      ref={ref}
+      className={cn(
+        'px-2 py-1 text-sm bg-black/50 text-white rounded-md',
+        className
+      )}
+      {...props}
+    >
+      <TooltipPrimitives.Arrow
+        className='fill-black/50'
+      />
+      {children}
+    </TooltipPrimitives.Content>
+  </TooltipPrimitives.Portal>
 ));
 TooltipContent.displayName = 'Content';
 
-const TooltipArrow = React.forwardRef<
-  React.ComponentRef<typeof TooltipPrimitives.Arrow>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitives.Arrow>
->(({ ...props }, ref) => (
-  <TooltipPrimitives.Arrow
-    className='fill-black/50'
-    ref={ref}
-    {...props}
-  />
-));
-TooltipArrow.displayName = 'Arrow';
+// const TooltipArrow = React.forwardRef<
+//   React.ComponentRef<typeof TooltipPrimitives.Arrow>,
+//   React.ComponentPropsWithoutRef<typeof TooltipPrimitives.Arrow>
+// >(({ ...props }, ref) => (
+//   <TooltipPrimitives.Arrow
+//     className='fill-black/50'
+//     ref={ref}
+//     {...props}
+//   />
+// ));
+// TooltipArrow.displayName = 'Arrow';
 
 type TooltipProps = React.ComponentPropsWithoutRef<typeof Tooltip>;
 
@@ -66,5 +74,5 @@ export {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-  TooltipArrow,
+  // TooltipArrow,
 };

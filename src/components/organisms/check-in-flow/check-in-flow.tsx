@@ -52,7 +52,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   } | null>(null);
 
   // Data fetching
-  const { data: activities } = useLocationActivities(location.id);
+  const { data: activities } = useLocationActivities(host.id, location.id);
   const { data: athletePets } = useAthletesPets(selectedAthlete?.id || '');
   const { data: hasSignedDisclaimer } = useHasSignedDisclaimer(
     selectedAthlete?.id || '',

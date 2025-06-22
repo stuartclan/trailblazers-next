@@ -17,16 +17,16 @@ All API routes are protected with AWS Cognito authentication. The token must be 
 - `GET /api/hosts/:hostId/rewards`: Get rewards for a host
 - `POST /api/hosts/:hostId/rewards`: Create a new reward for a host
 - `GET /api/hosts/:hostId/rewards/claims`: Get reward claims for a host
+- `POST /api/hosts/:hostId/locations`: Create a new location (super-admin only)
+- `GET /api/hosts/:hostId/locations/:locationId`: Get a specific location
+- `PATCH /api/hosts/:hostId/locations/:locationId`: Update a location (super-admin only)
+- `DELETE /api/hosts/:hostId/locations/:locationId`: Delete a location (super-admin only)
+- `GET /api/hosts/:hostId/locations/:locationId/activities`: Get activities for a location
+- `PUT /api/hosts/:hostId/locations/:locationId/activities`: Update activities for a location
 
 ## Locations APIs
 
 - `GET /api/locations`: List all locations (super-admin only)
-- `POST /api/locations`: Create a new location (super-admin only)
-- `GET /api/locations/:locationId`: Get a specific location
-- `PATCH /api/locations/:locationId`: Update a location (super-admin only)
-- `DELETE /api/locations/:locationId`: Delete a location (super-admin only)
-- `GET /api/locations/:locationId/activities`: Get activities for a location
-- `PUT /api/locations/:locationId/activities`: Update activities for a location
 
 ## Activities APIs
 
