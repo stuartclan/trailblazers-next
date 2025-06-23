@@ -1,20 +1,14 @@
 'use client';
 
-import { ArrowLeft, Heart, PawPrint, Shield, Shirt, ShirtIcon, User } from 'lucide-react';
+import { ArrowLeft, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { FormProvider, useForm } from 'react-hook-form';
 import { useCreateAthlete, useSignDisclaimer } from '@/hooks/useAthlete';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/atoms/button/button';
-import { Checkbox } from '@/components/atoms/checkbox/checkbox';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
-import { Form } from '@/components/atoms/form/form';
-import { FormControl } from '@/components/atoms/form-control/form-control';
-import { Input } from '@/components/atoms/input/input';
-import { MobileFormField } from '@/components/molecules/mobile-form-field/mobile-form-field';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
-import { Select } from '@/components/atoms/select/select';
+import { SignupForm } from '@/components/organisms/signup-form/signup-form';
 import { SignupFormLoading } from '@/components/molecules/loading-states/loading-states';
 import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,42 +16,6 @@ import { useCreatePet } from '@/hooks/usePet';
 import { useHost } from '@/hooks/useHost';
 import { useRouter } from 'next/navigation';
 import { useToastNotifications } from '@/hooks/useToast';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-// Validation schema
-const athleteSchema = z.object({
-  firstName: z.string().min(1, 'First name is required').max(50, 'First name too long'),
-  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name too long'),
-  middleInitial: z.string().max(1, 'Only one letter allowed').optional(),
-  email: z.string().email('Please enter a valid email address'),
-  employer: z.string().max(100, 'Employer name too long').optional(),
-  shirtGender: z.string().optional(),
-  shirtSize: z.string().optional(),
-  emergencyName: z.string().min(1, 'Emergency contact name is required'),
-  emergencyPhone: z.string()
-    .min(10, 'Phone number must be at least 10 digits')
-    .regex(/^[\d\s\-\(\)\+\.]+$/, 'Please enter a valid phone number'),
-
-  // Pet information
-  hasPet: z.boolean().default(false).optional(),
-  petName: z.string().optional(),
-
-  // Disclaimer
-  disclaimerAccepted: z.boolean().refine(val => val === true, {
-    message: 'You must accept the disclaimer to register'
-  })
-}).refine((data) => {
-  if (data.hasPet && !data.petName?.trim()) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Pet name is required when registering a pet",
-  path: ["petName"]
-});
-
-type AthleteFormValues = z.infer<typeof athleteSchema>;
 
 export default function Signup() {
   const router = useRouter();
@@ -66,50 +24,15 @@ export default function Signup() {
 
   // Get current host from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  // Check if we're on mobile (simple check)
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Fetch host details
-  const { data: host, isLoading: isLoadingHost, error: hostError } = useHost(hostId || '');
+  const { data: host, isLoading: isLoadingHost, error: hostError, refetch: refetchHost } = useHost(hostId || '');
 
   // Mutations
   const createAthlete = useCreateAthlete();
   const createPet = useCreatePet();
   const signDisclaimer = useSignDisclaimer();
-
-  // Form setup
-  const form = useForm<AthleteFormValues>({
-    resolver: zodResolver(athleteSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      middleInitial: '',
-      email: '',
-      employer: '',
-      shirtGender: '',
-      shirtSize: '',
-      emergencyName: '',
-      emergencyPhone: '',
-      hasPet: false,
-      petName: '',
-      disclaimerAccepted: false,
-    },
-  });
-
-  const { watch, setValue } = form;
-  const hasPet = watch('hasPet');
 
   // Load host from localStorage
   useEffect(() => {
@@ -129,17 +52,30 @@ export default function Signup() {
   }, [isAuthenticated, isAuthLoading, router]);
 
   // Handle form submission
-  const handleSubmit = async (data: AthleteFormValues) => {
+  const handleSignupSubmit = async (data: {
+    firstName: string;
+    lastName: string;
+    middleInitial?: string;
+    email: string;
+    employer?: string;
+    shirtGender?: string;
+    shirtSize?: string;
+    emergencyName: string;
+    emergencyPhone: string;
+    hasPet?: boolean;
+    petName?: string;
+    disclaimerAccepted: boolean;
+  }) => {
     if (!hostId) {
       error('No host selected. Please return to check-in.');
       return;
     }
 
-    setIsSubmitting(true);
-    info('Creating athlete registration...');
+    info('Processing athlete registration...', 'Registration');
 
     try {
       // Create the athlete
+      info('Creating athlete profile...', 'Creating Profile');
       const newAthlete = await createAthlete.mutateAsync({
         firstName: data.firstName,
         lastName: data.lastName,
@@ -152,7 +88,7 @@ export default function Signup() {
         emergencyPhone: data.emergencyPhone,
       });
 
-      info('Signing disclaimer...');
+      info('Signing disclaimer...', 'Disclaimer');
 
       // Sign the disclaimer
       await signDisclaimer.mutateAsync({
@@ -162,14 +98,17 @@ export default function Signup() {
 
       // Create a pet if specified
       if (data.hasPet && data.petName?.trim()) {
-        info('Registering pet...');
+        info('Registering pet...', 'Pet Registration');
         await createPet.mutateAsync({
           athleteId: newAthlete.id,
           name: data.petName.trim(),
         });
       }
 
-      success(`Welcome ${data.firstName}! Registration completed successfully.`, 'Registration Complete');
+      success(
+        `Welcome ${data.firstName}! Registration completed successfully.`,
+        'Registration Complete'
+      );
       setSubmitSuccess(true);
 
       // Redirect after success
@@ -181,12 +120,16 @@ export default function Signup() {
       console.error('Registration error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       error(errorMessage, 'Registration Failed');
-    } finally {
-      setIsSubmitting(false);
+      throw err; // Let the form handle the error state
     }
   };
 
-  // Loading state with skeleton instead of basic loading
+  // Handle cancel
+  const handleCancel = () => {
+    router.push('/checkin');
+  };
+
+  // Loading state with skeleton
   if (isAuthLoading || isLoadingHost) {
     return <SignupFormLoading />;
   }
@@ -197,8 +140,9 @@ export default function Signup() {
       <ErrorDisplay
         title="Unable to Load Registration"
         message="Could not load host information for registration."
+        error={hostError}
+        onRetry={refetchHost}
         onGoHome={() => router.push('/checkin')}
-        showRetry={false}
       />
     );
   }
@@ -229,24 +173,6 @@ export default function Signup() {
     );
   }
 
-  const shirtGenderOptions = [
-    // { value: '', label: 'Select gender...' },
-    { value: 'Men', label: 'Men' },
-    { value: 'Women', label: 'Women' },
-    { value: 'Unisex', label: 'Unisex' },
-  ];
-
-  const shirtSizeOptions = [
-    // { value: '', label: 'Select size...' },
-    { value: 'XS', label: 'Extra Small (XS)' },
-    { value: 'S', label: 'Small (S)' },
-    { value: 'M', label: 'Medium (M)' },
-    { value: 'L', label: 'Large (L)' },
-    { value: 'XL', label: 'Extra Large (XL)' },
-    { value: 'XXL', label: '2X Large (XXL)' },
-    { value: 'XXXL', label: '3X Large (XXXL)' },
-  ];
-
   return (
     <div className="min-h-screen py-8">
       <div className="container max-w-2xl mx-auto px-4">
@@ -271,372 +197,11 @@ export default function Signup() {
           }
         />
 
-        <FormProvider {...form}>
-          <Form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            isSubmitting={isSubmitting}
-          >
-            {/* Personal Information */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Personal Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    {isMobile ? (
-                      <MobileFormField
-                        type="input"
-                        label="First Name"
-                        value={watch('firstName')}
-                        onChange={(value) => setValue('firstName', value)}
-                        placeholder="Enter first name"
-                        required
-                        error={form.formState.errors.firstName?.message}
-                      />
-                    ) : (
-                      <FormControl
-                        name="firstName"
-                        label="First Name"
-                        render={({ field, error }) => (
-                          <Input
-                            {...field}
-                            error={error}
-                            placeholder="Enter first name"
-                          />
-                        )}
-                      />
-                    )}
-                  </div>
-
-                  {isMobile ? (
-                    <MobileFormField
-                      type="input"
-                      label="M.I."
-                      value={watch('middleInitial') || ''}
-                      onChange={(value) => setValue('middleInitial', value)}
-                      placeholder="M"
-                      error={form.formState.errors.middleInitial?.message}
-                    />
-                  ) : (
-                    <FormControl
-                      name="middleInitial"
-                      label="M.I."
-                      render={({ field, error }) => (
-                        <Input
-                          {...field}
-                          error={error}
-                          placeholder="M"
-                          maxLength={1}
-                        />
-                      )}
-                    />
-                  )}
-                </div>
-
-                {isMobile ? (
-                  <MobileFormField
-                    type="input"
-                    label="Last Name"
-                    value={watch('lastName')}
-                    onChange={(value) => setValue('lastName', value)}
-                    placeholder="Enter last name"
-                    required
-                    error={form.formState.errors.lastName?.message}
-                  />
-                ) : (
-                  <FormControl
-                    name="lastName"
-                    label="Last Name"
-                    render={({ field, error }) => (
-                      <Input
-                        {...field}
-                        error={error}
-                        placeholder="Enter last name"
-                      />
-                    )}
-                  />
-                )}
-
-                {isMobile ? (
-                  <MobileFormField
-                    type="input"
-                    label="Email Address"
-                    value={watch('email')}
-                    onChange={(value) => setValue('email', value)}
-                    placeholder="Enter email address"
-                    required
-                    error={form.formState.errors.email?.message}
-                  />
-                ) : (
-                  <FormControl
-                    name="email"
-                    label="Email Address"
-                    render={({ field, error }) => (
-                      <Input
-                        {...field}
-                        type="email"
-                        error={error}
-                        placeholder="Enter email address"
-                      />
-                    )}
-                  />
-                )}
-
-                {isMobile ? (
-                  <MobileFormField
-                    type="input"
-                    label="Employer (Optional)"
-                    value={watch('employer') || ''}
-                    onChange={(value) => setValue('employer', value)}
-                    placeholder="Enter employer name"
-                    error={form.formState.errors.employer?.message}
-                  />
-                ) : (
-                  <FormControl
-                    name="employer"
-                    label="Employer (Optional)"
-                    render={({ field, error }) => (
-                      <Input
-                        {...field}
-                        error={error}
-                        placeholder="Enter employer name"
-                      />
-                    )}
-                  />
-                )}
-              </CardContent>
-            </Card>
-
-            {/* T-Shirt Information */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShirtIcon className="h-5 w-5 text-primary" />
-                  T-Shirt Information (Optional)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {isMobile ? (
-                    <MobileFormField
-                      type="select"
-                      label="Shirt Style"
-                      value={watch('shirtGender') || ''}
-                      onChange={(value) => setValue('shirtGender', value)}
-                      options={shirtGenderOptions}
-                      error={form.formState.errors.shirtGender?.message}
-                    />
-                  ) : (
-                    <FormControl
-                      name="shirtGender"
-                      label="Shirt Style"
-                      render={(props) => (
-                        <Select
-                          options={shirtGenderOptions}
-                          value={props.value || ''}
-                          onValueChange={props.onChange}
-                          error={props.error}
-                        />
-                      )}
-                    />
-                  )}
-
-                  {isMobile ? (
-                    <MobileFormField
-                      type="select"
-                      label="Shirt Size"
-                      value={watch('shirtSize') || ''}
-                      onChange={(value) => setValue('shirtSize', value)}
-                      options={shirtSizeOptions}
-                      error={form.formState.errors.shirtSize?.message}
-                    />
-                  ) : (
-                    <FormControl
-                      name="shirtSize"
-                      label="Shirt Size"
-                      render={(props) => (
-                        <Select
-                          options={shirtSizeOptions}
-                          value={props.value || ''}
-                          onValueChange={props.onChange}
-                          error={props.error}
-                        />
-                      )}
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Emergency Contact */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-primary" />
-                  Emergency Contact
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isMobile ? (
-                  <MobileFormField
-                    type="input"
-                    label="Emergency Contact Name"
-                    value={watch('emergencyName')}
-                    onChange={(value) => setValue('emergencyName', value)}
-                    placeholder="Enter emergency contact name"
-                    required
-                    error={form.formState.errors.emergencyName?.message}
-                  />
-                ) : (
-                  <FormControl
-                    name="emergencyName"
-                    label="Emergency Contact Name"
-                    render={({ field, error }) => (
-                      <Input
-                        {...field}
-                        error={error}
-                        placeholder="Enter emergency contact name"
-                      />
-                    )}
-                  />
-                )}
-
-                {isMobile ? (
-                  <MobileFormField
-                    type="input"
-                    label="Emergency Contact Phone"
-                    value={watch('emergencyPhone')}
-                    onChange={(value) => setValue('emergencyPhone', value)}
-                    placeholder="Enter phone number"
-                    required
-                    error={form.formState.errors.emergencyPhone?.message}
-                  />
-                ) : (
-                  <FormControl
-                    name="emergencyPhone"
-                    label="Emergency Contact Phone"
-                    render={({ field, error }) => (
-                      <Input
-                        {...field}
-                        type="tel"
-                        error={error}
-                        placeholder="Enter phone number"
-                      />
-                    )}
-                  />
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Pet Information */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PawPrint className="h-5 w-5 text-primary" />
-                  Pet Information (Optional)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <TouchTarget>
-                  <FormControl
-                    name="hasPet"
-                    render={(props) => (
-                      <Checkbox
-                        checked={props.value}
-                        onCheckedChange={props.onChange}
-                        label="I have a pet that will be joining me"
-                      />
-                    )}
-                  />
-                </TouchTarget>
-
-                {hasPet && (
-                  isMobile ? (
-                    <MobileFormField
-                      type="input"
-                      label="Pet Name"
-                      value={watch('petName') || ''}
-                      onChange={(value) => setValue('petName', value)}
-                      placeholder="Enter your pet's name"
-                      required
-                      error={form.formState.errors.petName?.message}
-                    />
-                  ) : (
-                    <FormControl
-                      name="petName"
-                      label="Pet Name"
-                      render={({ field, error }) => (
-                        <Input
-                          {...field}
-                          error={error}
-                          placeholder="Enter your pet's name"
-                        />
-                      )}
-                    />
-                  )
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Disclaimer */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                  Disclaimer Agreement
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-md max-h-48 overflow-y-auto">
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {host.disc || `By participating in activities at this location, you acknowledge that you are participating voluntarily and at your own risk. You understand that physical activities involve inherent risks of injury, and you assume all such risks. You agree to release, indemnify, and hold harmless the host organization, its employees, and volunteers from any and all claims, damages, or injuries that may arise from your participation.`}
-                  </p>
-                </div>
-
-                <TouchTarget>
-                  <FormControl
-                    name="disclaimerAccepted"
-                    render={(props) => (
-                      <Checkbox
-                        checked={props.value}
-                        onCheckedChange={props.onChange}
-                        label="I have read, understood, and agree to the terms of this disclaimer"
-                        error={props.error}
-                      />
-                    )}
-                  />
-                </TouchTarget>
-              </CardContent>
-            </Card>
-
-            {/* Submit Button */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <TouchTarget className="flex-1">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => router.push('/checkin')}
-                  className="w-full"
-                >
-                  Cancel
-                </Button>
-              </TouchTarget>
-              <TouchTarget className="flex-1">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full"
-                >
-                  {isSubmitting ? 'Registering...' : 'Register Athlete'}
-                </Button>
-              </TouchTarget>
-            </div>
-          </Form>
-        </FormProvider>
+        <SignupForm
+          onSubmit={handleSignupSubmit}
+          disclaimerText={host.disc || `By participating in activities at this location, you acknowledge that you are participating voluntarily and at your own risk. You understand that physical activities involve inherent risks of injury, and you assume all such risks. You agree to release, indemnify, and hold harmless the host organization, its employees, and volunteers from any and all claims, damages, or injuries that may arise from your participation.`}
+          onCancel={handleCancel}
+        />
       </div>
     </div>
   );
