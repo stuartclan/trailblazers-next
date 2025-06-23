@@ -23,7 +23,7 @@ import { useToastNotifications } from '@/hooks/useToast';
 export default function SuperAdminLocationEdit() {
     const { hostId: hostIdParam, locationId: locationIdParam } = useParams();
     const router = useRouter();
-    const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
+    const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
     const { success, error, info } = useToastNotifications();
 
     const [isEditing, setIsEditing] = useState(false);
@@ -64,12 +64,12 @@ export default function SuperAdminLocationEdit() {
                 return;
             }
 
-            const userGroup = getUserGroup();
-            if (userGroup !== 'super-admins') {
+            if (!user?.isSuperAdmin) {
                 router.push('/super-admin/login');
             }
         }
-    }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, isAuthLoading, user]);
 
     // Handle location update
     const handleUpdateLocation = async (data: {
@@ -326,7 +326,7 @@ export default function SuperAdminLocationEdit() {
                             <Button
                                 onClick={() => router.push(`${baseUrl}/${locationId}/activities`)}
                                 size="sm"
-                                variant="outline"
+                                variant="secondary"
                                 className='text-nowrap'
                             >
                                 Manage Activities

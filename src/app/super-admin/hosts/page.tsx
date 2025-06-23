@@ -27,7 +27,7 @@ interface HostWithLocations {
 
 export default function SuperAdminHosts() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const { success, error, info } = useToastNotifications();
 
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -54,13 +54,12 @@ export default function SuperAdminHosts() {
         return;
       }
 
-      const userGroup = getUserGroup();
-      if (userGroup !== 'super-admins') {
+      if (!user?.isSuperAdmin) {
         router.push('/super-admin/login');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, isAuthLoading]);
+  }, [isAuthenticated, isAuthLoading, user]);
 
   // Fetch location counts for each host
   useAsync(async () => {

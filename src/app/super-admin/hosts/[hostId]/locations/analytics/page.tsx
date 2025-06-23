@@ -79,7 +79,7 @@ const generateMockAnalytics = (locations: LocationEntity[], hosts: HostEntity[])
 export default function SuperAdminLocationAnalytics() {
     const { hostId } = useParams();
     const router = useRouter();
-    const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
+    const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
     // const { success, error, info } = useToastNotifications();
 
     const [selectedHost, setSelectedHost] = useState<string>('all');
@@ -106,12 +106,12 @@ export default function SuperAdminLocationAnalytics() {
                 return;
             }
 
-            const userGroup = getUserGroup();
-            if (userGroup !== 'super-admins') {
+            if (!user?.isSuperAdmin) {
                 router.push('/super-admin/login');
             }
         }
-    }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, isAuthLoading, user]);
 
     // Filter locations by selected host
     const filteredLocations = selectedHost === 'all'

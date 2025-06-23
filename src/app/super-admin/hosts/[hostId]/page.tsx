@@ -21,7 +21,7 @@ import { useToastNotifications } from '@/hooks/useToast';
 export default function SuperAdminHostDetail() {
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const { success, error, info } = useToastNotifications();
 
   const hostId = params.hostId as string;
@@ -60,12 +60,12 @@ export default function SuperAdminHostDetail() {
         return;
       }
 
-      const userGroup = getUserGroup();
-      if (userGroup !== 'super-admins') {
+      if (!user?.isSuperAdmin) {
         router.push('/super-admin/login');
       }
     }
-  }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isAuthLoading, user]);
 
   // Handle host update
   const handleUpdateHost = async (data: {
@@ -271,7 +271,7 @@ export default function SuperAdminHostDetail() {
 
           {/* Locations */}
           <Card>
-            <CardHeader>
+            <CardHeader row>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
@@ -279,7 +279,11 @@ export default function SuperAdminHostDetail() {
                 </div>
               </CardTitle>
               <Link href={`/super-admin/hosts/${hostId}/locations/new`}>
-                <Button size="sm" className="flex items-center gap-1">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="flex items-center gap-1"
+                >
                   <Plus className="h-4 w-4" />
                   Add Location
                 </Button>

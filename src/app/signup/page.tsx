@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Heart, Shield, User } from 'lucide-react';
+import { ArrowLeft, Heart, PawPrint, Shield, Shirt, ShirtIcon, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useCreateAthlete, useSignDisclaimer } from '@/hooks/useAthlete';
@@ -38,11 +38,11 @@ const athleteSchema = z.object({
   emergencyPhone: z.string()
     .min(10, 'Phone number must be at least 10 digits')
     .regex(/^[\d\s\-\(\)\+\.]+$/, 'Please enter a valid phone number'),
-  
+
   // Pet information
-  hasPet: z.boolean().default(false),
+  hasPet: z.boolean().default(false).optional(),
   petName: z.string().optional(),
-  
+
   // Disclaimer
   disclaimerAccepted: z.boolean().refine(val => val === true, {
     message: 'You must accept the disclaimer to register'
@@ -63,22 +63,34 @@ export default function Signup() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { success, error, info } = useToastNotifications();
-  
+
   // Get current host from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  
+  // Check if we're on mobile (simple check)
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Fetch host details
   const { data: host, isLoading: isLoadingHost, error: hostError } = useHost(hostId || '');
-  
+
   // Mutations
   const createAthlete = useCreateAthlete();
   const createPet = useCreatePet();
   const signDisclaimer = useSignDisclaimer();
-  
+
   // Form setup
-  const methods = useForm<AthleteFormValues>({
+  const form = useForm<AthleteFormValues>({
     resolver: zodResolver(athleteSchema),
     defaultValues: {
       firstName: '',
@@ -96,9 +108,9 @@ export default function Signup() {
     },
   });
 
-  const { watch, setValue } = methods;
+  const { watch, setValue } = form;
   const hasPet = watch('hasPet');
-  
+
   // Load host from localStorage
   useEffect(() => {
     const savedHostId = localStorage.getItem('currentHostId');
@@ -108,24 +120,24 @@ export default function Signup() {
       router.push('/host/select-location');
     }
   }, [router]);
-  
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
       router.push('/host/login');
     }
   }, [isAuthenticated, isAuthLoading, router]);
-  
+
   // Handle form submission
   const handleSubmit = async (data: AthleteFormValues) => {
     if (!hostId) {
       error('No host selected. Please return to check-in.');
       return;
     }
-    
+
     setIsSubmitting(true);
     info('Creating athlete registration...');
-    
+
     try {
       // Create the athlete
       const newAthlete = await createAthlete.mutateAsync({
@@ -139,15 +151,15 @@ export default function Signup() {
         emergencyName: data.emergencyName,
         emergencyPhone: data.emergencyPhone,
       });
-      
+
       info('Signing disclaimer...');
-      
+
       // Sign the disclaimer
       await signDisclaimer.mutateAsync({
         athleteId: newAthlete.id,
         hostId,
       });
-      
+
       // Create a pet if specified
       if (data.hasPet && data.petName?.trim()) {
         info('Registering pet...');
@@ -156,29 +168,29 @@ export default function Signup() {
           name: data.petName.trim(),
         });
       }
-      
+
       success(`Welcome ${data.firstName}! Registration completed successfully.`, 'Registration Complete');
       setSubmitSuccess(true);
-      
+
       // Redirect after success
       setTimeout(() => {
         router.push('/checkin');
       }, 2000);
-      
-    } catch (error) {
-      console.error('Registration error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+
+    } catch (err) {
+      console.error('Registration error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       error(errorMessage, 'Registration Failed');
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   // Loading state with skeleton instead of basic loading
   if (isAuthLoading || isLoadingHost) {
     return <SignupFormLoading />;
   }
-  
+
   // Error state
   if (hostError || !host) {
     return (
@@ -190,7 +202,7 @@ export default function Signup() {
       />
     );
   }
-  
+
   // Success state
   if (submitSuccess) {
     return (
@@ -216,16 +228,16 @@ export default function Signup() {
       </div>
     );
   }
-  
+
   const shirtGenderOptions = [
-    { value: '', label: 'Select gender...' },
+    // { value: '', label: 'Select gender...' },
     { value: 'Men', label: 'Men' },
     { value: 'Women', label: 'Women' },
     { value: 'Unisex', label: 'Unisex' },
   ];
-  
+
   const shirtSizeOptions = [
-    { value: '', label: 'Select size...' },
+    // { value: '', label: 'Select size...' },
     { value: 'XS', label: 'Extra Small (XS)' },
     { value: 'S', label: 'Small (S)' },
     { value: 'M', label: 'Medium (M)' },
@@ -234,20 +246,7 @@ export default function Signup() {
     { value: 'XXL', label: '2X Large (XXL)' },
     { value: 'XXXL', label: '3X Large (XXXL)' },
   ];
-  
-  // Check if we're on mobile (simple check)
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-  
+
   return (
     <div className="min-h-screen py-8">
       <div className="container max-w-2xl mx-auto px-4">
@@ -271,10 +270,10 @@ export default function Signup() {
             </TouchTarget>
           }
         />
-        
-        <FormProvider {...methods}>
+
+        <FormProvider {...form}>
           <Form
-            onSubmit={methods.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleSubmit)}
             isSubmitting={isSubmitting}
           >
             {/* Personal Information */}
@@ -296,7 +295,7 @@ export default function Signup() {
                         onChange={(value) => setValue('firstName', value)}
                         placeholder="Enter first name"
                         required
-                        error={methods.formState.errors.firstName?.message}
+                        error={form.formState.errors.firstName?.message}
                       />
                     ) : (
                       <FormControl
@@ -312,7 +311,7 @@ export default function Signup() {
                       />
                     )}
                   </div>
-                  
+
                   {isMobile ? (
                     <MobileFormField
                       type="input"
@@ -320,7 +319,7 @@ export default function Signup() {
                       value={watch('middleInitial') || ''}
                       onChange={(value) => setValue('middleInitial', value)}
                       placeholder="M"
-                      error={methods.formState.errors.middleInitial?.message}
+                      error={form.formState.errors.middleInitial?.message}
                     />
                   ) : (
                     <FormControl
@@ -337,7 +336,7 @@ export default function Signup() {
                     />
                   )}
                 </div>
-                
+
                 {isMobile ? (
                   <MobileFormField
                     type="input"
@@ -346,7 +345,7 @@ export default function Signup() {
                     onChange={(value) => setValue('lastName', value)}
                     placeholder="Enter last name"
                     required
-                    error={methods.formState.errors.lastName?.message}
+                    error={form.formState.errors.lastName?.message}
                   />
                 ) : (
                   <FormControl
@@ -361,7 +360,7 @@ export default function Signup() {
                     )}
                   />
                 )}
-                
+
                 {isMobile ? (
                   <MobileFormField
                     type="input"
@@ -370,7 +369,7 @@ export default function Signup() {
                     onChange={(value) => setValue('email', value)}
                     placeholder="Enter email address"
                     required
-                    error={methods.formState.errors.email?.message}
+                    error={form.formState.errors.email?.message}
                   />
                 ) : (
                   <FormControl
@@ -386,7 +385,7 @@ export default function Signup() {
                     )}
                   />
                 )}
-                
+
                 {isMobile ? (
                   <MobileFormField
                     type="input"
@@ -394,7 +393,7 @@ export default function Signup() {
                     value={watch('employer') || ''}
                     onChange={(value) => setValue('employer', value)}
                     placeholder="Enter employer name"
-                    error={methods.formState.errors.employer?.message}
+                    error={form.formState.errors.employer?.message}
                   />
                 ) : (
                   <FormControl
@@ -411,11 +410,14 @@ export default function Signup() {
                 )}
               </CardContent>
             </Card>
-            
+
             {/* T-Shirt Information */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>T-Shirt Information (Optional)</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <ShirtIcon className="h-5 w-5 text-primary" />
+                  T-Shirt Information (Optional)
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -426,23 +428,23 @@ export default function Signup() {
                       value={watch('shirtGender') || ''}
                       onChange={(value) => setValue('shirtGender', value)}
                       options={shirtGenderOptions}
-                      error={methods.formState.errors.shirtGender?.message}
+                      error={form.formState.errors.shirtGender?.message}
                     />
                   ) : (
                     <FormControl
                       name="shirtGender"
                       label="Shirt Style"
-                      render={({ field, error }) => (
+                      render={(props) => (
                         <Select
                           options={shirtGenderOptions}
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          error={error}
+                          value={props.value || ''}
+                          onValueChange={props.onChange}
+                          error={props.error}
                         />
                       )}
                     />
                   )}
-                  
+
                   {isMobile ? (
                     <MobileFormField
                       type="select"
@@ -450,18 +452,18 @@ export default function Signup() {
                       value={watch('shirtSize') || ''}
                       onChange={(value) => setValue('shirtSize', value)}
                       options={shirtSizeOptions}
-                      error={methods.formState.errors.shirtSize?.message}
+                      error={form.formState.errors.shirtSize?.message}
                     />
                   ) : (
                     <FormControl
                       name="shirtSize"
                       label="Shirt Size"
-                      render={({ field, error }) => (
+                      render={(props) => (
                         <Select
                           options={shirtSizeOptions}
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          error={error}
+                          value={props.value || ''}
+                          onValueChange={props.onChange}
+                          error={props.error}
                         />
                       )}
                     />
@@ -469,12 +471,12 @@ export default function Signup() {
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Emergency Contact */}
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-red-500" />
+                  <Heart className="h-5 w-5 text-primary" />
                   Emergency Contact
                 </CardTitle>
               </CardHeader>
@@ -487,7 +489,7 @@ export default function Signup() {
                     onChange={(value) => setValue('emergencyName', value)}
                     placeholder="Enter emergency contact name"
                     required
-                    error={methods.formState.errors.emergencyName?.message}
+                    error={form.formState.errors.emergencyName?.message}
                   />
                 ) : (
                   <FormControl
@@ -502,7 +504,7 @@ export default function Signup() {
                     )}
                   />
                 )}
-                
+
                 {isMobile ? (
                   <MobileFormField
                     type="input"
@@ -511,7 +513,7 @@ export default function Signup() {
                     onChange={(value) => setValue('emergencyPhone', value)}
                     placeholder="Enter phone number"
                     required
-                    error={methods.formState.errors.emergencyPhone?.message}
+                    error={form.formState.errors.emergencyPhone?.message}
                   />
                 ) : (
                   <FormControl
@@ -529,26 +531,29 @@ export default function Signup() {
                 )}
               </CardContent>
             </Card>
-            
+
             {/* Pet Information */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Pet Information (Optional)</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <PawPrint className="h-5 w-5 text-primary" />
+                  Pet Information (Optional)
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <TouchTarget>
                   <FormControl
                     name="hasPet"
-                    render={({ field }) => (
+                    render={(props) => (
                       <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                        checked={props.value}
+                        onCheckedChange={props.onChange}
                         label="I have a pet that will be joining me"
                       />
                     )}
                   />
                 </TouchTarget>
-                
+
                 {hasPet && (
                   isMobile ? (
                     <MobileFormField
@@ -558,7 +563,7 @@ export default function Signup() {
                       onChange={(value) => setValue('petName', value)}
                       placeholder="Enter your pet's name"
                       required
-                      error={methods.formState.errors.petName?.message}
+                      error={form.formState.errors.petName?.message}
                     />
                   ) : (
                     <FormControl
@@ -576,12 +581,12 @@ export default function Signup() {
                 )}
               </CardContent>
             </Card>
-            
+
             {/* Disclaimer */}
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-blue-500" />
+                  <Shield className="h-5 w-5 text-primary" />
                   Disclaimer Agreement
                 </CardTitle>
               </CardHeader>
@@ -591,23 +596,23 @@ export default function Signup() {
                     {host.disc || `By participating in activities at this location, you acknowledge that you are participating voluntarily and at your own risk. You understand that physical activities involve inherent risks of injury, and you assume all such risks. You agree to release, indemnify, and hold harmless the host organization, its employees, and volunteers from any and all claims, damages, or injuries that may arise from your participation.`}
                   </p>
                 </div>
-                
+
                 <TouchTarget>
                   <FormControl
                     name="disclaimerAccepted"
-                    render={({ field, error }) => (
+                    render={(props) => (
                       <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                        checked={props.value}
+                        onCheckedChange={props.onChange}
                         label="I have read, understood, and agree to the terms of this disclaimer"
-                        error={error}
+                        error={props.error}
                       />
                     )}
                   />
                 </TouchTarget>
               </CardContent>
             </Card>
-            
+
             {/* Submit Button */}
             <div className="flex flex-col sm:flex-row gap-4">
               <TouchTarget className="flex-1">

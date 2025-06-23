@@ -15,7 +15,7 @@ const buttonVariants = cva(
         default: 'bg-primary text-white hover:bg-primary-dark',
         destructive: 'bg-red-500 text-white hover:bg-red-600',
         outline: 'border-1 border-primary text-primary hover:bg-primary-light hover:text-white',
-        secondary: 'bg-secondary text-white hover:bg-secondary-dark',
+        secondary: 'bg-primary-light text-white hover:bg-secondary-dark',
         ghost: 'hover:bg-gray-100 hover:text-gray-900',
         link: 'text-primary underline-offset-4 hover:underline',
       },
@@ -35,7 +35,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   /**
    * Whether to wrap the button in TouchTarget for enhanced mobile interactions
@@ -52,21 +52,21 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ 
-    className, 
-    variant, 
-    size, 
-    asChild = false, 
+  ({
+    className,
+    variant,
+    size,
+    asChild = false,
     enableTouch = true, // Enable touch by default for better mobile UX
     ripple = true,
     haptic = false,
     disabled,
     children,
     onClick,
-    ...props 
+    ...props
   }, ref) => {
     const Comp = asChild ? Slot : "button";
-    
+
     const buttonElement = (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}

@@ -40,29 +40,30 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
     if (!authHeader) {
       return { isAuthenticated: false, error: 'No authorization header' };
     }
-    
+
     // Extract the token from the header
     const [authType, token] = authHeader.split(' ');
-    
+
     if (authType !== 'Bearer' || !token) {
       return { isAuthenticated: false, error: 'Invalid authorization header' };
     }
-    
+
     // Verify the token
     const payload = await verifier.verify(token);
-    
+
     // Extract user information
     const userId = payload.sub;
-    const email = payload.email;
+    // Not actually populated
+    // const email = payload.email;
     const groups = payload['cognito:groups'] as string[] || [];
-    
+
     return {
       isAuthenticated: true,
       userId,
-      email,
+      // email,
       groups
     };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Auth verification error:', error);
     return {
@@ -79,7 +80,7 @@ export function isUserInGroup(authResult: AuthResult, group: string): boolean {
   if (!authResult.isAuthenticated || !authResult.groups) {
     return false;
   }
-  
+
   return authResult.groups.includes(group);
 }
 

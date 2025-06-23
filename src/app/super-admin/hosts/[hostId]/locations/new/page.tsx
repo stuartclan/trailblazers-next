@@ -16,7 +16,7 @@ import { useToastNotifications } from '@/hooks/useToast';
 export default function SuperAdminNewLocation() {
     const { hostId } = useParams();
     const router = useRouter();
-    const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
+    const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
     const { success, error, info } = useToastNotifications();
 
     const baseUrl = `/super-admin/hosts/${hostId}/locations`;
@@ -40,12 +40,12 @@ export default function SuperAdminNewLocation() {
                 return;
             }
 
-            const userGroup = getUserGroup();
-            if (userGroup !== 'super-admins') {
+            if (!user?.isSuperAdmin) {
                 router.push('/super-admin/login');
             }
         }
-    }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, isAuthLoading, user]);
 
     // Handle location creation
     const handleCreateLocation = async (data: {

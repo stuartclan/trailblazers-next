@@ -7,7 +7,7 @@ import {
   CognitoUserPool,
   CognitoUserSession
 } from 'amazon-cognito-identity-js';
-import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { useAsync } from 'react-use';
 
@@ -18,13 +18,13 @@ const userPoolClientId = process.env.NEXT_PUBLIC_POOL_CLIENT_ID || '';
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: any | null;
+  user: AuthUser | null;
   login: (email: string, password: string) => Promise<any>;
   logout: () => void;
   confirmNewPassword: (newPassword: string) => Promise<any>;
   confirm: (verificationCode: string, newPassword: string) => Promise<any>;
   changePassword: (oldPassword: string, newPassword: string) => Promise<any>;
-  getUserGroup: () => string | null;
+  getUserGroups: () => string[] | null;
   getHostId: () => string | null;
   getAccessToken: () => Promise<string | null>; // NEW: Get current access token
 }
@@ -33,9 +33,12 @@ interface AuthUser {
   email: string;
   hostId?: string;
   hostName?: string;
+  groups?: string[];
+  isSuperAdmin: boolean;
+  isHost: boolean;
   // what else?
   // location?
-  // groups? isAdmin? isHost?
+  // isAdmin? isHost?
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -47,7 +50,7 @@ const AuthContext = createContext<AuthContextType>({
   confirmNewPassword: async () => ({}),
   confirm: async () => ({}),
   changePassword: async () => ({}),
-  getUserGroup: () => null,
+  getUserGroups: () => null,
   getHostId: () => null,
   getAccessToken: async () => null, // NEW
 });
@@ -127,11 +130,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(null);
               setIsAuthenticated(false);
             } else {
+              const groupsAttr = session.getIdToken().payload['cognito:groups'];
+              const groups = (Array.isArray(groupsAttr) ? groupsAttr : []) as string[];
               setUser({
                 email: userAttributes.email,
                 hostId: userAttributes['custom:hostId'],
                 hostName: userAttributes['custom:hostName'],
-                ...userAttributes
+                groups,
+                isSuperAdmin: groups.includes('super-admins'),
+                isHost: groups.includes('hosts'),
+                ...userAttributes,
               });
               setIsAuthenticated(true);
             }
@@ -200,6 +208,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Confirm function
+  // const confirmNewPassword = async (newPassword: string): Promise<{ success: boolean; session: CognitoUserSession }> => {
   const confirmNewPassword = async (newPassword: string): Promise<any> => {
     return new Promise((resolve, reject) => {
       const email = user?.email;
@@ -272,34 +281,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Get user group
-  const getUserGroup = (): string | null => {
+  const getUserGroups = (): string[] | null => {
     if (!isAuthenticated || !user) return null;
+    return user?.groups || null;
+    // try {
+    //   // Groups are encoded in the ID token
+    //   const cognitoUser = getCurrentUser();
+    //   if (!cognitoUser) return null;
 
-    try {
-      // Groups are encoded in the ID token
-      const cognitoUser = getCurrentUser();
-      if (!cognitoUser) return null;
+    //   // Get the current session
+    //   let tokenResult: string[] | null = null;
 
-      // Get the current session
-      let tokenResult: string | null = null;
+    //   cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
+    //     if (err || !session) return null;
 
-      cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
-        if (err || !session) return null;
+    //     const idToken = session.getIdToken();
+    //     const payload = idToken.decodePayload();
 
-        const idToken = session.getIdToken();
-        const payload = idToken.decodePayload();
+    //     // Cognito stores groups in 'cognito:groups'
+    //     if (payload['cognito:groups'] && Array.isArray(payload['cognito:groups'])) {
+    //       tokenResult = (payload['cognito:groups'] || []) as string[];
+    //     }
+    //   });
 
-        // Cognito stores groups in 'cognito:groups'
-        if (payload['cognito:groups'] && Array.isArray(payload['cognito:groups'])) {
-          tokenResult = payload['cognito:groups'][0] || null;
-        }
-      });
-
-      return tokenResult;
-    } catch (error) {
-      console.error('Error getting user group:', error);
-      return null;
-    }
+    //   return tokenResult;
+    // } catch (error) {
+    //   console.error('Error getting user group:', error);
+    //   return null;
+    // }
   };
 
   // Get host ID
@@ -328,7 +337,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         confirmNewPassword,
         confirm,
         changePassword,
-        getUserGroup,
+        getUserGroups,
         getHostId,
         getAccessToken, // NEW
       }}

@@ -22,7 +22,7 @@ import { useToastNotifications } from '@/hooks/useToast';
 export default function SuperAdminLocationActivities() {
     const { hostId: hostIdParam, locationId: locationIdParam } = useParams();
     const router = useRouter();
-    const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
+    const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
     const { success, error, info } = useToastNotifications();
 
     const locationId = Array.isArray(locationIdParam) ? locationIdParam[0] : locationIdParam || '';
@@ -64,12 +64,12 @@ export default function SuperAdminLocationActivities() {
                 return;
             }
 
-            const userGroup = getUserGroup();
-            if (userGroup !== 'super-admins') {
+            if (!user?.isSuperAdmin) {
                 router.push('/super-admin/login');
             }
         }
-    }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, isAuthLoading, user]);
 
     // Toggle activity selection
     const toggleActivity = (activityId: string) => {

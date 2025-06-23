@@ -2,7 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { Edit3, MapPin, Plus, Trash2, Users } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/atoms/tooltip/tooltip';
 import { useDeleteLocation, useLocations } from '@/hooks/useLocation';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 import { Button } from '@/components/atoms/button/button';
@@ -12,15 +14,17 @@ import Link from 'next/link';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
 import { useHosts } from '@/hooks/useHost';
 import { useToastNotifications } from '@/hooks/useToast';
 
 export default function SuperAdminLocations() {
-    const { hostId } = useParams();
+    const { hostId: hostIdParam } = useParams();
     const router = useRouter();
-    const { isAuthenticated, isLoading: isAuthLoading, getUserGroup } = useAuth();
+    const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
     const { success, error, info } = useToastNotifications();
+    const [canDelete, setCanDelete] = useState(false);
+
+    const hostId = Array.isArray(hostIdParam) ? hostIdParam[0] : hostIdParam || '';
 
     // Data fetching
     const {
@@ -46,15 +50,27 @@ export default function SuperAdminLocations() {
                 return;
             }
 
-            const userGroup = getUserGroup();
-            if (userGroup !== 'super-admins') {
+            if (!user?.isSuperAdmin) {
                 router.push('/super-admin/login');
             }
         }
-    }, [isAuthenticated, isAuthLoading, router, getUserGroup]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, isAuthLoading, user]);
+
+    useEffect(() => {
+        if (!isLoadingLocations) {
+            setCanDelete((locations?.length ?? 0) > 1);
+        }
+
+    }, [isLoadingLocations, locations]);
 
     // Handle location deletion
     const handleDeleteLocation = async (locationId: string, locationName: string) => {
+        if (!canDelete) {
+            error('Unable to delete the last location. A location is required for a host.', 'Delete failure');
+            return;
+        }
+
         if (!confirm(`Are you sure you want to delete "${locationName}"? This action cannot be undone.`)) {
             return;
         }
@@ -62,7 +78,7 @@ export default function SuperAdminLocations() {
         info(`Deleting location "${locationName}"...`, 'Location Deletion');
 
         try {
-            await deleteLocation.mutateAsync(locationId);
+            await deleteLocation.mutateAsync({ id: locationId, hostId });
 
             success(
                 `Location "${locationName}" has been deleted successfully.`,
@@ -160,7 +176,7 @@ export default function SuperAdminLocations() {
                     />
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {locations.sort((a, b) => a.c - b.c).map((location) => (
+                        {locations.map((location) => (
                             <Card key={location.id} className="hover:shadow-lg transition-shadow">
                                 <CardContent className="p-6">
                                     <div className="flex items-start justify-between mb-4">
@@ -189,14 +205,20 @@ export default function SuperAdminLocations() {
                                                     <Edit3 className="h-4 w-4" />
                                                 </Button>
                                             </Link>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleDeleteLocation(location.id, location.n)}
-                                                className="text-red-600 hover:text-red-700"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        variant='ghost'
+                                                        size="sm"
+                                                        onClick={() => handleDeleteLocation(location.id, location.n)}
+                                                        className={canDelete ? 'text-red-600 hover:text-red-700' : 'text-gray-300 hover:text-gray-400'}
+                                                    // disabled={!canDelete}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent align='end' hidden={canDelete}>Cannot delete last location</TooltipContent>
+                                            </Tooltip>
                                         </div>
                                     </div>
 

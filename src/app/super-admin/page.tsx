@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, getUserGroup, logout } = useAuth();
+  const { isAuthenticated, isLoading, user, logout } = useAuth();
 
   // Fetch summary data
   const { data: hosts } = useHosts();
@@ -30,10 +30,9 @@ export default function SuperAdminDashboard() {
       }
 
       // Check if user is a super-admin
-      const userGroup = getUserGroup();
-      if (userGroup !== 'super-admins') {
+      if (!user?.isSuperAdmin) {
         // Not a super-admin - redirect to appropriate page
-        if (userGroup === 'hosts') {
+        if (user?.isHost) {
           router.push('/host/select-location');
         } else {
           // Unknown group or no group
@@ -41,7 +40,8 @@ export default function SuperAdminDashboard() {
         }
       }
     }
-  }, [isAuthenticated, isLoading, router, getUserGroup]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isLoading, user]);
 
   // Handle logout
   const handleLogout = () => {

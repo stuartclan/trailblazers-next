@@ -6,16 +6,14 @@ import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, getUserGroup } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        const userGroup = getUserGroup();
-
-        if (userGroup === 'super-admins') {
+        if (user?.isSuperAdmin) {
           router.push('/super-admin');
-        } else if (userGroup === 'hosts') {
+        } else if (user?.isHost) {
           // Check if a location is already selected in localStorage
           const savedLocationId = localStorage.getItem('currentLocationId');
           if (savedLocationId) {
@@ -32,7 +30,8 @@ export default function Home() {
         router.push('/host/login');
       }
     }
-  }, [isAuthenticated, isLoading, router, getUserGroup]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isLoading, user]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

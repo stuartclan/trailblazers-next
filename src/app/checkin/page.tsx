@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 
 export default function CheckIn() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   // Get current host and location from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
@@ -25,6 +25,18 @@ export default function CheckIn() {
   // Fetch host and location data
   const { data: host, isLoading: isLoadingHost, error: hostError } = useHost(hostId || '');
   const { data: location, isLoading: isLoadingLocation, error: locationError } = useLocation(hostId || '', locationId || '');
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/host/login');
+    }
+
+    if (user?.isSuperAdmin) {
+      router.push('/super-admin');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isLoading]);
 
   // Load host/location from localStorage on component mount
   useEffect(() => {
@@ -46,13 +58,6 @@ export default function CheckIn() {
       setIsReady(true);
     }
   }, [host, location, isLoadingHost, isLoadingLocation]);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/host/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
 
   // Handle navigation to athlete registration
   const handleNewAthlete = () => {
