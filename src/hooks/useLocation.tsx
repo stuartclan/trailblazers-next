@@ -24,7 +24,7 @@ const fetchLocations = async (): Promise<LocationEntity[]> => {
     throw new Error(response.error);
   }
 
-  return response.data!;
+  return response.data!.sort((a, b) => a.c - b.c);
 };
 
 export const fetchLocationsByHost = async (hostId: string): Promise<LocationEntity[]> => {

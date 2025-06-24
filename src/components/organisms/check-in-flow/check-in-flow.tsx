@@ -2,20 +2,22 @@
 
 import * as React from 'react';
 
-import { ActivityEntity, AthleteEntity, HostEntity, LocationEntity, PetEntity } from '@/lib/db/entities/types';
+// import { ActivityEntity, AthleteEntity, HostEntity, LocationEntity, PetEntity } from '@/lib/db/entities/types';
+import { ActivityEntity, AthleteEntity, HostEntity, LocationEntity } from '@/lib/db/entities/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { useCreateCheckIn, useCreatePetCheckIn } from '@/hooks/useCheckIn';
 
 import { ActivitySelector } from '@/components/molecules/activity-selector/activity-selector';
 import { Button } from '@/components/atoms/button/button';
 import { CheckInConfirmation } from '@/components/molecules/check-in-confirmation/check-in-confirmation';
 import { DisclaimerModal } from '@/components/molecules/disclaimer-modal/disclaimer-modal';
-import { PetRegistrationForm } from '@/components/organisms/pet-registration-form/pet-registration-form';
-import { Plus } from 'lucide-react';
+// import { PetRegistrationForm } from '@/components/organisms/pet-registration-form/pet-registration-form';
+// import { Plus } from 'lucide-react';
 import { SearchResults } from '@/components/molecules/search-results/search-results';
-import { Select } from '@/components/atoms/select/select';
-import { Switch } from '@/components/atoms/switch/switch';
-import { useAthletesPets } from '@/hooks/usePet';
+// import { useCreateCheckIn, useCreatePetCheckIn } from '@/hooks/useCheckIn';
+import { useCreateCheckIn } from '@/hooks/useCheckIn';
+// import { Select } from '@/components/atoms/select/select';
+// import { Switch } from '@/components/atoms/switch/switch';
+// import { useAthletesPets } from '@/hooks/usePet';
 import { useHasSignedDisclaimer } from '@/hooks/useAthlete';
 import { useLocationActivities } from '@/hooks/useActivity';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -41,19 +43,19 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   const [currentStep, setCurrentStep] = React.useState<FlowStep>('search');
   const [selectedAthlete, setSelectedAthlete] = React.useState<AthleteEntity | null>(null);
   const [selectedActivity, setSelectedActivity] = React.useState<string | null>(null);
-  const [includePet, setIncludePet] = React.useState(false);
-  const [selectedPet, setSelectedPet] = React.useState<PetEntity | null>(null);
-  const [showPetRegistration, setShowPetRegistration] = React.useState(false);
+  // const [includePet, setIncludePet] = React.useState(false);
+  // const [selectedPet, setSelectedPet] = React.useState<PetEntity | null>(null);
+  // const [showPetRegistration, setShowPetRegistration] = React.useState(false);
   const [checkInResult, setCheckInResult] = React.useState<{
     athlete: AthleteEntity;
     activity: ActivityEntity;
-    pet?: PetEntity;
+    // pet?: PetEntity;
     timestamp: number;
   } | null>(null);
 
   // Data fetching
   const { data: activities } = useLocationActivities(host.id, location.id);
-  const { data: athletePets } = useAthletesPets(selectedAthlete?.id || '');
+  // const { data: athletePets } = useAthletesPets(selectedAthlete?.id || '');
   const { data: hasSignedDisclaimer } = useHasSignedDisclaimer(
     selectedAthlete?.id || '',
     host.id
@@ -61,16 +63,16 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
   // Mutations
   const createCheckIn = useCreateCheckIn();
-  const createPetCheckIn = useCreatePetCheckIn();
+  // const createPetCheckIn = useCreatePetCheckIn();
 
   // Reset flow when athlete changes
   React.useEffect(() => {
     if (selectedAthlete) {
       setCurrentStep('activity');
       setSelectedActivity(null);
-      setIncludePet(false);
-      setSelectedPet(null);
-      setShowPetRegistration(false);
+      // setIncludePet(false);
+      // setSelectedPet(null);
+      // setShowPetRegistration(false);
       info(`Selected athlete: ${selectedAthlete.fn} ${selectedAthlete.ln}`);
     }
   }, [selectedAthlete, info]);
@@ -106,32 +108,32 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   };
 
   const handleProceedToCheckIn = () => {
-    if (includePet) {
-      setCurrentStep('pet');
-    } else {
-      performCheckIn();
-    }
+    // if (includePet) {
+    //   setCurrentStep('pet');
+    // } else {
+    performCheckIn();
+    // }
   };
 
-  const handlePetSelect = (petId: string) => {
-    const pet = athletePets?.find(p => p.id === petId);
-    setSelectedPet(pet || null);
-    if (pet) {
-      info(`Selected pet: ${pet.n}`);
-    }
-    performCheckIn();
-  };
+  // const handlePetSelect = (petId: string) => {
+  //   const pet = athletePets?.find(p => p.id === petId);
+  //   setSelectedPet(pet || null);
+  //   if (pet) {
+  //     info(`Selected pet: ${pet.n}`);
+  //   }
+  //   performCheckIn();
+  // };
 
-  const handlePetRegistered = (petId: string) => {
-    // Find the newly registered pet
-    const newPet = athletePets?.find(p => p.id === petId);
-    setSelectedPet(newPet || null);
-    setShowPetRegistration(false);
-    if (newPet) {
-      success(`Pet "${newPet.n}" registered successfully!`);
-    }
-    performCheckIn();
-  };
+  // const handlePetRegistered = (petId: string) => {
+  //   // Find the newly registered pet
+  //   const newPet = athletePets?.find(p => p.id === petId);
+  //   setSelectedPet(newPet || null);
+  //   setShowPetRegistration(false);
+  //   if (newPet) {
+  //     success(`Pet "${newPet.n}" registered successfully!`);
+  //   }
+  //   performCheckIn();
+  // };
 
   const performCheckIn = async () => {
     if (!selectedAthlete || !selectedActivity) return;
@@ -152,28 +154,29 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
         activityId: selectedActivity,
       });
 
-      // Create pet check-in if applicable
-      if (includePet && selectedPet) {
-        info('Processing pet check-in...');
-        await createPetCheckIn.mutateAsync({
-          athleteId: selectedAthlete.id,
-          petId: selectedPet.id,
-          hostId: host.id,
-          locationId: location.id,
-        });
-      }
+      // // Create pet check-in if applicable
+      // if (includePet && selectedPet) {
+      //   info('Processing pet check-in...');
+      //   await createPetCheckIn.mutateAsync({
+      //     athleteId: selectedAthlete.id,
+      //     petId: selectedPet.id,
+      //     hostId: host.id,
+      //     locationId: location.id,
+      //   });
+      // }
 
       // Set confirmation data
       setCheckInResult({
         athlete: selectedAthlete,
         activity,
-        pet: selectedPet || undefined,
+        // pet: selectedPet || undefined,
         timestamp,
       });
 
-      const petMessage = selectedPet ? ` and ${selectedPet.n}` : '';
+      // const petMessage = selectedPet ? ` and ${selectedPet.n}` : '';
       success(
-        `Check-in successful for ${selectedAthlete.fn}${petMessage}!`,
+        // `Check-in successful for ${selectedAthlete.fn}${petMessage}!`,
+        `Check-in successful for ${selectedAthlete.fn}!`,
         'Welcome to Trailblazers'
       );
 
@@ -189,9 +192,9 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     setCurrentStep('search');
     setSelectedAthlete(null);
     setSelectedActivity(null);
-    setIncludePet(false);
-    setSelectedPet(null);
-    setShowPetRegistration(false);
+    // setIncludePet(false);
+    // setSelectedPet(null);
+    // setShowPetRegistration(false);
     setCheckInResult(null);
     info('Ready for new check-in');
   };
@@ -221,7 +224,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
             {selectedActivity && (
               <div className="space-y-4">
-                <Switch
+                {/* <Switch
                   checked={includePet}
                   onCheckedChange={(checked) => {
                     setIncludePet(checked);
@@ -230,7 +233,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
                     }
                   }}
                   label="Include pet check-in"
-                />
+                /> */}
 
                 <Button
                   onClick={handleProceedToCheckIn}
@@ -244,66 +247,66 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
           </div>
         );
 
-      case 'pet':
-        if (showPetRegistration) {
-          return (
-            <PetRegistrationForm
-              athleteId={selectedAthlete!.id}
-              existingPetNames={athletePets?.map(p => p.n) || []}
-              onSuccess={handlePetRegistered}
-              onCancel={() => setShowPetRegistration(false)}
-            />
-          );
-        }
+      // case 'pet':
+      //   if (showPetRegistration) {
+      //     return (
+      //       <PetRegistrationForm
+      //         athleteId={selectedAthlete!.id}
+      //         existingPetNames={athletePets?.map(p => p.n) || []}
+      //         onSuccess={handlePetRegistered}
+      //         onCancel={() => setShowPetRegistration(false)}
+      //       />
+      //     );
+      //   }
 
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Select Pet</h3>
+      //   return (
+      //     <div className="space-y-4">
+      //       <h3 className="text-lg font-medium">Select Pet</h3>
 
-            {athletePets && athletePets.length > 0 ? (
-              <div className="space-y-3">
-                <Select
-                  options={[
-                    { value: '', label: 'Select a pet...' },
-                    ...athletePets.map(pet => ({
-                      value: pet.id,
-                      label: pet.n
-                    }))
-                  ]}
-                  onValueChange={handlePetSelect}
-                  placeholder="Choose existing pet"
-                />
+      //       {athletePets && athletePets.length > 0 ? (
+      //         <div className="space-y-3">
+      //           <Select
+      //             options={[
+      //               { value: '', label: 'Select a pet...' },
+      //               ...athletePets.map(pet => ({
+      //                 value: pet.id,
+      //                 label: pet.n
+      //               }))
+      //             ]}
+      //             onValueChange={handlePetSelect}
+      //             placeholder="Choose existing pet"
+      //           />
 
-                <div className="text-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPetRegistration(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Register New Pet
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <p className="text-gray-600 mb-4">No pets registered for this athlete</p>
-                <Button onClick={() => setShowPetRegistration(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Register First Pet
-                </Button>
-              </div>
-            )}
+      //           <div className="text-center">
+      //             <Button
+      //               variant="outline"
+      //               size="sm"
+      //               onClick={() => setShowPetRegistration(true)}
+      //             >
+      //               <Plus className="h-4 w-4 mr-2" />
+      //               Register New Pet
+      //             </Button>
+      //           </div>
+      //         </div>
+      //       ) : (
+      //         <div className="text-center py-6">
+      //           <p className="text-gray-600 mb-4">No pets registered for this athlete</p>
+      //           <Button onClick={() => setShowPetRegistration(true)}>
+      //             <Plus className="h-4 w-4 mr-2" />
+      //             Register First Pet
+      //           </Button>
+      //         </div>
+      //       )}
 
-            <Button
-              variant="outline"
-              onClick={() => performCheckIn()}
-              className="w-full"
-            >
-              Skip Pet Check-in
-            </Button>
-          </div>
-        );
+      //       <Button
+      //         variant="outline"
+      //         onClick={() => performCheckIn()}
+      //         className="w-full"
+      //       >
+      //         Skip Pet Check-in
+      //       </Button>
+      //     </div>
+      //   );
 
       case 'confirmation':
         if (!checkInResult) return null;
@@ -313,7 +316,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
             athlete={checkInResult.athlete}
             activity={checkInResult.activity}
             location={location}
-            pet={checkInResult.pet}
+            // pet={checkInResult.pet}
             timestamp={checkInResult.timestamp}
             onNewCheckIn={handleNewCheckIn}
           />

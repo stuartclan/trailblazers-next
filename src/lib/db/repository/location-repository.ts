@@ -78,11 +78,10 @@ export class LocationRepository {
       new QueryCommand({
         TableName: this.tableName,
         IndexName: 'GSI1',
-        // KeyConditionExpression: 'GSI1PK = :hostId AND begins_with(GSI1SK, :prefix)',
-        KeyConditionExpression: 'GSI1PK = :hostId',
+        KeyConditionExpression: 'GSI1PK = :hostId AND begins_with(GSI1SK, :prefix)',
         ExpressionAttributeValues: {
           ':hostId': `HOST#${hostId}`,
-          // ':prefix': 'LOC#'
+          ':prefix': 'LOC#'
         }
       })
     );

@@ -75,7 +75,7 @@ export const MobileFormField: React.FC<MobileFormFieldProps> = ({
 
   return (
     <div className="space-y-2">
-      <label 
+      <label
         htmlFor={fieldId}
         className={cn(
           'block text-sm font-medium text-gray-700',

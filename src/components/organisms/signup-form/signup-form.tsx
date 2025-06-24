@@ -180,21 +180,20 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     };
 
     const shirtGenderOptions = [
-        { value: 'Men', label: 'Men' },
-        { value: 'Women', label: 'Women' },
-        { value: 'Unisex', label: 'Unisex' },
+        { value: 'Mens', label: 'Mens' },
+        { value: 'Womens', label: 'Womens' },
+        { value: 'Kids', label: 'Kids' },
     ];
 
     const shirtSizeOptions = [
-        { value: 'XS', label: 'Extra Small (XS)' },
-        { value: 'S', label: 'Small (S)' },
-        { value: 'M', label: 'Medium (M)' },
-        { value: 'L', label: 'Large (L)' },
-        { value: 'XL', label: 'Extra Large (XL)' },
-        { value: 'XXL', label: '2X Large (XXL)' },
-        { value: 'XXXL', label: '3X Large (XXXL)' },
+        { value: 'XS', label: 'XS - Extra Small' },
+        { value: 'S', label: 'S - Small' },
+        { value: 'M', label: 'M - Medium' },
+        { value: 'L', label: 'L - Large' },
+        { value: 'XL', label: 'XL - Extra Large' },
     ];
 
+    // TODO: Cleanup Mobile fields; Add autocomplete off; autoCapitalize; etc
     return (
         <FormProvider {...form}>
             <Form
@@ -251,6 +250,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                         <Input
                                             {...props}
                                             maxLength={1}
+                                            placeholder='Optional'
                                         />
                                     )}
                                 />
@@ -343,6 +343,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                     onChange={(value) => setValue('shirtGender', value)}
                                     options={shirtGenderOptions}
                                     error={form.formState.errors.shirtGender?.message}
+                                    required
                                 />
                             ) : (
                                 <FormControl
@@ -350,11 +351,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                     label="Shirt Style"
                                     render={(props) => (
                                         <Select
+                                            label={props.label}
                                             options={shirtGenderOptions}
                                             value={props.value || ''}
                                             onValueChange={props.onChange}
                                             error={props.error}
-                                            placeholder="Optional"
+                                            placeholder="Select shirt type"
+                                            required
                                         />
                                     )}
                                 />
@@ -368,6 +371,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                     onChange={(value) => setValue('shirtSize', value)}
                                     options={shirtSizeOptions}
                                     error={form.formState.errors.shirtSize?.message}
+                                    required
                                 />
                             ) : (
                                 <FormControl
@@ -375,11 +379,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                     label="Shirt Size"
                                     render={(props) => (
                                         <Select
+                                            label={props.label}
                                             options={shirtSizeOptions}
                                             value={props.value || ''}
                                             onValueChange={props.onChange}
                                             error={props.error}
-                                            placeholder="Optional"
+                                            placeholder="Select shirt size"
+                                            required
                                         />
                                     )}
                                 />
@@ -400,7 +406,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                         {isMobile ? (
                             <MobileFormField
                                 type="input"
-                                label="Emergency Contact Name"
+                                label="Contact Name"
                                 value={watch('emergencyName')}
                                 onChange={(value) => setValue('emergencyName', value)}
                                 required
@@ -409,7 +415,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                         ) : (
                             <FormControl
                                 name="emergencyName"
-                                label="Emergency Contact Name"
+                                label="Contact Name"
                                 render={(props) => (
                                     <Input
                                         {...props}
@@ -422,7 +428,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                         {isMobile ? (
                             <MobileFormField
                                 type="input"
-                                label="Emergency Contact Phone"
+                                label="Contact Phone"
                                 value={watch('emergencyPhone')}
                                 onChange={(value) => setValue('emergencyPhone', value)}
                                 required
@@ -431,7 +437,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                         ) : (
                             <FormControl
                                 name="emergencyPhone"
-                                label="Emergency Contact Phone"
+                                label="Contact Phone"
                                 render={(props) => (
                                     <Input
                                         {...props}
@@ -445,7 +451,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 </Card>
 
                 {/* Pet Information */}
-                <Card className="mb-6">
+                {/* <Card className="mb-6">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <PawPrintIcon className="h-5 w-5 text-primary" />
@@ -489,7 +495,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                             )
                         )}
                     </CardContent>
-                </Card>
+                </Card> */}
 
                 {/* Disclaimer */}
                 {disclaimerText && (

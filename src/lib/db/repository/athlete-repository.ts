@@ -32,18 +32,18 @@ export class AthleteRepository {
   }): Promise<AthleteEntity> {
     const id = nanoid();
     const timestamp = Math.floor(Date.now() / 1000);
-    
+
     // Format name for GSI2 (search by name)
     const lastName = data.lastName.toUpperCase();
     const firstName = data.firstName.toUpperCase();
-    
+
     const athlete: AthleteEntity = {
       pk: `ATH#${id}`,
       sk: 'METADATA',
       GSI1PK: 'TYPE#athlete',
       GSI1SK: `ATH#${id}`,
-      GSI2PK: `NAME#${lastName}#${firstName}`,
-      GSI2SK: `ATH#${id}`,
+      GSI2PK: `TYPE#athlete`,
+      GSI2SK: `NAME#${lastName}#${firstName}`,
       t: 'athlete',
       id,
       c: timestamp,
@@ -62,17 +62,17 @@ export class AthleteRepository {
       ds: [],
       del: false
     };
-    
+
     await this.docClient.send(
       new PutCommand({
         TableName: this.tableName,
         Item: athlete
       })
     );
-    
+
     return athlete;
   }
-  
+
   /**
    * Get an athlete by ID
    */
@@ -86,52 +86,50 @@ export class AthleteRepository {
         }
       })
     );
-    
+
     return (response.Item as AthleteEntity) || null;
   }
-  
+
   /**
    * Search athletes by last name
    */
   async searchAthletesByName(lastName: string, firstName?: string): Promise<AthleteEntity[]> {
     // Format search parameters
     lastName = lastName.toUpperCase();
-    
+
     let keyCondition: string;
     let expressionValues: Record<string, any>;
-    
+
     if (firstName) {
       firstName = firstName.toUpperCase();
-      keyCondition = 'GSI2PK = :nameKey AND begins_with(GSI2SK, :prefix)';
+      keyCondition = '';
       expressionValues = {
         ':nameKey': `NAME#${lastName}#${firstName}`,
         ':prefix': 'ATH#'
       };
     } else {
-      keyCondition = 'begins_with(GSI2PK, :namePrefix) AND begins_with(GSI2SK, :prefix)';
+      keyCondition = 'GSI2PK = :type AND begins_with(GSI2SK, :namePrefix)';
       expressionValues = {
-        ':namePrefix': `NAME#${lastName}`,
-        ':prefix': 'ATH#'
+        ':type': 'TYPE#athlete',
+        ':namePrefix': `NAME#${lastName}`
       };
     }
-    
-    const response = await this.docClient.send(
-      new QueryCommand({
-        TableName: this.tableName,
-        IndexName: 'GSI2',
-        KeyConditionExpression: keyCondition,
-        ExpressionAttributeValues: expressionValues,
-        FilterExpression: 'del <> :deleted',
-        // ExpressionAttributeValues: {
-        //   ...expressionValues,
-        //   ':deleted': true
-        // }
-      })
-    );
-    
+
+    const response = await this.docClient.send(new QueryCommand({
+      TableName: this.tableName,
+      IndexName: 'GSI2',
+      KeyConditionExpression: keyCondition,
+      ExpressionAttributeValues: expressionValues,
+      // FilterExpression: 'del <> :deleted',
+      // ExpressionAttributeValues: {
+      //   ...expressionValues,
+      //   ':deleted': true
+      // }
+    }));
+
     return (response.Items as AthleteEntity[]) || [];
   }
-  
+
   /**
    * Update an athlete
    */
@@ -142,7 +140,7 @@ export class AthleteRepository {
       ':timestamp': Math.floor(Date.now() / 1000)
     };
     const expressionAttributeNames: Record<string, string> = {};
-    
+
     // Add each provided field to the update expression
     Object.entries(updateData).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -151,9 +149,9 @@ export class AthleteRepository {
         expressionAttributeNames[`#${key}`] = key;
       }
     });
-    
+
     const updateExpression = updateExpressionParts.join(', ');
-    
+
     // Run the update operation
     await this.docClient.send(
       new UpdateCommand({
@@ -168,18 +166,18 @@ export class AthleteRepository {
         ReturnValues: 'ALL_NEW'
       })
     );
-    
+
     // Return the updated athlete
     return this.getAthleteById(id);
   }
-  
+
   /**
    * Soft delete an athlete
    */
   async softDeleteAthlete(id: string): Promise<void> {
     await this.updateAthlete(id, { del: true });
   }
-  
+
   /**
    * Hard delete an athlete (use with caution)
    */
@@ -194,33 +192,33 @@ export class AthleteRepository {
       })
     );
   }
-  
+
   /**
    * Add host disclaimer signature to athlete
    */
   async addDisclaimerSignature(athleteId: string, hostId: string): Promise<AthleteEntity | null> {
     const athlete = await this.getAthleteById(athleteId);
     if (!athlete) return null;
-    
+
     // Add hostId to disclaimer signatures if not already present
     if (!athlete.ds.includes(hostId)) {
       const updatedDs = [...athlete.ds, hostId];
       return this.updateAthlete(athleteId, { ds: updatedDs });
     }
-    
+
     return athlete;
   }
-  
+
   /**
    * Check if athlete has signed disclaimer for host
    */
   async hasSignedDisclaimer(athleteId: string, hostId: string): Promise<boolean> {
     const athlete = await this.getAthleteById(athleteId);
     if (!athlete) return false;
-    
+
     return athlete.ds.includes(hostId);
   }
-  
+
   /**
    * Get all athletes
    * Used in admin interfaces for managing athletes
@@ -240,15 +238,15 @@ export class AthleteRepository {
       },
       Limit: limit
     };
-    
+
     if (lastEvaluatedKey) {
       queryParams.ExclusiveStartKey = lastEvaluatedKey;
     }
-    
+
     const response = await this.docClient.send(
       new QueryCommand(queryParams)
     );
-    
+
     return {
       athletes: (response.Items as AthleteEntity[]) || [],
       lastEvaluatedKey: response.LastEvaluatedKey
