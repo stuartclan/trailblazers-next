@@ -2,23 +2,21 @@
 
 import * as React from 'react';
 
-// import { ActivityEntity, AthleteEntity, HostEntity, LocationEntity, PetEntity } from '@/lib/db/entities/types';
-import { ActivityEntity, AthleteEntity, HostEntity, LocationEntity } from '@/lib/db/entities/types';
+import { ActivityEntity, AthleteEntity, CheckInEntity, HostEntity, LocationEntity } from '@/lib/db/entities/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { Search, User } from 'lucide-react';
 
-import { ActivitySelector } from '@/components/molecules/activity-selector/activity-selector';
+import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Button } from '@/components/atoms/button/button';
-import { CheckInConfirmation } from '@/components/molecules/check-in-confirmation/check-in-confirmation';
 import { DisclaimerModal } from '@/components/molecules/disclaimer-modal/disclaimer-modal';
-// import { PetRegistrationForm } from '@/components/organisms/pet-registration-form/pet-registration-form';
-// import { Plus } from 'lucide-react';
-import { SearchResults } from '@/components/molecules/search-results/search-results';
-// import { useCreateCheckIn, useCreatePetCheckIn } from '@/hooks/useCheckIn';
+import { Icon } from '@/components/atoms/icon/icon';
+import { Input } from '@/components/atoms/input/input';
+import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
+import { apiClient } from '@/lib/utils/api-client';
+import { cn } from '@/lib/utils/ui';
+import { useAthleteSearch } from '@/hooks/useAthlete';
 import { useCreateCheckIn } from '@/hooks/useCheckIn';
-// import { Select } from '@/components/atoms/select/select';
-// import { Switch } from '@/components/atoms/switch/switch';
-// import { useAthletesPets } from '@/hooks/usePet';
-import { useHasSignedDisclaimer } from '@/hooks/useAthlete';
+import { useDeleteCheckIn } from '@/hooks/useCheckIn';
 import { useLocationActivities } from '@/hooks/useActivity';
 import { useToastNotifications } from '@/hooks/useToast';
 
@@ -29,7 +27,14 @@ interface CheckInFlowProps {
   className?: string;
 }
 
-type FlowStep = 'search' | 'activity' | 'pet' | 'disclaimer' | 'confirmation';
+interface AthleteCheckInStatus {
+  athlete: AthleteEntity;
+  checkInCount: number;
+  // hasCheckedInThisWeek: boolean;
+  currentActivity?: ActivityEntity;
+  currentCheckIn?: CheckInEntity;
+  needsDisclaimer: boolean;
+}
 
 export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   host,
@@ -40,319 +45,443 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   const { success, error, info } = useToastNotifications();
 
   // State management
-  const [currentStep, setCurrentStep] = React.useState<FlowStep>('search');
-  const [selectedAthlete, setSelectedAthlete] = React.useState<AthleteEntity | null>(null);
-  const [selectedActivity, setSelectedActivity] = React.useState<string | null>(null);
-  // const [includePet, setIncludePet] = React.useState(false);
-  // const [selectedPet, setSelectedPet] = React.useState<PetEntity | null>(null);
-  // const [showPetRegistration, setShowPetRegistration] = React.useState(false);
-  const [checkInResult, setCheckInResult] = React.useState<{
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState('');
+  const [athleteStatuses, setAthleteStatuses] = React.useState<AthleteCheckInStatus[]>([]);
+  const [disclaimerAthlete, setDisclaimerAthlete] = React.useState<AthleteEntity | null>(null);
+  const [pendingCheckIn, setPendingCheckIn] = React.useState<{
     athlete: AthleteEntity;
     activity: ActivityEntity;
-    // pet?: PetEntity;
-    timestamp: number;
   } | null>(null);
+
+  // Timers
+  const searchTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
+  const resetTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Data fetching
   const { data: activities } = useLocationActivities(host.id, location.id);
-  // const { data: athletePets } = useAthletesPets(selectedAthlete?.id || '');
-  const { data: hasSignedDisclaimer } = useHasSignedDisclaimer(
-    selectedAthlete?.id || '',
-    host.id
-  );
+  const { data: searchResults } = useAthleteSearch(debouncedSearchQuery);
 
   // Mutations
   const createCheckIn = useCreateCheckIn();
-  // const createPetCheckIn = useCreatePetCheckIn();
+  const deleteCheckIn = useDeleteCheckIn();
 
-  // Reset flow when athlete changes
-  React.useEffect(() => {
-    if (selectedAthlete) {
-      setCurrentStep('activity');
-      setSelectedActivity(null);
-      // setIncludePet(false);
-      // setSelectedPet(null);
-      // setShowPetRegistration(false);
-      info(`Selected athlete: ${selectedAthlete.fn} ${selectedAthlete.ln}`);
+  // Handle search input change with debouncing
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Clear existing search timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
     }
-  }, [selectedAthlete, info]);
 
-  // Check disclaimer when athlete and activity are selected
+    if (query.length >= 2) {
+      // Set new timeout for search
+      searchTimeoutRef.current = setTimeout(() => {
+        setDebouncedSearchQuery(query);
+      }, 300);
+    } else {
+      setDebouncedSearchQuery('');
+      setAthleteStatuses([]);
+    }
+
+    // Reset the auto-reset timer
+    resetAutoResetTimer();
+  };
+
+  // Auto-reset timer function
+  const resetAutoResetTimer = React.useCallback(() => {
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current);
+    }
+
+    resetTimeoutRef.current = setTimeout(() => {
+      setSearchQuery('');
+      setDebouncedSearchQuery('');
+      setAthleteStatuses([]);
+      info('Search reset due to inactivity');
+    }, 30000); // 30 seconds
+  }, [info]);
+
+  // Process search results and fetch additional data
   React.useEffect(() => {
-    if (selectedAthlete && selectedActivity && hasSignedDisclaimer !== undefined) {
-      if (!hasSignedDisclaimer) {
-        info('Disclaimer required for this athlete');
-        setCurrentStep('disclaimer');
-      } else {
-        handleProceedToCheckIn();
+    if (!searchResults || !activities) return;
+
+    const processAthletes = async () => {
+      const statuses: AthleteCheckInStatus[] = [];
+
+      for (const athlete of searchResults) {
+        try {
+          // Fetch check-in count
+          const checkInCountResponse = await apiClient.get<{ count: number }>(
+            `/api/athletes/${athlete.id}/checkins/count`
+          );
+          const checkInCount = checkInCountResponse.data?.count || 0;
+
+          // // Check if checked in this week at this host
+          // const recentCheckInResponse = await apiClient.get<{ hasCheckedIn: boolean }>(
+          //   `/api/athletes/${athlete.id}/checkins/recent?hostId=${host.id}`
+          // );
+          // const hasCheckedInThisWeek = recentCheckInResponse.data?.hasCheckedIn || false;
+          const lastCheckIn = await apiClient.get<any[]>(
+            `/api/athletes/${athlete.id}/checkins?limit=1`
+          );
+
+          // Check disclaimer status
+          // const disclaimerResponse = await apiClient.get<{ hasSigned: boolean }>(
+          //   `/api/athletes/${athlete.id}/disclaimer/${host.id}`
+          // );
+          // const needsDisclaimer = !(disclaimerResponse.data?.hasSigned || false);
+          const needsDisclaimer = !(athlete.ds?.includes(host.id) || false);
+
+          // If they checked in this week, try to get their current activity
+          let currentActivity: ActivityEntity | undefined;
+          let currentCheckIn: CheckInEntity | undefined;
+
+          // if (hasCheckedInThisWeek) {
+          // if (lastCheckIn) {
+          // const checkInsResponse = await apiClient.get<any[]>(
+          //   `/api/athletes/${athlete.id}/checkins?limit=1`
+          // );
+          // if (checkInsResponse.data) {
+          if (lastCheckIn?.data?.length) {
+            // const thisWeekCheckIn = checkInsResponse.data.find((checkIn: any) =>
+            const thisWeekCheckIn = lastCheckIn.data.find((checkIn: any) => {
+              // TODO: Are we just limiting it to one host a week or just one a week?
+              // checkIn.hid === host.id && isWithinCurrentWeek(checkIn.ct);
+              // const checkinTime = checkIn.c.split('#')[1];
+              return isWithinCurrentWeek(checkIn.c);
+            });
+            if (thisWeekCheckIn) {
+              currentCheckIn = thisWeekCheckIn;
+              currentActivity = activities.find(a => a.id === thisWeekCheckIn.actid);
+            }
+          }
+          // }
+
+          statuses.push({
+            athlete,
+            checkInCount,
+            // hasCheckedInThisWeek,
+            currentActivity,
+            currentCheckIn,
+            needsDisclaimer,
+          });
+        } catch (err) {
+          console.error('Error processing athlete:', athlete.id, err);
+          // Add athlete with minimal data if there's an error
+          statuses.push({
+            athlete,
+            checkInCount: 0,
+            // hasCheckedInThisWeek: false,
+            needsDisclaimer: true,
+          });
+        }
       }
+
+      setAthleteStatuses(statuses);
+    };
+
+    processAthletes();
+  }, [searchResults, activities, host.id]);
+
+  // Helper function to check if timestamp is within current week
+  const isWithinCurrentWeek = (timestampInSeconds: number): boolean => {
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
+    weekStart.setHours(0, 0, 0, 0);
+
+    const checkInDate = new Date(timestampInSeconds * 1000);
+    return checkInDate >= weekStart;
+  };
+
+  // Handle activity selection/toggle
+  const handleActivityToggle = async (
+    athleteStatus: AthleteCheckInStatus,
+    activity: ActivityEntity
+  ) => {
+    resetAutoResetTimer(); // Extend the timer on interaction
+
+    const { athlete, currentActivity, currentCheckIn, needsDisclaimer } = athleteStatus;
+
+    // Check if this is the same activity (toggle off)
+    const isSameActivity = currentActivity?.id === activity.id;
+
+    if (isSameActivity) {
+      // Remove check-in
+      try {
+        // Find the check-in to delete
+        // const checkInsResponse = await apiClient.get<any[]>(
+        //   `/api/athletes/${athlete.id}/checkins?limit=10`
+        // );
+        // if (checkInsResponse.data) {
+        if (currentCheckIn) {
+          // const thisWeekCheckIn = checkInsResponse.data.find((checkIn: any) =>
+          //   checkIn.hid === host.id && isWithinCurrentWeek(checkIn.c)
+          // );
+
+          // if (thisWeekCheckIn) {
+          if (currentCheckIn) {
+            await deleteCheckIn.mutateAsync({
+              athleteId: athlete.id,
+              // timestamp: thisWeekCheckIn.c
+              timestamp: currentCheckIn.c
+            });
+
+            success(`Removed check-in for ${athlete.fn} ${athlete.ln}`);
+
+            // Update local state
+            setAthleteStatuses(prev => prev.map(status =>
+              status.athlete.id === athlete.id
+                ? {
+                  ...status,
+                  // hasCheckedInThisWeek: false,
+                  currentActivity: undefined,
+                  checkInCount: status.checkInCount - 1
+                }
+                : status
+            ));
+          }
+        }
+      } catch (err) {
+        console.error('Error removing check-in:', err);
+        error('Failed to remove check-in');
+      }
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAthlete, selectedActivity, hasSignedDisclaimer]);
 
-  const handleAthleteSelect = (athlete: AthleteEntity) => {
-    setSelectedAthlete(athlete);
-  };
-
-  const handleActivitySelect = (activityId: string) => {
-    setSelectedActivity(activityId);
-    const activity = activities?.find(a => a.id === activityId);
-    if (activity) {
-      info(`Selected activity: ${activity.n}`);
+    // Check if disclaimer is needed
+    if (needsDisclaimer) {
+      setDisclaimerAthlete(athlete);
+      setPendingCheckIn({ athlete, activity });
+      return;
     }
+
+    // Perform check-in
+    await performCheckIn(athlete, activity);
   };
 
-  const handleDisclaimerAccepted = () => {
-    success('Disclaimer accepted successfully');
-    setCurrentStep('pet');
-  };
-
-  const handleProceedToCheckIn = () => {
-    // if (includePet) {
-    //   setCurrentStep('pet');
-    // } else {
-    performCheckIn();
-    // }
-  };
-
-  // const handlePetSelect = (petId: string) => {
-  //   const pet = athletePets?.find(p => p.id === petId);
-  //   setSelectedPet(pet || null);
-  //   if (pet) {
-  //     info(`Selected pet: ${pet.n}`);
-  //   }
-  //   performCheckIn();
-  // };
-
-  // const handlePetRegistered = (petId: string) => {
-  //   // Find the newly registered pet
-  //   const newPet = athletePets?.find(p => p.id === petId);
-  //   setSelectedPet(newPet || null);
-  //   setShowPetRegistration(false);
-  //   if (newPet) {
-  //     success(`Pet "${newPet.n}" registered successfully!`);
-  //   }
-  //   performCheckIn();
-  // };
-
-  const performCheckIn = async () => {
-    if (!selectedAthlete || !selectedActivity) return;
-
+  // Perform the actual check-in
+  const performCheckIn = async (athlete: AthleteEntity, activity: ActivityEntity) => {
     try {
-      const activity = activities?.find(a => a.id === selectedActivity);
-      if (!activity) throw new Error('Activity not found');
-
-      const timestamp = Date.now();
-
-      info('Processing check-in...');
-
-      // Create athlete check-in
-      await createCheckIn.mutateAsync({
-        athleteId: selectedAthlete.id,
+      const checkIn = await createCheckIn.mutateAsync({
+        athleteId: athlete.id,
         hostId: host.id,
         locationId: location.id,
-        activityId: selectedActivity,
+        activityId: activity.id,
       });
 
-      // // Create pet check-in if applicable
-      // if (includePet && selectedPet) {
-      //   info('Processing pet check-in...');
-      //   await createPetCheckIn.mutateAsync({
-      //     athleteId: selectedAthlete.id,
-      //     petId: selectedPet.id,
-      //     hostId: host.id,
-      //     locationId: location.id,
-      //   });
-      // }
+      success(`${athlete.fn} ${athlete.ln} checked in for ${activity.n}!`);
 
-      // Set confirmation data
-      setCheckInResult({
-        athlete: selectedAthlete,
-        activity,
-        // pet: selectedPet || undefined,
-        timestamp,
-      });
+      // Update local state
+      setAthleteStatuses(prev => prev.map(status =>
+        status.athlete.id === athlete.id
+          ? {
+            ...status,
+            // hasCheckedInThisWeek: true,
+            currentActivity: activity,
+            currentCheckIn: checkIn,
+            // checkInCount: status.hasCheckedInThisWeek ? status.checkInCount : status.checkInCount + 1,
+            checkInCount: status.checkInCount + 1,
+            needsDisclaimer: false
+          }
+          : status
+      ));
 
-      // const petMessage = selectedPet ? ` and ${selectedPet.n}` : '';
-      success(
-        // `Check-in successful for ${selectedAthlete.fn}${petMessage}!`,
-        `Check-in successful for ${selectedAthlete.fn}!`,
-        'Welcome to Trailblazers'
-      );
-
-      setCurrentStep('confirmation');
     } catch (err) {
       console.error('Check-in error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to complete check-in';
-      error(errorMessage, 'Check-in Failed');
+      error(errorMessage);
     }
   };
 
-  const handleNewCheckIn = () => {
-    setCurrentStep('search');
-    setSelectedAthlete(null);
-    setSelectedActivity(null);
-    // setIncludePet(false);
-    // setSelectedPet(null);
-    // setShowPetRegistration(false);
-    setCheckInResult(null);
-    info('Ready for new check-in');
+  // Handle disclaimer acceptance
+  const handleDisclaimerAccepted = () => {
+    if (pendingCheckIn) {
+      performCheckIn(pendingCheckIn.athlete, pendingCheckIn.activity);
+    }
+    setDisclaimerAthlete(null);
+    setPendingCheckIn(null);
   };
 
-  const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 'search':
-        return (
-          <SearchResults
-            onSelect={handleAthleteSelect}
-            onRegisterNew={onNewAthlete}
-            selectedAthleteId={selectedAthlete?.id}
-            label="Search for Athlete"
-            placeholder="Enter athlete's last name..."
-          />
-        );
+  // Handle disclaimer modal close
+  const handleDisclaimerClose = () => {
+    setDisclaimerAthlete(null);
+    setPendingCheckIn(null);
+  };
 
-      case 'activity':
-        return (
-          <div className="space-y-6">
-            <ActivitySelector
-              value={selectedActivity}
-              onChange={handleActivitySelect}
-              activities={activities}
-              hideTitle={false}
-            />
+  // Cleanup timers on unmount
+  React.useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
+      }
+    };
+  }, []);
 
-            {selectedActivity && (
-              <div className="space-y-4">
-                {/* <Switch
-                  checked={includePet}
-                  onCheckedChange={(checked) => {
-                    setIncludePet(checked);
-                    if (checked) {
-                      info('Pet check-in enabled');
-                    }
-                  }}
-                  label="Include pet check-in"
-                /> */}
-
-                <Button
-                  onClick={handleProceedToCheckIn}
-                  disabled={!selectedActivity}
-                  className="w-full"
-                >
-                  Continue Check-in
-                </Button>
-              </div>
-            )}
-          </div>
-        );
-
-      // case 'pet':
-      //   if (showPetRegistration) {
-      //     return (
-      //       <PetRegistrationForm
-      //         athleteId={selectedAthlete!.id}
-      //         existingPetNames={athletePets?.map(p => p.n) || []}
-      //         onSuccess={handlePetRegistered}
-      //         onCancel={() => setShowPetRegistration(false)}
-      //       />
-      //     );
-      //   }
-
-      //   return (
-      //     <div className="space-y-4">
-      //       <h3 className="text-lg font-medium">Select Pet</h3>
-
-      //       {athletePets && athletePets.length > 0 ? (
-      //         <div className="space-y-3">
-      //           <Select
-      //             options={[
-      //               { value: '', label: 'Select a pet...' },
-      //               ...athletePets.map(pet => ({
-      //                 value: pet.id,
-      //                 label: pet.n
-      //               }))
-      //             ]}
-      //             onValueChange={handlePetSelect}
-      //             placeholder="Choose existing pet"
-      //           />
-
-      //           <div className="text-center">
-      //             <Button
-      //               variant="outline"
-      //               size="sm"
-      //               onClick={() => setShowPetRegistration(true)}
-      //             >
-      //               <Plus className="h-4 w-4 mr-2" />
-      //               Register New Pet
-      //             </Button>
-      //           </div>
-      //         </div>
-      //       ) : (
-      //         <div className="text-center py-6">
-      //           <p className="text-gray-600 mb-4">No pets registered for this athlete</p>
-      //           <Button onClick={() => setShowPetRegistration(true)}>
-      //             <Plus className="h-4 w-4 mr-2" />
-      //             Register First Pet
-      //           </Button>
-      //         </div>
-      //       )}
-
-      //       <Button
-      //         variant="outline"
-      //         onClick={() => performCheckIn()}
-      //         className="w-full"
-      //       >
-      //         Skip Pet Check-in
-      //       </Button>
-      //     </div>
-      //   );
-
-      case 'confirmation':
-        if (!checkInResult) return null;
-
-        return (
-          <CheckInConfirmation
-            athlete={checkInResult.athlete}
-            activity={checkInResult.activity}
-            location={location}
-            // pet={checkInResult.pet}
-            timestamp={checkInResult.timestamp}
-            onNewCheckIn={handleNewCheckIn}
-          />
-        );
-
-      default:
-        return null;
-    }
+  // Get reward icon class based on check-in count
+  const getRewardIconClass = (count: number): string => {
+    if (count >= 60) return 'user-activity__icon--complete-60';
+    if (count >= 30) return 'user-activity__icon--complete-30';
+    if (count >= 8) return 'user-activity__icon--complete';
+    return 'user-activity__icon';
   };
 
   return (
     <div className={className}>
       <Card>
         <CardHeader>
-          <CardTitle>
-            {currentStep === 'search' && 'Find Athlete'}
-            {currentStep === 'activity' && `Check-in: ${selectedAthlete?.fn} ${selectedAthlete?.ln}`}
-            {currentStep === 'pet' && 'Pet Check-in'}
-            {currentStep === 'confirmation' && 'Check-in Complete'}
-          </CardTitle>
+          <CardTitle>Athlete Check-in</CardTitle>
         </CardHeader>
-        <CardContent>
-          {renderCurrentStep()}
+        <CardContent className="space-y-6">
+          {/* Search Input */}
+          <div>
+            <Input
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by last name..."
+              leftIcon={<Search className="h-4 w-4" />}
+              label="Find Athlete"
+            />
+
+            {searchQuery.length > 0 && searchQuery.length < 2 && (
+              <p className="mt-1 text-xs text-gray-500">
+                Enter at least 2 characters to search
+              </p>
+            )}
+          </div>
+
+          {/* Search Results */}
+          {athleteStatuses.length > 0 && (
+            <div className="border-1 rounded-md overflow-hidden">
+              {/* Header */}
+              <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 border-b font-medium text-sm">
+                <div className="col-span-3">Last Name</div>
+                <div className="col-span-3">First Name</div>
+                <div className="col-span-2 text-center">Activities</div>
+                <div className="col-span-4">Check-in</div>
+              </div>
+
+              {/* Athletes */}
+              <div className="divide-y">
+                {athleteStatuses.map((status) => (
+                  <div
+                    key={status.athlete.id}
+                    className="grid grid-cols-12 gap-4 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    {/* Last Name */}
+                    <div className="col-span-3 flex items-center">
+                      <h5 className="font-medium">{status.athlete.ln}</h5>
+                    </div>
+
+                    {/* First Name + MI */}
+                    <div className="col-span-3 flex items-center">
+                      <span>
+                        {status.athlete.fn} {status.athlete.mi || ''}
+                      </span>
+                    </div>
+
+                    {/* Reward Icon with Count */}
+                    <div className="col-span-2 flex items-center justify-center">
+                      <div className="relative">
+                        <Icon
+                          name="emoji_events"
+                          className={cn(
+                            'fa-3x',
+                            getRewardIconClass(status.checkInCount)
+                          )}
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-sm">
+                          {status.checkInCount}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Activity Buttons */}
+                    <div className="col-span-4 flex items-center gap-2">
+                      {activities?.slice(0, 3).map((activity) => {
+                        const isSelected = status.currentActivity?.id === activity.id;
+
+                        return (
+                          <TouchTarget
+                            key={activity.id}
+                            onClick={() => handleActivityToggle(status, activity)}
+                            haptic={true}
+                            className={cn(
+                              'flex flex-col items-center justify-center p-2 border-1 rounded-lg transition-all duration-200',
+                              'hover:shadow-md active:scale-95 min-h-[60px] min-w-[60px]',
+                              isSelected
+                                ? 'bg-primary text-white border-primary shadow-md'
+                                : 'bg-white hover:bg-gray-50 border-gray-200'
+                            )}
+                          >
+                            <ActivityIconCircle
+                              activity={{
+                                en: true,
+                                i: activity.i,
+                                n: activity.n
+                              }}
+                              size="sm"
+                              variant={isSelected ? 'default' : 'ghost'}
+                            />
+                          </TouchTarget>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* No Results */}
+          {debouncedSearchQuery.length >= 2 && athleteStatuses.length === 0 && (
+            <div className="text-center py-6">
+              <div className="flex flex-col items-center space-y-4">
+                <User className="h-12 w-12 text-gray-400" />
+                <div>
+                  <p className="text-gray-600 mb-2">No athletes found</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Try a different search or register a new athlete
+                  </p>
+                  {onNewAthlete && (
+                    <Button onClick={onNewAthlete} variant="outline">
+                      Register New Athlete
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Instructions */}
+          {searchQuery.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium mb-2">Ready for Check-in</p>
+              <p className="text-sm">Search for an athlete by last name to begin</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Disclaimer Modal */}
-      <DisclaimerModal
-        isOpen={currentStep === 'disclaimer'}
-        onClose={() => setCurrentStep('activity')}
-        athleteId={selectedAthlete?.id || ''}
-        hostId={host.id}
-        athleteName={selectedAthlete ? `${selectedAthlete.fn} ${selectedAthlete.ln}` : ''}
-        disclaimerText={host.disc}
-        onSuccess={handleDisclaimerAccepted}
-      />
+      {disclaimerAthlete && (
+        <DisclaimerModal
+          isOpen={true}
+          onClose={handleDisclaimerClose}
+          athleteId={disclaimerAthlete.id}
+          hostId={host.id}
+          athleteName={`${disclaimerAthlete.fn} ${disclaimerAthlete.ln}`}
+          disclaimerText={host.disc}
+          onSuccess={handleDisclaimerAccepted}
+        />
+      )}
     </div>
   );
 };

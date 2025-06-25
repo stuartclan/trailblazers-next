@@ -93,32 +93,36 @@ export default function CheckIn() {
   }
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="container max-w-4xl mx-auto px-4">
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="border-b border-gray-200">
+        <div className="container max-w-6xl mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Trailblazers Check-In</h1>
+              <p className="text-gray-600 mt-1">Welcome to {host.n}</p>
+            </div>
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Trailblazers Check-In</h1>
-            <p className="text-gray-600 mt-1">Welcome to {host.n}</p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleChangeLocation}
-            >
-              Change Location
-            </Button>
-            <Link href="/host/admin">
-              <Button variant="ghost" size="sm">
-                Host Admin
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleChangeLocation}
+              >
+                Change Location
               </Button>
-            </Link>
+              <Link href="/host/admin">
+                <Button variant="ghost" size="sm">
+                  Host Admin
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="container max-w-6xl mx-auto px-4 py-8">
         {/* Location Info */}
         <Alert variant="info" className="mb-6">
           <div className="flex items-center justify-between">
@@ -138,7 +142,7 @@ export default function CheckIn() {
         />
 
         {/* Footer */}
-        <div className="bg-white rounded-lg border-1 p-4">
+        <div className="bg-white rounded-lg border-1 p-4 mt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <div>
               <p>Need help? Contact your host administrator.</p>
