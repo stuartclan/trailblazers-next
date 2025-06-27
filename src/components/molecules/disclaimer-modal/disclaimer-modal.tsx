@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import { Button } from '@/components/atoms/button/button';
 import { Checkbox } from '@/components/atoms/checkbox/checkbox';
-import { X } from 'lucide-react';
+import { LuX as X } from 'react-icons/lu';
 import { cn } from '@/lib/utils/ui';
 import { useSignDisclaimer } from '@/hooks/useAthlete';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -73,11 +73,11 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
         onSuccess();
       }
       onClose();
-      
+
     } catch (err) {
       console.error('Disclaimer signing error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign disclaimer';
-      
+
       // Show error in both local state and toast
       setError(errorMessage);
       toastError(errorMessage, 'Agreement Failed');

@@ -4,7 +4,7 @@
 import * as React from 'react';
 
 import { ActivityEntity, AthleteEntity, LocationEntity, PetEntity } from '@/lib/db/entities/types';
-import { Calendar, CheckCircle, MapPin, User } from 'lucide-react';
+import { LuCalendar as Calendar, LuCircleCheck as CheckCircle, LuMapPin as MapPin, LuUser as User } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 
 import { Button } from '@/components/atoms/button/button';
@@ -102,7 +102,7 @@ export const CheckInConfirmation: React.FC<CheckInConfirmationProps> = ({
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
           {onNewCheckIn && (
-            <Button 
+            <Button
               onClick={onNewCheckIn}
               className="flex-1"
             >
@@ -110,7 +110,7 @@ export const CheckInConfirmation: React.FC<CheckInConfirmationProps> = ({
             </Button>
           )}
           {onViewHistory && (
-            <Button 
+            <Button
               variant="outline"
               onClick={onViewHistory}
               className="flex-1"
@@ -123,7 +123,7 @@ export const CheckInConfirmation: React.FC<CheckInConfirmationProps> = ({
         {/* Additional Info */}
         <div className="bg-blue-50 border-1 border-blue-200 rounded-md p-3 mt-4">
           <p className="text-xs text-blue-700">
-            <strong>Note:</strong> You can only check in once per week at each location. 
+            <strong>Note:</strong> You can only check in once per week at each location.
             Keep track of your progress toward rewards in the host admin area.
           </p>
         </div>

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Circle } from 'lucide-react';
+import { LuCircle as Circle } from 'react-icons/lu';
 import { cn } from '@/lib/utils/ui';
 import { Label } from '../label/label';
 
@@ -73,7 +73,7 @@ const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
     const generatedId = React.useId();
     // Then use the provided ID if available, otherwise use the generated one
     const groupId = id || generatedId;
-    
+
     // Handle variant choice based on error state
     const itemVariant = error ? 'error' : variant;
 
@@ -87,7 +87,7 @@ const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
             {label}
           </Label>
         )}
-        
+
         <RadioGroupPrimitive.Root
           name={name}
           value={value}
@@ -125,11 +125,11 @@ const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
             </div>
           ))}
         </RadioGroupPrimitive.Root>
-        
+
         {helpText && !error && (
           <p className="mt-1 text-sm text-gray-500">{helpText}</p>
         )}
-        
+
         {error && (
           <p className="mt-1 text-sm text-red-500">{error}</p>
         )}

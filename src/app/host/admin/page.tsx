@@ -1,15 +1,15 @@
 'use client';
 
 import {
-  AlertTriangle,
-  Award,
-  Calendar,
-  LogOut,
-  MapPin,
-  Settings,
-  TrendingUp,
-  Users
-} from 'lucide-react';
+  LuTriangleAlert as AlertTriangle,
+  LuAward as Award,
+  LuCalendar as Calendar,
+  LuLogOut as LogOut,
+  LuMapPin as MapPin,
+  LuSettings as Settings,
+  LuTrendingUp as TrendingUp,
+  LuUsers as Users
+} from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { useEffect, useState } from 'react';
 

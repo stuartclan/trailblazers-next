@@ -1,8 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Edit3, MapPin, Plus, Trash2, Users } from 'lucide-react';
-import { fetchLocationsByHost, useLocationsByHost } from '@/hooks/useLocation';
+import { LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuTrash2 as Trash2, LuUsers as Users } from 'react-icons/lu';
 import { useCreateHost, useDeleteHost, useHosts } from '@/hooks/useHost';
 import { useEffect, useState } from 'react';
 
@@ -13,6 +12,7 @@ import { HostForm } from '@/components/organisms/host-form/host-form';
 import Link from 'next/link';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
+import { fetchLocationsByHost } from '@/hooks/useLocation';
 import { useAsync } from 'react-use';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -265,7 +265,7 @@ export default function SuperAdminHosts() {
                     <div className="flex items-center space-x-2">
                       <Link href={`/super-admin/hosts/${host.id}`}>
                         <Button variant="ghost" size="sm">
-                          <Edit3 className="h-4 w-4" />
+                          <PenLine className="h-4 w-4" />
                         </Button>
                       </Link>
                       <Button

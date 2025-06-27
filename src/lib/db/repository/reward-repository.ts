@@ -7,7 +7,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { getDynamoDBDocumentClient, getTableName } from '../utils/client';
 
-import { ActivityIcon } from '@/lib/utils/material-icons';
+import { IconNames } from '@/components/atoms/icon/icon';
 import { RewardEntity } from '../entities/types';
 import { nanoid } from 'nanoid';
 
@@ -27,7 +27,7 @@ export class RewardRepository {
   }): Promise<RewardEntity> {
     const id = nanoid();
     const timestamp = Math.floor(Date.now() / 1000);
-    
+
     const reward: Partial<RewardEntity> = {
       pk: `REW#${id}`,
       sk: 'METADATA',
@@ -40,7 +40,7 @@ export class RewardRepository {
       i: data.icon,
       rt: data.type
     };
-    
+
     // Set GSI1 based on reward type
     if (data.type === 'host' && data.hostId) {
       reward.hid = data.hostId;
@@ -51,17 +51,17 @@ export class RewardRepository {
       reward.GSI1PK = `TYPE#reward#${data.type}`;
       reward.GSI1SK = `REW#${id}`;
     }
-    
+
     await this.docClient.send(
       new PutCommand({
         TableName: this.tableName,
         Item: reward
       })
     );
-    
+
     return reward as RewardEntity;
   }
-  
+
   /**
    * Get a reward by ID
    */
@@ -75,10 +75,10 @@ export class RewardRepository {
         }
       })
     );
-    
+
     return (response.Item as RewardEntity) || null;
   }
-  
+
   /**
    * Get all global rewards
    */
@@ -93,10 +93,10 @@ export class RewardRepository {
         }
       })
     );
-    
+
     return (response.Items as RewardEntity[]) || [];
   }
-  
+
   /**
    * Get all pet rewards
    */
@@ -111,10 +111,10 @@ export class RewardRepository {
         }
       })
     );
-    
+
     return (response.Items as RewardEntity[]) || [];
   }
-  
+
   /**
    * Get rewards for a specific host
    */
@@ -130,10 +130,10 @@ export class RewardRepository {
         }
       })
     );
-    
+
     return (response.Items as RewardEntity[]) || [];
   }
-  
+
   /**
    * Update a reward
    */
@@ -145,7 +145,7 @@ export class RewardRepository {
       ':timestamp': Math.floor(Date.now() / 1000)
     };
     const expressionAttributeNames: Record<string, string> = {};
-    
+
     // Add each provided field to the update expression
     Object.entries(updateData).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -154,9 +154,9 @@ export class RewardRepository {
         expressionAttributeNames[`#${key}`] = key;
       }
     });
-    
+
     const updateExpression = updateExpressionParts.join(', ');
-    
+
     // Run the update operation
     await this.docClient.send(
       new UpdateCommand({
@@ -171,11 +171,11 @@ export class RewardRepository {
         ReturnValues: 'ALL_NEW'
       })
     );
-    
+
     // Return the updated reward
     return this.getRewardById(id);
   }
-  
+
   /**
    * Delete a reward
    */
@@ -190,27 +190,27 @@ export class RewardRepository {
       })
     );
   }
-  
+
   /**
    * Create default global rewards if none exist
    */
   async createDefaultGlobalRewardsIfNoneExist(): Promise<RewardEntity[]> {
     const existingGlobalRewards = await this.getGlobalRewards();
-    
+
     if (existingGlobalRewards.length > 0) {
       return existingGlobalRewards;
     }
-    
+
     // Define default global rewards
     const defaultGlobalRewards = [
-      { count: 8, name: 'Tier 1 Reward', icon: ActivityIcon.EmojiEvents },
-      { count: 30, name: 'Tier 2 Reward', icon: ActivityIcon.EmojiEvents },
-      { count: 60, name: 'Tier 3 Reward', icon: ActivityIcon.EmojiEvents }
+      { count: 8, name: 'Tier 1 Reward', icon: IconNames.Shirt },
+      { count: 30, name: 'Tier 2 Reward', icon: IconNames.ShirtLongSleeve },
+      { count: 60, name: 'Tier 3 Reward', icon: IconNames.EmojiEvents }
     ];
-    
+
     // Create all default global rewards
     const createdRewards = await Promise.all(
-      defaultGlobalRewards.map(reward => 
+      defaultGlobalRewards.map(reward =>
         this.createReward({
           count: reward.count,
           name: reward.name,
@@ -219,28 +219,28 @@ export class RewardRepository {
         })
       )
     );
-    
+
     return createdRewards;
   }
-  
+
   /**
    * Create default pet rewards if none exist
    */
   async createDefaultPetRewardsIfNoneExist(): Promise<RewardEntity[]> {
     const existingPetRewards = await this.getPetRewards();
-    
+
     if (existingPetRewards.length > 0) {
       return existingPetRewards;
     }
-    
+
     // Define default pet rewards
     const defaultPetRewards = [
-      { count: 8, name: 'Pet Reward', icon: ActivityIcon.Pets }
+      { count: 8, name: 'Pet Reward', icon: IconNames.Pets }
     ];
-    
+
     // Create default pet rewards
     const createdRewards = await Promise.all(
-      defaultPetRewards.map(reward => 
+      defaultPetRewards.map(reward =>
         this.createReward({
           count: reward.count,
           name: reward.name,
@@ -249,10 +249,10 @@ export class RewardRepository {
         })
       )
     );
-    
+
     return createdRewards;
   }
-  
+
   /**
    * Get all rewards (admin function)
    */
@@ -262,7 +262,7 @@ export class RewardRepository {
       this.getGlobalRewards(),
       this.getPetRewards()
     ]);
-    
+
     // Note: Host rewards would need to be queried separately by host
     return [...globalRewards, ...petRewards];
   }

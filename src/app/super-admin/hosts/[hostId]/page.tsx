@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Edit3, MapPin, Plus, Settings, Users } from 'lucide-react';
+import { LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuSettings as Settings, LuUsers as Users } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 import { useHost, useUpdateHost } from '@/hooks/useHost';
 import { useParams, useRouter } from 'next/navigation';
@@ -199,7 +199,7 @@ export default function SuperAdminHostDetail() {
               variant="outline"
               className="flex items-center gap-2"
             >
-              <Edit3 className="h-4 w-4" />
+              <PenLine className="h-4 w-4" />
               {isEditing ? 'Cancel Edit' : 'Edit Host'}
             </Button>
           }
@@ -333,7 +333,7 @@ export default function SuperAdminHostDetail() {
                       <div className="flex items-center space-x-2">
                         <Link href={`/super-admin/hosts/${hostId}/locations/${location.id}`}>
                           <Button variant="outline" size="sm">
-                            <Edit3 className="h-4 w-4" />
+                            <PenLine className="h-4 w-4" />
                           </Button>
                         </Link>
                       </div>

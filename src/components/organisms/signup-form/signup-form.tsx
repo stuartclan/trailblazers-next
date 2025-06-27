@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { FormProvider, useForm } from 'react-hook-form';
-import { HeartIcon, PawPrintIcon, ShieldIcon, UserIcon } from 'lucide-react';
+import { LuHeart as HeartIcon, LuPawPrint as PawPrintIcon, LuShield as ShieldIcon, LuUser as UserIcon } from 'react-icons/lu';
 
 import { Button } from '@/components/atoms/button/button';
 import { Checkbox } from '@/components/atoms/checkbox/checkbox';

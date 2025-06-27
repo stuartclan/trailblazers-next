@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Check, TargetIcon, X } from 'lucide-react';
+import { LuCheck as Check, LuTarget as TargetIcon, LuX as X } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 import { useLocation, useUpdateLocationActivities } from '@/hooks/useLocation';
 import { useParams, useRouter } from 'next/navigation';

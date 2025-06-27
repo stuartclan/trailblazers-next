@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { ChevronRight, Home } from 'lucide-react';
+import { LuChevronRight as ChevronRight, LuHouse as Home } from 'react-icons/lu';
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils/ui';
@@ -27,7 +27,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   homeHref = '/',
   className,
 }) => {
-  const allItems = showHome 
+  const allItems = showHome
     ? [{ label: 'Home', href: homeHref }, ...items]
     : items;
 
@@ -37,13 +37,13 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
         {allItems.map((item, index) => {
           const isLast = index === allItems.length - 1;
           const isHome = showHome && index === 0;
-          
+
           return (
             <li key={index} className="flex items-center">
               {index > 0 && (
                 <ChevronRight className="h-4 w-4 text-gray-400 mx-2" />
               )}
-              
+
               {item.href && !isLast ? (
                 <Link
                   href={item.href}

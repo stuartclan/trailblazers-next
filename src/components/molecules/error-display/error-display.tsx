@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { AlertCircle, Home, RefreshCw } from 'lucide-react';
+import { LuCircleAlert as AlertCircle, LuHouse as Home, LuRefreshCw as RefreshCw } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 
 import { Alert } from '@/components/atoms/alert/alert';

@@ -3,7 +3,7 @@
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import * as React from 'react';
 
-import { Check } from 'lucide-react';
+import { LuCheck as Check } from 'react-icons/lu';
 import { cn } from '@/lib/utils/ui';
 
 interface CheckboxProps

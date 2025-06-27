@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Edit3, Activity as EmptyActivityIcon, Plus, Settings, Trash2, TrendingUp } from 'lucide-react';
+import { LuActivity as EmptyActivityIcon, LuPenLine as PenLine, LuPlus as Plus, LuSettings as Settings, LuTrash2 as Trash2, LuTrendingUp as TrendingUp } from 'react-icons/lu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/atoms/tooltip/tooltip';
 import { useActivities, useCreateDefaultActivities, useDeleteActivity, useUpdateActivity } from '@/hooks/useActivity';
 import { useEffect, useState } from 'react';
@@ -354,12 +354,12 @@ export default function SuperAdminActivities() {
                                         <div className="flex space-x-2">
                                             <Link href={`/super-admin/activities/${activity.id}`} className="flex-1">
                                                 <Button variant="outline" size="sm" className="w-full">
-                                                    <Edit3 className="h-4 w-4 mr-1" />
+                                                    <PenLine className="h-4 w-4 mr-1" />
                                                     Edit
                                                 </Button>
                                             </Link>
                                             <Tooltip>
-                                                <TooltipTrigger>
+                                                <TooltipTrigger asChild>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, User } from 'lucide-react';
+import { LuArrowLeft as ArrowLeft, LuUser as User } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { useCreateAthlete, useSignDisclaimer } from '@/hooks/useAthlete';
 import { useEffect, useState } from 'react';

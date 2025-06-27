@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Edit3, MapPin, Settings, TargetIcon, Trash2 } from 'lucide-react';
+import { LuMapPin as MapPin, LuPenLine as PenLine, LuSettings as Settings, LuTargetIcon as TargetIcon, LuTrash2 as Trash2 } from 'react-icons/lu';
 import { useDeleteLocation, useLocation, useUpdateLocation } from '@/hooks/useLocation';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -240,7 +240,7 @@ export default function SuperAdminLocationEdit() {
                                 variant="outline"
                                 className="flex items-center gap-2"
                             >
-                                <Edit3 className="h-4 w-4" />
+                                <PenLine className="h-4 w-4" />
                                 {isEditing ? 'Cancel Edit' : 'Edit Location'}
                             </Button>
                             <Button

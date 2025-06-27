@@ -1,24 +1,24 @@
-import { ActivityIcon } from "./material-icons";
+import { ActivityIcons } from "@/components/atoms/icon/icon";
 
 // Popular activity-related Material Icons
 export const AVAILABLE_ACTIVITIES = [
     // Defaults
-    { name: ActivityIcon.DirectionsRun, label: 'Run', categories: ['Defaults', 'Outdoor'] },
-    { name: ActivityIcon.DirectionsBike, label: 'Bike', categories: ['Defaults', 'Outdoor'] },
-    { name: ActivityIcon.Hiking, label: 'Hike', categories: ['Defaults', 'Outdoor'] },
+    { name: ActivityIcons.Run, label: 'Run', categories: ['Defaults', 'Outdoor'] },
+    { name: ActivityIcons.Bike, label: 'Bike', categories: ['Defaults', 'Outdoor'] },
+    { name: ActivityIcons.Hiking, label: 'Hike', categories: ['Defaults', 'Outdoor'] },
 
     // Outdoor activities
-    { name: ActivityIcon.DirectionsWalk, label: 'Walk', categories: ['Outdoor'] },
+    { name: ActivityIcons.Walk, label: 'Walk', categories: ['Outdoor'] },
     // { name: ActivityIcon.NordicWalking, label: 'Nordic Walking', category: 'Outdoor' },
-    { name: ActivityIcon.Ice, label: 'Winter Sports', categories: ['Winter'] },
-    { name: ActivityIcon.Downhill, label: 'Skiing', categories: ['Winter'] },
-    { name: ActivityIcon.Snowboarding, label: 'Snow-boarding', categories: ['Winter'] },
-    { name: ActivityIcon.Snowshoeing, label: 'Snow-shoeing', categories: ['Winter'] },
-    { name: ActivityIcon.Waves, label: 'Water Sports', categories: ['Water'] },
-    { name: ActivityIcon.Kayaking, label: 'Kayaking', categories: ['Water'] },
-    { name: ActivityIcon.Rowing, label: 'Rafting', categories: ['Water'] },
-    { name: ActivityIcon.Sailboat, label: 'Boating', categories: ['Water'] },
-    { name: ActivityIcon.Pool, label: 'Swimming', categories: ['Water'] },
+    { name: ActivityIcons.Ice, label: 'Winter Sports', categories: ['Winter'] },
+    { name: ActivityIcons.Skiing, label: 'Skiing', categories: ['Winter'] },
+    { name: ActivityIcons.Snowboarding, label: 'Snow-boarding', categories: ['Winter'] },
+    { name: ActivityIcons.Snowshoeing, label: 'Snow-shoeing', categories: ['Winter'] },
+    { name: ActivityIcons.Waves, label: 'Water Sports', categories: ['Water'] },
+    { name: ActivityIcons.Kayaking, label: 'Kayaking', categories: ['Water'] },
+    { name: ActivityIcons.Rowing, label: 'Rafting', categories: ['Water'] },
+    { name: ActivityIcons.Sailboat, label: 'Boating', categories: ['Water'] },
+    { name: ActivityIcons.Pool, label: 'Swimming', categories: ['Water'] },
     // { name: ActivityIcon.Surfing, label: 'Surfing', categories: 'Water' },
     // { name: ActivityIcon.Sailboat, label: 'Sailing', categories: 'Water' },
 

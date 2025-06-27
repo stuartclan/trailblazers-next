@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/atoms/button/button';
-import { ChevronRight } from 'lucide-react';
+import { LuChevronRight as ChevronRight } from 'react-icons/lu';
 import type { LocationEntity } from '@/lib/db/entities/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocationsByHost } from '@/hooks/useLocation';

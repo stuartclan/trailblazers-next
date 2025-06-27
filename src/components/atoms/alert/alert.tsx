@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils/ui';
-import { AlertCircle, CheckCircle, XCircle, Info } from 'lucide-react';
+import { LuCircleAlert as AlertCircle, LuCircleCheck as CheckCircle, LuCircleX as XCircle, LuInfo as Info } from 'react-icons/lu';
 
 const alertVariants = cva(
   'alert relative rounded-md border-1 p-4',

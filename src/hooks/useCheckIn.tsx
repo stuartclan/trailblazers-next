@@ -11,11 +11,11 @@ const fetchAthleteCheckIns = async (athleteId: string, limit = 50): Promise<Chec
   const response = await apiClient.get<CheckInEntity[]>(
     `/api/athletes/${athleteId}/checkins?limit=${limit}`
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -23,11 +23,11 @@ const fetchPetCheckIns = async (petId: string, limit = 50): Promise<PetCheckInEn
   const response = await apiClient.get<PetCheckInEntity[]>(
     `/api/pets/${petId}/checkins?limit=${limit}`
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -35,11 +35,11 @@ const fetchHostCheckIns = async (hostId: string, limit = 50): Promise<CheckInEnt
   const response = await apiClient.get<CheckInEntity[]>(
     `/api/hosts/${hostId}/checkins?limit=${limit}`
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -47,11 +47,11 @@ const fetchHostPetCheckIns = async (hostId: string, limit = 50): Promise<PetChec
   const response = await apiClient.get<PetCheckInEntity[]>(
     `/api/hosts/${hostId}/pet-checkins?limit=${limit}`
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -62,11 +62,11 @@ const createCheckIn = async (data: {
   activityId: string;
 }): Promise<CheckInEntity> => {
   const response = await apiClient.post<CheckInEntity>('/api/checkins', data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -77,17 +77,27 @@ const createPetCheckIn = async (data: {
   locationId: string;
 }): Promise<PetCheckInEntity> => {
   const response = await apiClient.post<PetCheckInEntity>('/api/pet-checkins', data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
+  return response.data!;
+};
+
+const updateCheckIn = async (data: { athleteId: string; timestamp: number, activityId: string }): Promise<CheckInEntity> => {
+  const response = await apiClient.patch<CheckInEntity>(`/api/athletes/${data.athleteId}/checkins/${data.timestamp}`, data);
+
+  if (response.error) {
+    throw new Error(response.error);
+  }
+
   return response.data!;
 };
 
 const deleteCheckIn = async ({ athleteId, timestamp }: { athleteId: string; timestamp: number }): Promise<void> => {
   const response = await apiClient.delete(`/api/athletes/${athleteId}/checkins/${timestamp}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
@@ -95,7 +105,7 @@ const deleteCheckIn = async ({ athleteId, timestamp }: { athleteId: string; time
 
 const deletePetCheckIn = async ({ petId, timestamp }: { petId: string; timestamp: number }): Promise<void> => {
   const response = await apiClient.delete(`/api/pets/${petId}/checkins/${timestamp}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
@@ -106,13 +116,13 @@ const getAthleteCheckInCount = async (athleteId: string, hostId?: string): Promi
   if (hostId) {
     url += `?hostId=${hostId}`;
   }
-  
+
   const response = await apiClient.get<{ count: number }>(url);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!.count;
 };
 
@@ -121,13 +131,13 @@ const getPetCheckInCount = async (petId: string, hostId?: string): Promise<numbe
   if (hostId) {
     url += `?hostId=${hostId}`;
   }
-  
+
   const response = await apiClient.get<{ count: number }>(url);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!.count;
 };
 
@@ -135,11 +145,11 @@ const hasCheckedInAtHostWithinWeek = async ({ athleteId, hostId }: { athleteId: 
   const response = await apiClient.get<{ hasCheckedIn: boolean }>(
     `/api/athletes/${athleteId}/checkins/recent?hostId=${hostId}`
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!.hasCheckedIn;
 };
 
@@ -178,7 +188,7 @@ export const useHostPetCheckIns = (hostId: string, limit = 50) => {
 
 export const useCreateCheckIn = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createCheckIn,
     onSuccess: (data) => {
@@ -193,7 +203,7 @@ export const useCreateCheckIn = () => {
 
 export const useCreatePetCheckIn = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createPetCheckIn,
     onSuccess: (data) => {
@@ -206,9 +216,22 @@ export const useCreatePetCheckIn = () => {
   });
 };
 
+export const useUpdateCheckIn = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateCheckIn,
+    onSuccess: (data) => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['checkins', 'athlete', data.aid] });
+      queryClient.invalidateQueries({ queryKey: ['checkins', 'host', data.hid] });
+    },
+  });
+};
+
 export const useDeleteCheckIn = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deleteCheckIn,
     onSuccess: (_data, variables) => {
@@ -221,7 +244,7 @@ export const useDeleteCheckIn = () => {
 
 export const useDeletePetCheckIn = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deletePetCheckIn,
     onSuccess: (_data, variables) => {

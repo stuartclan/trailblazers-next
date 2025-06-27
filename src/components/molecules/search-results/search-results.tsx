@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { Search, User, UserPlus } from 'lucide-react';
+import { LuSearch as Search, LuUser as User, LuUserPlus as UserPlus } from 'react-icons/lu';
 
 import { AthleteEntity } from '@/lib/db/entities/types';
 import { Button } from '@/components/atoms/button/button';
@@ -38,35 +38,35 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 }) => {
   // State for the search input
   const [searchQuery, setSearchQuery] = React.useState('');
-  
+
   // Search for athletes when the query is long enough
   const { data: searchResults, isLoading } = useAthleteSearch(searchQuery.length >= minimumSearchLength ? searchQuery : '');
-  
+
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-  
+
   // Handle athlete selection
   const handleAthleteSelect = (athlete: AthleteEntity) => {
     if (onSelect) {
       onSelect(athlete);
     }
   };
-  
+
   // Handle "Register New" button click
   const handleRegisterNew = () => {
     if (onRegisterNew) {
       onRegisterNew();
     }
   };
-  
+
   // Whether to show search results
   const showResults = searchQuery.length >= minimumSearchLength;
-  
+
   // Whether to show the "No results" message
   const showNoResults = showResults && !isLoading && (!searchResults || searchResults.length === 0);
-  
+
   return (
     <div className={cn('search-results space-y-3', className)}>
       {/* Search Input */}
@@ -78,14 +78,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           placeholder={placeholder}
           leftIcon={<Search className="h-4 w-4" />}
         />
-        
+
         {searchQuery.length > 0 && searchQuery.length < minimumSearchLength && (
           <p className="mt-1 text-xs text-gray-500">
             Enter at least {minimumSearchLength} characters to search
           </p>
         )}
       </div>
-      
+
       {/* Loading Indicator */}
       {isLoading && (
         <div className="py-4 text-center">
@@ -93,7 +93,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <span className="ml-2 text-sm text-gray-500">Searching...</span>
         </div>
       )}
-      
+
       {/* Search Results */}
       {showResults && !isLoading && searchResults && searchResults.length > 0 && (
         <div className="border-1 rounded-md overflow-hidden divide-y">
@@ -119,12 +119,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           ))}
         </div>
       )}
-      
+
       {/* No Results Message */}
       {showNoResults && (
         <div className="py-4 text-center">
           <p className="text-gray-500 mb-4">{noResultsMessage}</p>
-          
+
           {showRegisterButton && (
             <Button
               variant="outline"

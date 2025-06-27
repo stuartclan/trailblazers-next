@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, MapPin, TrendingUp, Users } from 'lucide-react';
+import { LuActivity as Activity, LuMapPin as MapPin, LuTrendingUp as TrendingUp, LuUsers as Users } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { HostEntity, LocationEntity } from '@/lib/db/entities/types';
 import { useEffect, useState } from 'react';

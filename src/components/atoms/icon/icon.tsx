@@ -2,11 +2,124 @@
 
 import * as React from 'react';
 
-import { cn } from '@/lib/utils/ui';
-import { useMaterialIcons } from '@/lib/utils/material-icons';
+import { MdAcUnit, MdCardGiftcard, MdCelebration, MdDirectionsBike, MdDirectionsRun, MdDirectionsWalk, MdDownhillSkiing, MdEmojiEvents, MdFitnessCenter, MdHiking, MdKayaking, MdLocalActivity, MdNordicWalking, MdPets, MdPool, MdRedeem, MdRowing, MdSailing, MdSnowboarding, MdSnowshoeing, MdSportsBasketball, MdSportsGymnastics, MdSportsTennis, MdSportsVolleyball, MdStar, MdSurfing, MdVerified, MdWaves } from 'react-icons/md';
 
-export interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
-  name: string;
+import { GiMailShirt } from 'react-icons/gi';
+import { IoIosShirt } from 'react-icons/io';
+import { cn } from '@/lib/utils/ui';
+
+// import { useMaterialIcons } from '@/lib/utils/material-icons';
+
+export enum IconNames {
+  // Outdoor activities
+  Bike,
+  Walk,
+  Run,
+  Hiking,
+  Skiing,
+  NordicWalking,
+  Kayaking,
+  Surfing,
+  Rowing,
+  Pool,
+  Sailboat,
+  Snowboarding,
+  Snowshoeing,
+  Ice,
+  Waves,
+
+  // Indoor activities
+  FitnessCenter,
+  SportsGymnastics,
+  SportsTennis,
+  SportsBasketball,
+  SportsVolleyball,
+
+  // Rewards
+  Shirt,
+  ShirtLongSleeve,
+  EmojiEvents,
+  Verified,
+  Pets,
+  LocalActivity,
+  Redeem,
+  CardGiftcard,
+  Celebration,
+  Star,
+};
+
+export const ActivityIcons = {
+  Bike: 'bike',
+  Walk: 'walk',
+  Run: 'run',
+  Hiking: 'hiking',
+  Skiing: 'skiing',
+  NordicWalking: 'nordicWalking',
+  Kayaking: 'kayaking',
+  Surfing: 'surfing',
+  Rowing: 'rowing',
+  Pool: 'pool',
+  Sailboat: 'sailboat',
+  Snowboarding: 'snowboarding',
+  Snowshoeing: 'snowshoeing',
+  Ice: 'ice',
+  Waves: 'waves',
+}
+
+const activityMap = {
+  [ActivityIcons.Bike]: IconNames.Bike,
+  [ActivityIcons.Walk]: IconNames.Walk,
+  [ActivityIcons.Run]: IconNames.Run,
+  [ActivityIcons.Hiking]: IconNames.Hiking,
+  [ActivityIcons.Skiing]: IconNames.Skiing,
+  [ActivityIcons.NordicWalking]: IconNames.NordicWalking,
+  [ActivityIcons.Kayaking]: IconNames.Kayaking,
+  [ActivityIcons.Surfing]: IconNames.Surfing,
+  [ActivityIcons.Rowing]: IconNames.Rowing,
+  [ActivityIcons.Pool]: IconNames.Pool,
+  [ActivityIcons.Sailboat]: IconNames.Sailboat,
+  [ActivityIcons.Snowboarding]: IconNames.Snowboarding,
+  [ActivityIcons.Snowshoeing]: IconNames.Snowshoeing,
+  [ActivityIcons.Ice]: IconNames.Ice,
+  [ActivityIcons.Waves]: IconNames.Waves,
+}
+
+const iconMap: Record<IconNames, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  [IconNames.Bike]: MdDirectionsBike,
+  [IconNames.Walk]: MdDirectionsWalk,
+  [IconNames.Run]: MdDirectionsRun,
+  [IconNames.Hiking]: MdHiking,
+  [IconNames.Skiing]: MdDownhillSkiing,
+  [IconNames.NordicWalking]: MdNordicWalking,
+  [IconNames.Kayaking]: MdKayaking,
+  [IconNames.Surfing]: MdSurfing,
+  [IconNames.Rowing]: MdRowing,
+  [IconNames.Pool]: MdPool,
+  [IconNames.Sailboat]: MdSailing,
+  [IconNames.Snowboarding]: MdSnowboarding,
+  [IconNames.Snowshoeing]: MdSnowshoeing,
+  [IconNames.Ice]: MdAcUnit,
+  [IconNames.Waves]: MdWaves,
+  [IconNames.FitnessCenter]: MdFitnessCenter,
+  [IconNames.SportsGymnastics]: MdSportsGymnastics,
+  [IconNames.SportsTennis]: MdSportsTennis,
+  [IconNames.SportsBasketball]: MdSportsBasketball,
+  [IconNames.SportsVolleyball]: MdSportsVolleyball,
+  [IconNames.Shirt]: IoIosShirt,
+  [IconNames.ShirtLongSleeve]: GiMailShirt,
+  [IconNames.EmojiEvents]: MdEmojiEvents,
+  [IconNames.Verified]: MdVerified,
+  [IconNames.Pets]: MdPets,
+  [IconNames.LocalActivity]: MdLocalActivity,
+  [IconNames.Redeem]: MdRedeem,
+  [IconNames.CardGiftcard]: MdCardGiftcard,
+  [IconNames.Celebration]: MdCelebration,
+  [IconNames.Star]: MdStar,
+}
+
+export interface IconProps extends React.HTMLAttributes<SVGSVGElement> {
+  name: IconNames | string;
+  type?: 'activity';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   color?:
   | 'primary'
@@ -39,24 +152,36 @@ const colorMap = {
   inherit: 'text-inherit',
 };
 
-const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
-  ({ name, size = 'md', color = 'inherit', className, ...props }, ref) => {
+const Icon = React.forwardRef<SVGSVGElement, IconProps>(
+  ({ name, type, size = 'md', color = 'inherit', className, ...props }, ref) => {
     // Load Material Icons stylesheet
-    useMaterialIcons();
+    // useMaterialIcons();
+    const iconName = typeof name == 'string' || type == 'activity' ? activityMap[name as keyof typeof activityMap] : name;
+
+    const IconComponent = iconMap[iconName] as React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
     return (
-      <span
+      <IconComponent
         ref={ref}
         className={cn(
-          'material-icons',
           sizeMap[size],
           colorMap[color],
-          className
+          className,
         )}
         {...props}
-      >
-        {name}
-      </span>
+      />
+      // <span
+      //   ref={ref}
+      //   className={cn(
+      //     'material-icons',
+      //     sizeMap[size],
+      //     colorMap[color],
+      //     className
+      //   )}
+      //   {...props}
+      // >
+      //   {name}
+      // </span>
     );
   }
 );

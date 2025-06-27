@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Edit3, MapPin, Plus, Trash2, Users } from 'lucide-react';
+import { LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuTrash2 as Trash2, LuUsers as Users } from 'react-icons/lu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/atoms/tooltip/tooltip';
 import { useDeleteLocation, useLocations } from '@/hooks/useLocation';
 import { useEffect, useState } from 'react';
@@ -202,7 +202,7 @@ export default function SuperAdminLocations() {
                                         <div className="flex items-center space-x-2">
                                             <Link href={`/super-admin/hosts/${hostId}/locations/${location.id}`}>
                                                 <Button variant="ghost" size="sm">
-                                                    <Edit3 className="h-4 w-4" />
+                                                    <PenLine className="h-4 w-4" />
                                                 </Button>
                                             </Link>
                                             <Tooltip>

@@ -3,7 +3,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import * as React from 'react';
 
-import { X } from 'lucide-react';
+import { LuX as X } from 'react-icons/lu';
 import { cn } from '@/lib/utils/ui';
 
 interface ActionSheetAction {

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { LuCheck as Check, LuChevronDown as ChevronDown, LuChevronUp as ChevronUp } from 'react-icons/lu';
 import { cn } from '@/lib/utils/ui';
 import { Label } from '../label/label';
 
@@ -51,36 +51,36 @@ export interface SelectProps extends VariantProps<typeof selectTriggerVariants> 
 }
 
 const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
-  ({ 
-    options, 
-    value, 
-    defaultValue, 
-    name, 
-    placeholder = 'Select an option', 
-    label, 
-    helpText, 
-    error, 
-    required, 
-    disabled, 
-    id, 
-    className, 
+  ({
+    options,
+    value,
+    defaultValue,
+    name,
+    placeholder = 'Select an option',
+    label,
+    helpText,
+    error,
+    required,
+    disabled,
+    id,
+    className,
     variant,
     size,
     onValueChange,
-    ...props 
+    ...props
   }, ref) => {
     // Generate ID unconditionally to avoid React Hook conditional call warning
     const generatedId = React.useId();
     // Then use the provided ID if available, otherwise use the generated one
     const selectId = id || generatedId;
-    
+
     // Handle variant choice based on error state
     const triggerVariant = error ? 'error' : variant;
 
     return (
       <div className="select-wrapper mb-4">
         {label && (
-          <Label 
+          <Label
             htmlFor={selectId}
             required={required}
             className="mb-2 block"
@@ -88,7 +88,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
             {label}
           </Label>
         )}
-        
+
         <SelectPrimitive.Root
           value={value}
           defaultValue={defaultValue}
@@ -110,7 +110,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
               <ChevronDown />
             </SelectPrimitive.Icon>
           </SelectPrimitive.Trigger>
-          
+
           <SelectPrimitive.Portal>
             <SelectPrimitive.Content
               className="select-content relative z-50 min-w-[8rem] overflow-hidden rounded-md border-1 border-gray-200 bg-white text-gray-950 shadow-md animate-in fade-in-80"
@@ -120,7 +120,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
               <SelectPrimitive.ScrollUpButton className="flex h-6 cursor-default items-center justify-center bg-white text-gray-700">
                 <ChevronUp className="h-4 w-4" />
               </SelectPrimitive.ScrollUpButton>
-              
+
               <SelectPrimitive.Viewport className="p-1">
                 {options.map((option) => (
                   <SelectPrimitive.Item
@@ -138,18 +138,18 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
                   </SelectPrimitive.Item>
                 ))}
               </SelectPrimitive.Viewport>
-              
+
               <SelectPrimitive.ScrollDownButton className="flex h-6 cursor-default items-center justify-center bg-white text-gray-700">
                 <ChevronDown className="h-4 w-4" />
               </SelectPrimitive.ScrollDownButton>
             </SelectPrimitive.Content>
           </SelectPrimitive.Portal>
         </SelectPrimitive.Root>
-        
+
         {helpText && !error && (
           <p className="mt-1 text-sm text-gray-500">{helpText}</p>
         )}
-        
+
         {error && (
           <p className="mt-1 text-sm text-red-500">{error}</p>
         )}

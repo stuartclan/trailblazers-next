@@ -3,7 +3,7 @@
 import * as React from 'react';
 
 import { ACTIVITY_CATEGORIES, AVAILABLE_ACTIVITIES } from '@/lib/utils/activity-helper';
-import { Search, X } from 'lucide-react';
+import { LuSearch as Search, LuX as X } from 'react-icons/lu';
 
 import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Button } from '@/components/atoms/button/button';

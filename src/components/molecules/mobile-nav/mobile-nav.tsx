@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { Award, Home, Menu, Settings, Users, X } from 'lucide-react';
+import { LuAward as Award, LuHouse as Home, LuMenu as Menu, LuSettings as Settings, LuUsers as Users, LuX as X } from 'react-icons/lu';
 
 import { Button } from '@/components/atoms/button/button';
 import Link from 'next/link';

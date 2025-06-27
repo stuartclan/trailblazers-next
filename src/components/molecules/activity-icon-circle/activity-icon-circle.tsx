@@ -10,9 +10,12 @@ interface ActivityIconCircleProps {
 }
 
 const sizeMapper: Record<string, { size: string, iconSize: IconProps['size'] }> = {
-    sm: { size: 'w-8 h-8', iconSize: 'lg' },
-    md: { size: 'w-12 h-12', iconSize: 'xl' },
-    lg: { size: 'w-16 h-16', iconSize: 'xxl' },
+    // sm: { size: 'w-8 h-8', iconSize: 'lg' },
+    // md: { size: 'w-12 h-12', iconSize: 'xl' },
+    // lg: { size: 'w-16 h-16', iconSize: 'xxl' },
+    sm: { size: 'p-1.5', iconSize: 'lg' },
+    md: { size: 'p-2', iconSize: 'xl' },
+    lg: { size: 'p-2.5', iconSize: 'xxl' },
 }
 
 const styles = {
@@ -23,11 +26,11 @@ const styles = {
 export const ActivityIconCircle = ({ activity, size = 'md', variant = 'default' }: ActivityIconCircleProps) => {
     const { size: wrapperSize, iconSize } = sizeMapper[size];
     return (
-        <div className={cn('rounded-full flex items-center justify-center',
+        <span className={cn('rounded-full flex items-center justify-center',
             activity.en ? styles[variant] : styles['ghost'],
             wrapperSize,
         )}>
             <Icon name={activity.i || ''} size={iconSize} />
-        </div>
+        </span>
     )
 }

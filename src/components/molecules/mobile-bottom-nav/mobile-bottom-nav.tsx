@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { Award, Home, Settings, Users } from 'lucide-react';
+import { LuAward as Award, LuHouse as Home, LuSettings as Settings, LuUsers as Users } from 'react-icons/lu';
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils/ui';
@@ -40,7 +40,7 @@ export const MobileBottomNav: React.FC<BottomNavProps> = ({
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = pathname === tab.href || pathname.startsWith(tab.href + '/');
-          
+
           return (
             <Link
               key={tab.href}
