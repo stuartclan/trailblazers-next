@@ -239,7 +239,7 @@ export default function SuperAdminHosts() {
           <EmptyState
             icon={<Users className="h-12 w-12" />}
             title="No hosts found"
-            description="Get started by creating your first host organization."
+            description="Get started by creating your first host."
             actionLabel="Create Host"
             onAction={() => setShowCreateForm(true)}
           />
@@ -298,7 +298,7 @@ export default function SuperAdminHosts() {
         )}
 
         {/* Summary Stats */}
-        {hostsWithLocationCounts.length > 0 && (
+        {/* {hostsWithLocationCounts.length > 0 && (
           <Card className="mt-8">
             <CardHeader>
               <CardTitle>Summary</CardTitle>
@@ -328,7 +328,7 @@ export default function SuperAdminHosts() {
               </div>
             </CardContent>
           </Card>
-        )}
+        )} */}
       </div>
     </div>
   );

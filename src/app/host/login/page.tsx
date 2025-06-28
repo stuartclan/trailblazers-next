@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/car
 import { Alert } from '@/components/atoms/alert/alert';
 import { Button } from '@/components/atoms/button/button';
 import { Input } from '@/components/atoms/input/input';
+import { isSuperAdmin } from '@/lib/auth/api-auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -15,34 +16,42 @@ export default function HostLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const router = useRouter();
   const { login } = useAuth();
   const { success, error: toastError, info } = useToastNotifications();
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     // Show progress toast
     info('Signing you in...', 'Authentication');
-    
+
     try {
-      await login(email, password);
-      
+      const res = await login(email, password);
+
+      if (!res?.success) {
+        // Shouldn't really get here
+        const errorMessage = 'Login unsuccessful';
+        setError(errorMessage);
+        toastError(errorMessage, 'Admin authentication failed');
+        return;
+      }
+
       // Show success toast
       success('Successfully signed in! Redirecting...', 'Welcome Back');
-      
+
       // Small delay to show success message
       setTimeout(() => {
         router.push('/host/select-location');
       }, 1000);
-      
+
     } catch (err: any) {
       console.error('Login error:', err);
       const errorMessage = err.message || 'Failed to login. Please check your credentials.';
-      
+
       // Show error in both toast and local state for immediate feedback
       setError(errorMessage);
       toastError(errorMessage, 'Sign In Failed');
@@ -50,7 +59,7 @@ export default function HostLogin() {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-md">
@@ -60,14 +69,14 @@ export default function HostLogin() {
             <p className="text-gray-600 mt-2 font-normal">Sign in to manage check-ins</p>
           </CardTitle>
         </CardHeader>
-        
+
         <CardContent>
           {error && (
             <Alert variant="error" className="mb-6">
               {error}
             </Alert>
           )}
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Email"
@@ -78,7 +87,7 @@ export default function HostLogin() {
               placeholder="Enter your email"
               disabled={loading}
             />
-            
+
             <Input
               label="Password"
               type="password"
@@ -88,7 +97,7 @@ export default function HostLogin() {
               placeholder="Enter your password"
               disabled={loading}
             />
-            
+
             <Button
               type="submit"
               disabled={loading || !email || !password}

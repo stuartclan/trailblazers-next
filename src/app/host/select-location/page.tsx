@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 
 export default function SelectLocation() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, getHostId } = useAuth();
+  const { isAuthenticated, isLoading, user, getHostId } = useAuth();
   // const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +35,11 @@ export default function SelectLocation() {
     if (!isLoading && !isAuthenticated) {
       router.push('/host/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+    if (user?.isSuperAdmin) {
+      router.push('/super-admin');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isLoading]);
 
   // If the host only has one location, automatically select it
   useEffect(() => {

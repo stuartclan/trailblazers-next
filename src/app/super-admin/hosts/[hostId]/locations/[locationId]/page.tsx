@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { LuMapPin as MapPin, LuPenLine as PenLine, LuSettings as Settings, LuTargetIcon as TargetIcon, LuTrash2 as Trash2 } from 'react-icons/lu';
+import { LuMapPin as MapPin, LuPenLine as PenLine, LuSettings as Settings, LuTarget as TargetIcon, LuTrash2 as Trash2 } from 'react-icons/lu';
 import { useDeleteLocation, useLocation, useUpdateLocation } from '@/hooks/useLocation';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -370,7 +370,7 @@ export default function SuperAdminLocationEdit() {
                 </div>
 
                 {/* Location Statistics */}
-                <Card className="mt-6">
+                {/* <Card className="mt-6">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <MapPin className="h-5 w-5" />
@@ -401,7 +401,7 @@ export default function SuperAdminLocationEdit() {
                             </div>
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
 
                 {/* Warning for Deletion */}
                 {isEditing && (

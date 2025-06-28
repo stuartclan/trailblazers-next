@@ -24,7 +24,7 @@ const fetchLocations = async (): Promise<LocationEntity[]> => {
     throw new Error(response.error);
   }
 
-  return response.data!.sort((a, b) => a.c - b.c);
+  return response.data!.sort((a, b) => a.n.localeCompare(b.n));
 };
 
 export const fetchLocationsByHost = async (hostId: string): Promise<LocationEntity[]> => {
@@ -34,7 +34,7 @@ export const fetchLocationsByHost = async (hostId: string): Promise<LocationEnti
     throw new Error(response.error);
   }
 
-  return response.data!.sort((a, b) => a.c - b.c);
+  return response.data!.sort((a, b) => a.n.localeCompare(b.n));
 };
 
 const createLocation = async (data: {

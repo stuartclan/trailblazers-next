@@ -297,8 +297,6 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
             activityId: activity.id
           });
 
-          console.log('DEBUG: Updated check-in in flow:', updatedCheckIn);
-
           success(`Updated check-in for ${athlete.fn} ${athlete.ln} - set to ${activity.n}`);
 
           // Update local state

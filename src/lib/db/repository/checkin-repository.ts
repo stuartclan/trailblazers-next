@@ -355,8 +355,6 @@ export class CheckInRepository {
       })
     );
 
-    console.log('DEBUG: update response:', test);
-
     // Return the updated check-in
     return this.getCheckIn(athleteId, timestamp);
   }

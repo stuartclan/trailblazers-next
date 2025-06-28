@@ -263,7 +263,7 @@ export default function SuperAdminActivities() {
                 />
 
                 {/* Filter Tabs */}
-                <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
+                <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-md w-fit">
                     {[
                         { key: 'all', label: 'All Activities' },
                         { key: 'enabled', label: 'Enabled' },
@@ -272,11 +272,11 @@ export default function SuperAdminActivities() {
                         <TouchTarget
                             key={tab.key}
                             onClick={() => setFilter(tab.key as typeof filter)}
-                            className="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                            className="px-4 py-2 rounded-sm text-sm font-medium transition-colors"
                             style={{
                                 backgroundColor: filter === tab.key ? 'white' : 'transparent',
                                 color: filter === tab.key ? '#1f2937' : '#6b7280',
-                                boxShadow: filter === tab.key ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none'
+                                boxShadow: filter === tab.key ? '0 1px 2px rgba(0, 0, 0, 0.2)' : 'none'
                             }}
                         >
                             {tab.label} ({activities?.filter(a =>

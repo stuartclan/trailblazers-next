@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuTrash2 as Trash2, LuUsers as Users } from 'react-icons/lu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/atoms/tooltip/tooltip';
-import { useDeleteLocation, useLocations } from '@/hooks/useLocation';
+import { useDeleteLocation, useLocations, useLocationsByHost } from '@/hooks/useLocation';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
@@ -32,7 +32,7 @@ export default function SuperAdminLocations() {
         isLoading: isLoadingLocations,
         error: locationsError,
         refetch: refetchLocations
-    } = useLocations();
+    } = useLocationsByHost(hostId);
 
     const {
         data: hosts,
@@ -241,7 +241,7 @@ export default function SuperAdminLocations() {
                 )}
 
                 {/* Summary Stats */}
-                {locations && locations.length > 0 && (
+                {/* {locations && locations.length > 0 && (
                     <Card className="mt-8">
                         <CardHeader>
                             <CardTitle>Summary</CardTitle>
@@ -271,7 +271,7 @@ export default function SuperAdminLocations() {
                             </div>
                         </CardContent>
                     </Card>
-                )}
+                )} */}
             </div>
         </div>
     );

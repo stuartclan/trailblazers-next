@@ -5,6 +5,9 @@ import * as React from 'react';
 
 import { Breadcrumb, BreadcrumbItem } from '../breadcrumb/breadcrumb';
 
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+
 interface PageHeaderProps {
   title: string;
   description?: string;
@@ -20,6 +23,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actions,
   className,
 }) => {
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    router.push('/host/login');
+  };
+
   return (
     <div className={className}>
       {breadcrumbs && breadcrumbs.length > 0 && (
@@ -34,11 +46,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           )}
         </div>
         
-        {actions && (
-          <div className="flex flex-col sm:flex-row gap-2">
-            {actions}
-          </div>
-        )}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button
+            onClick={handleLogout}
+            className="text-red-500 hover:underline"
+          >
+            Logout
+          </button>
+          { actions }
+        </div>
       </div>
     </div>
   );
