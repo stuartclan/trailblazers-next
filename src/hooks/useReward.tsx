@@ -9,41 +9,41 @@ import { apiClient } from '@/lib/utils/api-client';
 // API client functions using the new authenticated client
 const fetchReward = async (rewardId: string): Promise<RewardEntity> => {
   const response = await apiClient.get<RewardEntity>(`/api/rewards/${rewardId}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const fetchGlobalRewards = async (): Promise<RewardEntity[]> => {
   const response = await apiClient.get<RewardEntity[]>('/api/rewards/global');
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
-  return response.data!;
+
+  return response.data!.sort((a, b) => a.cnt - b.cnt);
 };
 
 const fetchPetRewards = async (): Promise<RewardEntity[]> => {
   const response = await apiClient.get<RewardEntity[]>('/api/rewards/pet');
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const fetchHostRewards = async (hostId: string): Promise<RewardEntity[]> => {
   const response = await apiClient.get<RewardEntity[]>(`/api/hosts/${hostId}/rewards`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -55,11 +55,11 @@ const createReward = async (data: {
   hostId?: string;
 }): Promise<RewardEntity> => {
   const response = await apiClient.post<RewardEntity>('/api/rewards', data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -71,17 +71,17 @@ const updateReward = async ({
   data: Partial<Omit<RewardEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'rt' | 'GSI1PK' | 'GSI1SK'>>;
 }): Promise<RewardEntity> => {
   const response = await apiClient.patch<RewardEntity>(`/api/rewards/${id}`, data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const deleteReward = async (id: string): Promise<void> => {
   const response = await apiClient.delete(`/api/rewards/${id}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
@@ -89,11 +89,11 @@ const deleteReward = async (id: string): Promise<void> => {
 
 const fetchRewardClaims = async (athleteId: string): Promise<RewardClaimEntity[]> => {
   const response = await apiClient.get<RewardClaimEntity[]>(`/api/athletes/${athleteId}/rewards/claims`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -101,11 +101,11 @@ const fetchHostRewardClaims = async (hostId: string, limit = 50): Promise<Reward
   const response = await apiClient.get<RewardClaimEntity[]>(
     `/api/hosts/${hostId}/rewards/claims?limit=${limit}`
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -117,11 +117,11 @@ const createRewardClaim = async (data: {
   petId?: string;
 }): Promise<RewardClaimEntity> => {
   const response = await apiClient.post<RewardClaimEntity>('/api/rewards/claims', data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -136,16 +136,16 @@ const checkRewardEligibility = async (data: {
   if (data.hostId) {
     url += `?hostId=${data.hostId}`;
   }
-  
+
   const response = await apiClient.get<{
     globalRewards: { rewardId: string; count: number }[];
     hostRewards: { rewardId: string; count: number }[];
   }>(url);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -159,15 +159,15 @@ const checkPetRewardEligibility = async (data: {
   if (data.hostId) {
     url += `?hostId=${data.hostId}`;
   }
-  
+
   const response = await apiClient.get<{
     petRewards: { rewardId: string; count: number }[];
   }>(url);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -180,11 +180,11 @@ const getOneAwayAthletes = async (hostId: string): Promise<{
     globalOneAway: { athleteId: string; rewardId: string; currentCount: number; requiredCount: number }[];
     hostOneAway: { athleteId: string; rewardId: string; currentCount: number; requiredCount: number }[];
   }>(`/api/hosts/${hostId}/rewards/one-away`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -196,11 +196,11 @@ const createDefaultRewards = async (): Promise<{
     global: RewardEntity[];
     pet: RewardEntity[];
   }>('/api/rewards/create-defaults');
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -237,7 +237,7 @@ export const useHostRewards = (hostId: string) => {
 
 export const useCreateReward = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createReward,
     onSuccess: (data) => {
@@ -248,7 +248,7 @@ export const useCreateReward = () => {
       } else if (data.rt === 'host' && data.hid) {
         queryClient.invalidateQueries({ queryKey: ['rewards', 'host', data.hid] });
       }
-      
+
       queryClient.invalidateQueries({ queryKey: ['rewards', data.id] });
     },
   });
@@ -256,7 +256,7 @@ export const useCreateReward = () => {
 
 export const useUpdateReward = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: updateReward,
     onSuccess: (data) => {
@@ -267,7 +267,7 @@ export const useUpdateReward = () => {
       } else if (data.rt === 'host' && data.hid) {
         queryClient.invalidateQueries({ queryKey: ['rewards', 'host', data.hid] });
       }
-      
+
       queryClient.invalidateQueries({ queryKey: ['rewards', data.id] });
     },
   });
@@ -275,24 +275,22 @@ export const useUpdateReward = () => {
 
 export const useDeleteReward = () => {
   const queryClient = useQueryClient();
-  
+
+
   return useMutation({
+    // onMutate(variables) {
+    //   const reward = queryClient.getQueryData<RewardEntity>(['rewards', variables]);
+    //   console.log('DEBUG: delete mutation:', variables);
+    //   console.log('DEBUG: mutation reward:', reward);
+    // },
     mutationFn: deleteReward,
     onSuccess: (_data, variables) => {
       // We need the reward data to know which queries to invalidate
-      // Fortunately, it should be in the cache
-      const reward = queryClient.getQueryData<RewardEntity>(['rewards', variables]);
-      
-      if (reward) {
-        if (reward.rt === 'global') {
-          queryClient.invalidateQueries({ queryKey: ['rewards', 'global'] });
-        } else if (reward.rt === 'pet') {
-          queryClient.invalidateQueries({ queryKey: ['rewards', 'pet'] });
-        } else if (reward.rt === 'host' && reward.hid) {
-          queryClient.invalidateQueries({ queryKey: ['rewards', 'host', reward.hid] });
-        }
-      }
-      
+      // Unfortunately, it isn't in the cache to pull out - so just invalidate all queries
+      queryClient.invalidateQueries({ queryKey: ['rewards', 'global'] });
+      queryClient.invalidateQueries({ queryKey: ['rewards', 'pet'] });
+      // If we use this for host reward deletion, we'll need to handle this differently
+      // queryClient.invalidateQueries({ queryKey: ['rewards', 'host', reward.hid] });
       queryClient.invalidateQueries({ queryKey: ['rewards', variables] });
     },
   });
@@ -316,19 +314,19 @@ export const useHostRewardClaims = (hostId: string, limit = 50) => {
 
 export const useCreateRewardClaim = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createRewardClaim,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['rewards', 'claims', data.aid] });
       queryClient.invalidateQueries({ queryKey: ['rewards', 'claims', 'host', data.hid] });
       queryClient.invalidateQueries({ queryKey: ['rewards', 'eligibility', data.aid] });
-      
+
       // If this is a pet reward claim
       if (data.pid) {
         queryClient.invalidateQueries({ queryKey: ['rewards', 'eligibility', 'pet', data.pid] });
       }
-      
+
       // Invalidate one-away queries
       queryClient.invalidateQueries({ queryKey: ['rewards', 'one-away', data.hid] });
     },
@@ -361,7 +359,7 @@ export const useOneAwayAthletes = (hostId: string) => {
 
 export const useCreateDefaultRewards = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createDefaultRewards,
     onSuccess: () => {

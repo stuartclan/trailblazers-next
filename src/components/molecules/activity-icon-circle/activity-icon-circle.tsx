@@ -30,7 +30,7 @@ export const ActivityIconCircle = ({ activity, size = 'md', variant = 'default' 
             activity.en ? styles[variant] : styles['ghost'],
             wrapperSize,
         )}>
-            <Icon name={activity.i || ''} size={iconSize} />
+            <Icon name={activity.i || ''} variant="activity" size={iconSize} />
         </span>
     )
 }

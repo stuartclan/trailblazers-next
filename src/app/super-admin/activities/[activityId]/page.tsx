@@ -420,7 +420,7 @@ export default function SuperAdminActivityDetail() {
                                         className="w-full justify-start"
                                         disabled={isEditing}
                                     >
-                                        <Edit3 className="h-4 w-4 mr-2" />
+                                        <PenLine className="h-4 w-4 mr-2" />
                                         Edit Activity Details
                                     </Button>
 

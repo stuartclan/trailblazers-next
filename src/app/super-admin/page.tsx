@@ -135,13 +135,46 @@ export default function SuperAdminDashboard() {
                 <ChevronRight />
               </Link>
 
-              <Link
+              {/* <Link
                 href="/super-admin/settings"
                 className="block p-4 border-1 rounded-md hover:bg-gray-50 flex justify-between items-center"
               >
                 <span>System Settings</span>
+
+                IDEAS for future settings page:
+                  ## System-wide Settings:
+                  Default reward configurations
+                  Check-in limits per day/athlete
+                  Emergency contact requirements
+                  Email notification settings
+
+                  ## Host Management Settings:
+                  Default disclaimer text template
+                  Required fields for athlete registration
+                  Location activity limits (currently hardcoded to 3)
+
+                  ## Activity Settings:
+                  Create default activities for new hosts
+                  Global activity enable/disable
+                  Activity sorting/ordering
+
+                  ## Reward Settings:
+                  Global reward thresholds
+                  Automatic reward creation rules
+                  Reward claim notifications
+
+                  ## Data Management:
+                  Export/import functionality
+                  Backup settings
+                  Data retention policies
+
+                  ## Security Settings:
+                  Password requirements
+                  Session timeout settings
+                  Failed login attempt limits
+
                 <Settings />
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>

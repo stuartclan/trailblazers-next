@@ -38,7 +38,7 @@ export enum IconNames {
   // Rewards
   Shirt,
   ShirtLongSleeve,
-  EmojiEvents,
+  Trophy,
   Verified,
   Pets,
   LocalActivity,
@@ -84,6 +84,20 @@ const activityMap = {
   [ActivityIcons.Waves]: IconNames.Waves,
 }
 
+export const RewardIcons = {
+  Shirt: 'shirt',
+  ShirtLongSleeve: 'shirtLongSleeve',
+  Trophy: 'trophy',
+  Star: 'star',
+}
+
+const rewardMap = {
+  [RewardIcons.Shirt]: IconNames.Shirt,
+  [RewardIcons.ShirtLongSleeve]: IconNames.ShirtLongSleeve,
+  [RewardIcons.Trophy]: IconNames.Trophy,
+  [RewardIcons.Star]: IconNames.Star,
+}
+
 const iconMap: Record<IconNames, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   [IconNames.Bike]: MdDirectionsBike,
   [IconNames.Walk]: MdDirectionsWalk,
@@ -107,7 +121,7 @@ const iconMap: Record<IconNames, React.ComponentType<React.SVGProps<SVGSVGElemen
   [IconNames.SportsVolleyball]: MdSportsVolleyball,
   [IconNames.Shirt]: IoIosShirt,
   [IconNames.ShirtLongSleeve]: GiMailShirt,
-  [IconNames.EmojiEvents]: MdEmojiEvents,
+  [IconNames.Trophy]: MdEmojiEvents,
   [IconNames.Verified]: MdVerified,
   [IconNames.Pets]: MdPets,
   [IconNames.LocalActivity]: MdLocalActivity,
@@ -119,7 +133,7 @@ const iconMap: Record<IconNames, React.ComponentType<React.SVGProps<SVGSVGElemen
 
 export interface IconProps extends React.HTMLAttributes<SVGSVGElement> {
   name: IconNames | string;
-  type?: 'activity';
+  variant?: 'activity' | 'reward';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   color?:
   | 'primary'
@@ -152,11 +166,19 @@ const colorMap = {
   inherit: 'text-inherit',
 };
 
+const getIconName = (name: string | IconNames, variant: 'activity' | 'reward' | undefined) => {
+  if (variant === 'activity') {
+    return activityMap[name as keyof typeof activityMap];
+  } else if (variant === 'reward') {
+    return rewardMap[name as keyof typeof rewardMap];
+  } else {
+    return name;
+  }
+};
+
 const Icon = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ name, type, size = 'md', color = 'inherit', className, ...props }, ref) => {
-    // Load Material Icons stylesheet
-    // useMaterialIcons();
-    const iconName = typeof name == 'string' || type == 'activity' ? activityMap[name as keyof typeof activityMap] : name;
+  ({ name, variant, size = 'md', color = 'inherit', className, ...props }, ref) => {
+    const iconName = getIconName(name, variant) as IconNames;
 
     const IconComponent = iconMap[iconName] as React.ComponentType<React.SVGProps<SVGSVGElement>>;
 

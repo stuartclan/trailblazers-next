@@ -110,12 +110,13 @@ export async function PATCH(
 
     // Parse request body
     const body = await request.json();
+    const { cnt, n, i } = body;
 
     // Update reward
     const updatedReward = await repositories.rewards.updateReward(rewardId, {
-      cnt: body.count,
-      n: body.name,
-      i: body.icon
+      cnt,
+      n,
+      i,
     });
 
     return NextResponse.json(updatedReward);
