@@ -39,8 +39,9 @@ export async function GET(
       count = await repositories.checkins.getAthleteCheckInCountByHost(athleteId, hostId);
     } else {
       // Get all check-ins and count them
-      const checkIns = await repositories.checkins.getAthleteCheckIns(athleteId, 1000);
-      count = checkIns.length;
+      // const checkIns = await repositories.checkins.getAthleteCheckIns(athleteId, 1000);
+      // count = checkIns.length;
+      count = await repositories.checkins.getAthleteCheckInCount(athleteId);
     }
 
     return NextResponse.json({ count });

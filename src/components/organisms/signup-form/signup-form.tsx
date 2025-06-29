@@ -180,9 +180,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     };
 
     const shirtGenderOptions = [
-        { value: 'Mens', label: 'Mens' },
-        { value: 'Womens', label: 'Womens' },
-        { value: 'Kids', label: 'Kids' },
+        { value: 'M', label: 'Mens' },
+        { value: 'W', label: 'Womens' },
+        { value: 'K', label: 'Kids' },
     ];
 
     const shirtSizeOptions = [

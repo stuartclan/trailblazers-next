@@ -70,6 +70,7 @@ export interface ActivityEntity extends BaseEntity {
   GSI1SK: string; // 'ACT#[activityId]'
 }
 
+// Athlete entity
 export interface AthleteEntity extends BaseEntity {
   t: 'athlete';
   fn: string; // first name
@@ -83,12 +84,12 @@ export interface AthleteEntity extends BaseEntity {
   en?: string; // emergency name
   ep?: string; // emergency phone
   ar?: boolean; // archived reward
-  ds: string[]; // host IDs where disclaimer was signed
+  ds: Record<string, number>; // disclaimer signatures: hostId -> unix timestamp
   del: boolean; // soft delete flag
-  GSI1PK: string; // 'TYPE#athlete'
-  GSI1SK: string; // 'ATH#[athleteId]'
-  GSI2PK: string; // NAME#[lastName]#[firstName]
-  GSI2SK: string; // ATH#[athleteId]
+  GSI1PK: string; // 'TYPE#athlete' 
+  GSI1SK: string; // 'EMAIL#[email]'
+  GSI2PK: string; // 'TYPE#athlete'
+  GSI2SK: string; // NAME#[LASTNAME]#[FIRSTNAME]
 }
 
 export interface PetEntity extends BaseEntity {

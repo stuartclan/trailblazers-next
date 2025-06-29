@@ -40,10 +40,10 @@ export class AthleteRepository {
     const athlete: AthleteEntity = {
       pk: `ATH#${id}`,
       sk: 'METADATA',
-      GSI1PK: 'TYPE#athlete',
-      GSI1SK: `ATH#${id}`,
-      GSI2PK: `TYPE#athlete`,
-      GSI2SK: `NAME#${lastName}#${firstName}`,
+      GSI1PK: `TYPE#athlete`,
+      GSI1SK: `NAME#${lastName}#${firstName}`,
+      GSI2PK: 'TYPE#athlete',
+      GSI2SK: `EMAIL#${(data.email || '').toLowerCase()}`,
       t: 'athlete',
       id,
       c: timestamp,
@@ -55,11 +55,12 @@ export class AthleteRepository {
       em: data.employer || '',
       sg: data.shirtGender || '',
       ss: data.shirtSize || '',
-      lc: data.legacyCount || 0,
+      // lc: data.legacyCount || 0,
       en: data.emergencyName || '',
       ep: data.emergencyPhone || '',
       ar: false,
-      ds: [],
+      // TODO: this should default to the host they're signing up with
+      ds: {},
       del: false
     };
 
@@ -108,12 +109,40 @@ export class AthleteRepository {
         ':prefix': 'ATH#'
       };
     } else {
-      keyCondition = 'GSI2PK = :type AND begins_with(GSI2SK, :namePrefix)';
+      keyCondition = 'GSI1PK = :type AND begins_with(GSI1SK, :namePrefix)';
       expressionValues = {
         ':type': 'TYPE#athlete',
         ':namePrefix': `NAME#${lastName}`
       };
     }
+
+    const response = await this.docClient.send(new QueryCommand({
+      TableName: this.tableName,
+      IndexName: 'GSI1',
+      KeyConditionExpression: keyCondition,
+      ExpressionAttributeValues: expressionValues,
+      // FilterExpression: 'del <> :deleted',
+      // ExpressionAttributeValues: {
+      //   ...expressionValues,
+      //   ':deleted': true
+      // }
+    }));
+
+    return (response.Items as AthleteEntity[]) || [];
+  }
+
+  /**
+   * Search athletes by email
+   */
+  async searchAthletesByEmail(email: string): Promise<AthleteEntity[]> {
+    // Format search parameters
+    email = email.toLowerCase();
+
+    const keyCondition = 'GSI2PK = :type AND begins_with(GSI2SK, :namePrefix)';
+    const expressionValues = {
+      ':type': 'TYPE#athlete',
+      ':namePrefix': `EMAIL#${email}`
+    };
 
     const response = await this.docClient.send(new QueryCommand({
       TableName: this.tableName,
@@ -133,7 +162,7 @@ export class AthleteRepository {
   /**
    * Update an athlete
    */
-  async updateAthlete(id: string, updateData: Partial<Omit<AthleteEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'GSI2PK' | 'GSI2SK'>>): Promise<AthleteEntity | null> {
+  async updateAthlete(id: string, updateData: Partial<Omit<AthleteEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'GSI1PK' | 'GSI1SK' | 'GSI2PK' | 'GSI2SK'>>): Promise<AthleteEntity | null> {
     // Create update expression dynamically based on provided fields
     const updateExpressionParts: string[] = ['SET u = :timestamp'];
     const expressionAttributeValues: Record<string, any> = {
@@ -197,16 +226,18 @@ export class AthleteRepository {
    * Add host disclaimer signature to athlete
    */
   async addDisclaimerSignature(athleteId: string, hostId: string): Promise<AthleteEntity | null> {
+    const timestamp = Math.floor(Date.now() / 1000);
+
     const athlete = await this.getAthleteById(athleteId);
     if (!athlete) return null;
 
     // Add hostId to disclaimer signatures if not already present
-    if (!athlete.ds.includes(hostId)) {
-      const updatedDs = [...athlete.ds, hostId];
-      return this.updateAthlete(athleteId, { ds: updatedDs });
-    }
-
-    return athlete;
+    return this.updateAthlete(athleteId, {
+      ds: {
+        ...athlete.ds,
+        [`${hostId}`]: timestamp,
+      },
+    });
   }
 
   /**
@@ -216,7 +247,7 @@ export class AthleteRepository {
     const athlete = await this.getAthleteById(athleteId);
     if (!athlete) return false;
 
-    return athlete.ds.includes(hostId);
+    return !!athlete.ds[hostId];
   }
 
   /**
@@ -234,6 +265,7 @@ export class AthleteRepository {
       FilterExpression: 'del <> :deleted',
       ExpressionAttributeValues: {
         ':typeKey': 'TYPE#athlete',
+        // TODO: Ideally this wouldn't be a filter expression (less efficient)...
         ':deleted': true
       },
       Limit: limit

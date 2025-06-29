@@ -222,6 +222,27 @@ export class CheckInRepository {
   }
 
   /**
+   * Get the count of check-ins for an athlete
+   */
+  async getAthleteCheckInCount(athleteId: string): Promise<number> {
+    // Note: This is not the most efficient way to get a count in DynamoDB
+    // For a high-scale app, consider using a counter or calculating this another way
+    const checkIns = await this.docClient.send(
+      new QueryCommand({
+        TableName: this.tableName,
+        KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+        ExpressionAttributeValues: {
+          ':pk': `ATH#${athleteId}`,
+          ':sk': 'CI#',
+        },
+        Select: 'COUNT'
+      })
+    );
+
+    return checkIns.Count || 0;
+  }
+
+  /**
    * Get the count of check-ins for an athlete at a specific host
    */
   async getAthleteCheckInCountByHost(athleteId: string, hostId: string): Promise<number> {

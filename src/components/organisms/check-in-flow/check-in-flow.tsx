@@ -136,7 +136,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
           //   `/api/athletes/${athlete.id}/disclaimer/${host.id}`
           // );
           // const needsDisclaimer = !(disclaimerResponse.data?.hasSigned || false);
-          const needsDisclaimer = !(athlete.ds?.includes(host.id) || false);
+          const needsDisclaimer = !(host.id in athlete.ds || false);
 
           // If they checked in this week, try to get their current activity
           // let currentActivity: ActivityEntity | undefined;
