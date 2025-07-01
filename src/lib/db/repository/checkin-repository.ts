@@ -360,7 +360,7 @@ export class CheckInRepository {
       return existingCheckIn; // Nothing to update
     }
 
-    const test = await this.docClient.send(
+    await this.docClient.send(
       new UpdateCommand({
         TableName: this.tableName,
         Key: {

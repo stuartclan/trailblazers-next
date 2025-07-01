@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isHost, isSuperAdmin, verifyAuth } from '@/lib/auth/api-auth';
 
-import { getStartOfWeekUnix } from '@/lib/utils/dates';
+import { CheckInHelper } from '@/lib/utils/helpers/checkin';
 import { repositories } from '@/lib/db/repository';
 
 // Create a new check-in
@@ -35,33 +35,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const startOfWeek = getStartOfWeekUnix();
-    const endOfWeek = startOfWeek + (7 * 24 * 60 * 60); // 7 days in seconds
-
-    // A lot of validation calls... 
-    const [
-      athlete,
-      host,
-      location,
-      activity,
-      recentCheckIns,
-      hasSignedDisclaimer
-    ] = await Promise.all([
+    // Fetch all required entities in parallel
+    const [athlete, host, location, activity] = await Promise.all([
       repositories.athletes.getAthleteById(body.athleteId),
       repositories.hosts.getHostById(body.hostId),
       repositories.locations.getLocationById(body.locationId),
-      repositories.activities.getActivityById(body.activityId),
-      repositories.checkins.getAthleteCheckInsByHostInDateRange(
-        body.athleteId,
-        body.hostId,
-        startOfWeek * 1000,  // Convert to milliseconds
-        endOfWeek * 1000     // Convert to milliseconds
-      ),
-      repositories.athletes.hasSignedDisclaimer(body.athleteId, body.hostId),
+      repositories.activities.getActivityById(body.activityId)
     ]);
 
     // Check if athlete exists
-    // const athlete = await repositories.athletes.getAthleteById(body.athleteId);
     if (!athlete) {
       return NextResponse.json(
         { error: 'Athlete not found' },
@@ -70,7 +52,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if host exists
-    // const host = await repositories.hosts.getHostById(body.hostId);
     if (!host) {
       return NextResponse.json(
         { error: 'Host not found' },
@@ -79,7 +60,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if location exists and belongs to the host
-    // const location = await repositories.locations.getLocationById(body.locationId);
     if (!location) {
       return NextResponse.json(
         { error: 'Location not found' },
@@ -94,8 +74,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if activity exists and is enabled for the location
-    // const activity = await repositories.activities.getActivityById(body.activityId);
     if (!activity) {
       return NextResponse.json(
         { error: 'Activity not found' },
@@ -103,6 +81,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if activity exists and is enabled for the location
     if (!activity.en) {
       return NextResponse.json(
         { error: 'Activity is not enabled' },
@@ -117,21 +96,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if athlete has already checked in at this host this week
-    // const startOfWeek = getStartOfWeekUnix();
-    // const endOfWeek = startOfWeek + (7 * 24 * 60 * 60); // 7 days in seconds
-
-    // const [recentCheckIns, hasSignedDisclaimer] = await Promise.all([
-    //   repositories.checkins.getAthleteCheckInsByHostInDateRange(
-    //     body.athleteId,
-    //     body.hostId,
-    //     startOfWeek * 1000,  // Convert to milliseconds
-    //     endOfWeek * 1000     // Convert to milliseconds
-    //   ),
-    //   repositories.athletes.hasSignedDisclaimer(body.athleteId, body.hostId),
-    // ]);
-
-    if (recentCheckIns.length > 0) {
+    // Use the lw property to check eligibility
+    if (!CheckInHelper.canCheckInAtHost(athlete, body.hostId)) {
       return NextResponse.json(
         { error: 'Athlete has already checked in at this host this week' },
         { status: 400 }
@@ -139,22 +105,37 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if athlete has signed the disclaimer for this host
-    // const hasSignedDisclaimer = await repositories.athletes.hasSignedDisclaimer(body.athleteId, body.hostId);
-    if (!hasSignedDisclaimer) {
+    // This is already efficiently stored on the athlete entity
+    if (!athlete.ds[body.hostId]) {
       return NextResponse.json(
         { error: 'Athlete has not signed the disclaimer for this host', requiresDisclaimer: true },
         { status: 400 }
       );
     }
 
-    // Create check-in
-    const checkIn = await repositories.checkins.createCheckIn({
-      athleteId: body.athleteId,
-      hostId: body.hostId,
-      locationId: body.locationId,
-      activityId: body.activityId,
-      timestamp: body.timestamp || Date.now()
-    });
+    // Determine if we should increment global count
+    const shouldIncrementGlobalCount = CheckInHelper.shouldIncrementGlobalCount(athlete);
+
+    // Create check-in timestamp
+    const checkInTimestamp = body.timestamp || Date.now();
+
+    // Create the check-in record and update athlete optimization properties atomically
+    const [checkIn] = await Promise.all([
+      repositories.checkins.createCheckIn({
+        athleteId: body.athleteId,
+        hostId: body.hostId,
+        locationId: body.locationId,
+        activityId: body.activityId,
+        timestamp: checkInTimestamp
+      }),
+      repositories.athletes.updateAfterCheckIn(
+        body.athleteId,
+        body.hostId,
+        checkInTimestamp,
+        body.activityId,
+        shouldIncrementGlobalCount
+      )
+    ]);
 
     return NextResponse.json(checkIn);
   } catch (error: any) {

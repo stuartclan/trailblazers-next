@@ -85,7 +85,7 @@ const createPetCheckIn = async (data: {
   return response.data!;
 };
 
-const updateCheckIn = async (data: { athleteId: string; timestamp: number, activityId: string }): Promise<CheckInEntity> => {
+const updateCheckIn = async (data: { athleteId: string; hostId: string, timestamp: number, activityId: string }): Promise<CheckInEntity> => {
   const response = await apiClient.patch<CheckInEntity>(`/api/athletes/${data.athleteId}/checkins/${data.timestamp}`, data);
 
   if (response.error) {

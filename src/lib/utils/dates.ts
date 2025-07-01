@@ -1,12 +1,42 @@
 import { format, formatDistanceToNow, isToday, isYesterday, parseISO } from 'date-fns';
 
 /**
+ * Configuration for week start day
+ * 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+ * Based on JavaScript Date.getDay() values
+ */
+export const WEEK_START_DAY = 0; // Sunday
+
+/**
+ * Get the start of the current week based on configured week start day
+ */
+export function getCurrentWeekStart(): number {
+  const now = new Date();
+  const weekStart = new Date(now);
+
+  const currentDay = now.getDay();
+  const daysToSubtract = (currentDay - WEEK_START_DAY + 7) % 7;
+
+  weekStart.setDate(now.getDate() - daysToSubtract);
+  weekStart.setHours(0, 0, 0, 0);
+  return weekStart.getTime();
+}
+
+/**
+ * Check if timestamp is within current week
+ */
+export function isWithinCurrentWeek(timestamp: number): boolean {
+  const weekStart = getCurrentWeekStart();
+  return timestamp >= weekStart;
+}
+
+/**
  * Format a date as a readable string
  */
 export function formatDate(date: Date | number | string): string {
   // Convert string to Date if necessary
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  
+
   return format(dateObj, 'MMM d, yyyy');
 }
 
@@ -16,7 +46,7 @@ export function formatDate(date: Date | number | string): string {
 export function formatTime(date: Date | number | string): string {
   // Convert string to Date if necessary
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  
+
   return format(dateObj, 'h:mm a');
 }
 
@@ -26,7 +56,7 @@ export function formatTime(date: Date | number | string): string {
 export function formatDateTime(date: Date | number | string): string {
   // Convert string to Date if necessary
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  
+
   return format(dateObj, 'MMM d, yyyy h:mm a');
 }
 
@@ -36,14 +66,14 @@ export function formatDateTime(date: Date | number | string): string {
 export function formatRelativeTime(date: Date | number | string): string {
   // Convert string to Date if necessary
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  
+
   // Check if the date is today or yesterday
   if (isToday(dateObj)) {
     return `Today at ${format(dateObj, 'h:mm a')}`;
   } else if (isYesterday(dateObj)) {
     return `Yesterday at ${format(dateObj, 'h:mm a')}`;
   }
-  
+
   // Otherwise, use relative time
   return formatDistanceToNow(dateObj, { addSuffix: true });
 }
@@ -56,7 +86,7 @@ export function unixToDate(timestamp: number): Date {
   if (timestamp < 10000000000) {
     return new Date(timestamp * 1000);
   }
-  
+
   // Otherwise, assume it's already in milliseconds
   return new Date(timestamp);
 }
@@ -97,13 +127,13 @@ export function getStartOfWeekUnix(): number {
  */
 export function isDateInCurrentWeek(date: Date | number | string): boolean {
   // Convert string or timestamp to Date if necessary
-  const dateObj = typeof date === 'string' 
-    ? parseISO(date) 
+  const dateObj = typeof date === 'string'
+    ? parseISO(date)
     : (typeof date === 'number' ? unixToDate(date) : date);
-  
+
   const startOfWeek = getStartOfWeek();
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 7);
-  
+
   return dateObj >= startOfWeek && dateObj < endOfWeek;
 }

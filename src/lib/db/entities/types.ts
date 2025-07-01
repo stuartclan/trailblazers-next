@@ -80,12 +80,15 @@ export interface AthleteEntity extends BaseEntity {
   em?: string; // employer
   sg?: string; // shirt gender
   ss?: string; // shirt size
+  lw: Record<string, string>; // last weekly check-in per host: hostId -> "timestamp#activityId"
+  gc: number; // global check-in count (for global rewards)
   lc?: number; // legacy check-in count (reference only)
   en?: string; // emergency name
   ep?: string; // emergency phone
   ar?: boolean; // archived reward
   ds: Record<string, number>; // disclaimer signatures: hostId -> unix timestamp
   del: boolean; // soft delete flag
+
   GSI1PK: string; // 'TYPE#athlete' 
   GSI1SK: string; // 'EMAIL#[email]'
   GSI2PK: string; // 'TYPE#athlete'

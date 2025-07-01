@@ -177,7 +177,7 @@ const getIconName = (name: string | IconNames, variant: 'activity' | 'reward' | 
 };
 
 const Icon = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ name, variant, size = 'md', color = 'inherit', className, ...props }, ref) => {
+  ({ name, variant = 'activity', size = 'md', color = 'inherit', className, ...props }, ref) => {
     const iconName = getIconName(name, variant) as IconNames;
 
     const IconComponent = iconMap[iconName] as React.ComponentType<React.SVGProps<SVGSVGElement>>;

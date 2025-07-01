@@ -9,7 +9,18 @@ import {
 import { getDynamoDBDocumentClient, getTableName } from '../utils/client';
 
 import { AthleteEntity } from '../entities/types';
+import { CheckInHelper } from '@/lib/utils/helpers/checkin';
 import { nanoid } from 'nanoid';
+
+// Add default values for optimization properties if they don't exist
+// This handles existing athletes created before these properties were added
+const defaultCheckInValues = (athlete: AthleteEntity) => {
+  return {
+    ...athlete,
+    gc: athlete.gc ?? 0, // Start with 0 global check-ins
+    lw: athlete.lw ?? {}, // Start with no weekly check-ins
+  };
+};
 
 export class AthleteRepository {
   private docClient = getDynamoDBDocumentClient();
@@ -55,13 +66,15 @@ export class AthleteRepository {
       em: data.employer || '',
       sg: data.shirtGender || '',
       ss: data.shirtSize || '',
-      // lc: data.legacyCount || 0,
       en: data.emergencyName || '',
       ep: data.emergencyPhone || '',
+      gc: 0, // Start with 0 global check-ins
+      lw: {}, // Start with no weekly check-ins
+      // lc: data.legacyCount || 0,
       ar: false,
       // TODO: this should default to the host they're signing up with
       ds: {},
-      del: false
+      del: false,
     };
 
     await this.docClient.send(
@@ -75,7 +88,7 @@ export class AthleteRepository {
   }
 
   /**
-   * Get an athlete by ID
+   * Get an athlete by ID with default values for optimization properties
    */
   async getAthleteById(id: string): Promise<AthleteEntity | null> {
     const response = await this.docClient.send(
@@ -88,11 +101,13 @@ export class AthleteRepository {
       })
     );
 
-    return (response.Item as AthleteEntity) || null;
+    if (!response.Item) return null;
+
+    return defaultCheckInValues(response.Item as AthleteEntity);
   }
 
   /**
-   * Search athletes by last name
+   * Search athletes by last name with default optimization properties
    */
   async searchAthletesByName(lastName: string, firstName?: string): Promise<AthleteEntity[]> {
     // Format search parameters
@@ -120,19 +135,21 @@ export class AthleteRepository {
       TableName: this.tableName,
       IndexName: 'GSI1',
       KeyConditionExpression: keyCondition,
-      ExpressionAttributeValues: expressionValues,
-      // FilterExpression: 'del <> :deleted',
-      // ExpressionAttributeValues: {
-      //   ...expressionValues,
-      //   ':deleted': true
-      // }
+      FilterExpression: 'del <> :deleted',
+      // ExpressionAttributeValues: expressionValues,
+      ExpressionAttributeValues: {
+        ...expressionValues,
+        ':deleted': true
+      }
     }));
 
-    return (response.Items as AthleteEntity[]) || [];
+    const athletes = (response.Items as AthleteEntity[]) || [];
+
+    return athletes.map(defaultCheckInValues);
   }
 
   /**
-   * Search athletes by email
+   * Search athletes by email with default optimization properties
    */
   async searchAthletesByEmail(email: string): Promise<AthleteEntity[]> {
     // Format search parameters
@@ -148,15 +165,17 @@ export class AthleteRepository {
       TableName: this.tableName,
       IndexName: 'GSI2',
       KeyConditionExpression: keyCondition,
-      ExpressionAttributeValues: expressionValues,
-      // FilterExpression: 'del <> :deleted',
-      // ExpressionAttributeValues: {
-      //   ...expressionValues,
-      //   ':deleted': true
-      // }
+      //FilterExpression ExpressionAttributeValues: expressionValues,
+      FilterExpression: 'del <> :deleted',
+      ExpressionAttributeValues: {
+        ...expressionValues,
+        ':deleted': true
+      }
     }));
 
-    return (response.Items as AthleteEntity[]) || [];
+    const athletes = (response.Items as AthleteEntity[]) || [];
+
+    return athletes.map(defaultCheckInValues);
   }
 
   /**
@@ -198,6 +217,32 @@ export class AthleteRepository {
 
     // Return the updated athlete
     return this.getAthleteById(id);
+  }
+
+  /**
+   * Update athlete's optimization properties after check-in
+   */
+  async updateAfterCheckIn(
+    athleteId: string,
+    hostId: string,
+    checkInTimestamp: number,
+    activityId: string,
+    shouldIncrementGlobalCount: boolean
+  ): Promise<AthleteEntity | null> {
+    // Get current athlete to merge with existing lw data
+    const currentAthlete = await this.getAthleteById(athleteId);
+    if (!currentAthlete) return null;
+
+    const lwValue = `${checkInTimestamp}#${activityId}`;
+    const newGc = shouldIncrementGlobalCount ? (currentAthlete.gc || 0) + 1 : (currentAthlete.gc || 0);
+
+    return this.updateAthlete(athleteId, {
+      gc: newGc,
+      lw: {
+        ...(!CheckInHelper.shouldIncrementGlobalCount(currentAthlete) ? currentAthlete.lw : {}),
+        [hostId]: lwValue
+      }
+    });
   }
 
   /**
@@ -265,7 +310,6 @@ export class AthleteRepository {
       FilterExpression: 'del <> :deleted',
       ExpressionAttributeValues: {
         ':typeKey': 'TYPE#athlete',
-        // TODO: Ideally this wouldn't be a filter expression (less efficient)...
         ':deleted': true
       },
       Limit: limit
@@ -279,8 +323,13 @@ export class AthleteRepository {
       new QueryCommand(queryParams)
     );
 
+    const athletes = (response.Items as AthleteEntity[]) || [];
+
+    // Add default values for optimization properties
+    const athletesWithDefaults = athletes.map(defaultCheckInValues);
+
     return {
-      athletes: (response.Items as AthleteEntity[]) || [],
+      athletes: athletesWithDefaults,
       lastEvaluatedKey: response.LastEvaluatedKey
     };
   }

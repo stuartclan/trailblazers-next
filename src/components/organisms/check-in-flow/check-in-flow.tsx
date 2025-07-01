@@ -5,14 +5,15 @@ import * as React from 'react';
 import { ActivityEntity, AthleteEntity, CheckInEntity, HostEntity, LocationEntity } from '@/lib/db/entities/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { Icon, IconNames } from '@/components/atoms/icon/icon';
-import { LuSearch as Search, LuShirt as ShirtIcon, LuUser as User } from 'react-icons/lu';
+import { LuSearch as Search, LuUser as User } from 'react-icons/lu';
+import { getCurrentWeekStart, isWithinCurrentWeek } from '@/lib/utils/dates';
 import { useCreateCheckIn, useDeleteCheckIn, useUpdateCheckIn } from '@/hooks/useCheckIn';
 
 import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Button } from '@/components/atoms/button/button';
+import { CheckInHelper } from '@/lib/utils/helpers/checkin';
 import { DisclaimerModal } from '@/components/molecules/disclaimer-modal/disclaimer-modal';
 import { Input } from '@/components/atoms/input/input';
-import { apiClient } from '@/lib/utils/api-client';
 import { cn } from '@/lib/utils/ui';
 import { useAthleteSearch } from '@/hooks/useAthlete';
 import { useLocationActivities } from '@/hooks/useActivity';
@@ -27,11 +28,64 @@ interface CheckInFlowProps {
 
 interface AthleteCheckInStatus {
   athlete: AthleteEntity;
-  checkInCount: number;
-  // hasCheckedInThisWeek: boolean;
-  // currentActivity?: ActivityEntity;
-  currentCheckIn?: CheckInEntity;
+  canCheckIn: boolean;
+  currentActivity: string | null;
   needsDisclaimer: boolean;
+}
+
+// Helper functions for optimization
+class Helpers {
+  /**
+   * Parse the composite lw value to get timestamp and activity ID
+   */
+  static parseLwValue(lwValue: string): { timestamp: number; activityId: string } | null {
+    if (!lwValue || !lwValue.includes('#')) return null;
+
+    const [timestampStr, activityId] = lwValue.split('#');
+    const timestamp = parseInt(timestampStr);
+
+    if (isNaN(timestamp) || !activityId) return null;
+
+    return { timestamp, activityId };
+  }
+
+  /**
+   * Check if athlete can check in at a specific host this week
+   */
+  static canCheckInAtHost(athlete: AthleteEntity, hostId: string): boolean {
+    const lwValue = athlete.lw?.[hostId];
+    if (!lwValue) return true; // Never checked in at this host
+
+    const parsed = this.parseLwValue(lwValue);
+    if (!parsed) return true; // Invalid data, allow check-in
+
+    return !isWithinCurrentWeek(parsed.timestamp);
+  }
+
+  /**
+   * Get current activity for athlete at a specific host this week
+   */
+  static getCurrentWeekActivity(athlete: AthleteEntity, hostId: string): string | null {
+    const lwValue = athlete.lw?.[hostId];
+    if (!lwValue) return null;
+
+    const parsed = this.parseLwValue(lwValue);
+    if (!parsed || !isWithinCurrentWeek(parsed.timestamp)) return null;
+
+    return parsed.activityId;
+  }
+
+  /**
+   * Process athletes into optimized status objects
+   */
+  static processAthletes(athletes: AthleteEntity[], hostId: string): AthleteCheckInStatus[] {
+    return athletes.map(athlete => ({
+      athlete,
+      canCheckIn: this.canCheckInAtHost(athlete, hostId),
+      currentActivity: this.getCurrentWeekActivity(athlete, hostId),
+      needsDisclaimer: !(athlete.ds?.[hostId])
+    }));
+  }
 }
 
 export const CheckInFlow: React.FC<CheckInFlowProps> = ({
@@ -65,6 +119,21 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   const updateCheckIn = useUpdateCheckIn();
   const deleteCheckIn = useDeleteCheckIn();
 
+  // Auto-reset timer function
+  const resetAutoResetTimer = React.useCallback(() => {
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current);
+    }
+
+    resetTimeoutRef.current = setTimeout(() => {
+      setSearchQuery('');
+      setDebouncedSearchQuery('');
+      setAthleteStatuses([]);
+      info('Search reset due to inactivity');
+    }, 30000); // 30 seconds
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Handle search input change with debouncing
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -85,123 +154,22 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
       setAthleteStatuses([]);
     }
 
-    // // Reset the auto-reset timer
-    // resetAutoResetTimer();
+    // Reset the auto-reset timer
+    resetAutoResetTimer();
   };
 
-  // // Auto-reset timer function
-  // const resetAutoResetTimer = React.useCallback(() => {
-  //   if (resetTimeoutRef.current) {
-  //     clearTimeout(resetTimeoutRef.current);
-  //   }
-
-  //   resetTimeoutRef.current = setTimeout(() => {
-  //     setSearchQuery('');
-  //     setDebouncedSearchQuery('');
-  //     setAthleteStatuses([]);
-  //     info('Search reset due to inactivity');
-  //   }, 30000); // 30 seconds
-  // }, [info]);
-
-  // Process search results and fetch additional data
+  // OPTIMIZED: Process search results without additional API calls
   React.useEffect(() => {
     if (!searchResults || !activities) return;
 
-    const processAthletes = async () => {
-      const statuses: AthleteCheckInStatus[] = [];
-
-      for (const athlete of searchResults) {
-        try {
-          const [checkInCountResponse, lastCheckIn] = await Promise.all([
-            // Fetch check-in count
-            apiClient.get<{ count: number }>(`/api/athletes/${athlete.id}/checkins/count`),
-            // // Last check-in for this host:
-            // apiClient.get<{ hasCheckedIn: boolean }>(`/api/athletes/${athlete.id}/checkins/recent?hostId=${host.id}`),
-            // Get last check-in
-            apiClient.get<any[]>(`/api/athletes/${athlete.id}/checkins?limit=1`),
-          ]);
-          const checkInCount = checkInCountResponse.data?.count || 0;
-
-          // // // Check if checked in this week at this host
-          // // const recentCheckInResponse = await apiClient.get<{ hasCheckedIn: boolean }>(
-          // //   `/api/athletes/${athlete.id}/checkins/recent?hostId=${host.id}`
-          // // );
-          // // const hasCheckedInThisWeek = recentCheckInResponse.data?.hasCheckedIn || false;
-          // const lastCheckIn = await apiClient.get<any[]>(
-          //   `/api/athletes/${athlete.id}/checkins?limit=1`
-          // );
-
-          // Check disclaimer status
-          // const disclaimerResponse = await apiClient.get<{ hasSigned: boolean }>(
-          //   `/api/athletes/${athlete.id}/disclaimer/${host.id}`
-          // );
-          // const needsDisclaimer = !(disclaimerResponse.data?.hasSigned || false);
-          const needsDisclaimer = !(host.id in athlete.ds || false);
-
-          // If they checked in this week, try to get their current activity
-          // let currentActivity: ActivityEntity | undefined;
-          let currentCheckIn: CheckInEntity | undefined;
-
-          // if (hasCheckedInThisWeek) {
-          // if (lastCheckIn) {
-          // const checkInsResponse = await apiClient.get<any[]>(
-          //   `/api/athletes/${athlete.id}/checkins?limit=1`
-          // );
-          // if (checkInsResponse.data) {
-          if (lastCheckIn?.data?.length) {
-            // const thisWeekCheckIn = checkInsResponse.data.find((checkIn: any) =>
-            const thisWeekCheckIn = lastCheckIn.data.find((checkIn: any) => {
-              // TODO: Are we just limiting it to one host a week or just one a week?
-              // checkIn.hid === host.id && isWithinCurrentWeek(checkIn.ct);
-              // const checkinTime = checkIn.c.split('#')[1];
-              return isWithinCurrentWeek(checkIn.c);
-            });
-            if (thisWeekCheckIn) {
-              currentCheckIn = thisWeekCheckIn;
-              // currentActivity = activities.find(a => a.id === thisWeekCheckIn.actid);
-            }
-          }
-          // }
-
-          statuses.push({
-            athlete,
-            checkInCount,
-            // hasCheckedInThisWeek,
-            // currentActivity,
-            currentCheckIn,
-            needsDisclaimer,
-          });
-        } catch (err) {
-          console.error('Error processing athlete:', athlete.id, err);
-          // Add athlete with minimal data if there's an error
-          statuses.push({
-            athlete,
-            checkInCount: 0,
-            // hasCheckedInThisWeek: false,
-            needsDisclaimer: true,
-          });
-        }
-      }
-
-      setAthleteStatuses(statuses);
-    };
-
-    processAthletes();
+    // Process athletes using optimization helper - no additional API calls needed!
+    const statuses = Helpers.processAthletes(searchResults, host.id);
+    setAthleteStatuses(statuses);
   }, [searchResults, activities, host.id]);
-
-  // Helper function to check if timestamp is within current week
-  const isWithinCurrentWeek = (timestampInSeconds: number): boolean => {
-    const now = new Date();
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
-    weekStart.setHours(0, 0, 0, 0);
-
-    const checkInDate = new Date(timestampInSeconds * 1000);
-    return checkInDate >= weekStart;
-  };
 
   // Perform the actual check-in
   const performCheckIn = async (athlete: AthleteEntity, activity: ActivityEntity) => {
+    resetAutoResetTimer(); // Extend the timer on interaction
     try {
       const checkIn = await createCheckIn.mutateAsync({
         athleteId: athlete.id,
@@ -212,17 +180,24 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
       success(`${athlete.fn} ${athlete.ln} checked in for ${activity.n}!`);
 
-      // Update local state
+      // Update local state to reflect the new check-in
+      const checkInTimestamp = checkIn.c;
       setAthleteStatuses(prev => prev.map(status =>
         status.athlete.id === athlete.id
           ? {
             ...status,
-            // hasCheckedInThisWeek: true,
-            // currentActivity: activity,
-            currentCheckIn: checkIn,
-            // checkInCount: status.hasCheckedInThisWeek ? status.checkInCount : status.checkInCount + 1,
-            checkInCount: status.checkInCount + 1,
-            needsDisclaimer: false
+            canCheckIn: false, // They've now checked in this week
+            currentActivity: activity.id,
+            needsDisclaimer: false,
+            athlete: {
+              ...status.athlete,
+              // Update the optimization properties locally
+              gc: CheckInHelper.shouldIncrementGlobalCount(athlete) ? status.athlete.gc + 1 : status.athlete.gc,
+              lw: {
+                ...status.athlete.lw,
+                [host.id]: `${checkInTimestamp}#${activity.id}`
+              }
+            }
           }
           : status
       ));
@@ -239,85 +214,100 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     athleteStatus: AthleteCheckInStatus,
     activity: ActivityEntity
   ) => {
-    // resetAutoResetTimer(); // Extend the timer on interaction
+    resetAutoResetTimer(); // Extend the timer on interaction
+    const { athlete, currentActivity, needsDisclaimer, canCheckIn } = athleteStatus;
 
-    const { athlete, currentCheckIn, needsDisclaimer } = athleteStatus;
-
-    if (currentCheckIn) {
-      // Check if this is the same activity (toggle off)
-      // const isSameActivity = currentCheckIn.actid === activity.id;
-
-      if (currentCheckIn.actid === activity.id) {
-        // Remove check-in
+    // If they have a current activity, handle update/delete
+    if (currentActivity) {
+      if (currentActivity === activity.id) {
+        // Same activity - remove check-in
         try {
-          // Find the check-in to delete
-          // const checkInsResponse = await apiClient.get<any[]>(
-          //   `/api/athletes/${athlete.id}/checkins?limit=10`
-          // );
-          // if (checkInsResponse.data) {
+          // Find the current check-in timestamp from lw property
+          const lwValue = athlete.lw?.[host.id];
+          if (lwValue) {
+            const parsed = Helpers.parseLwValue(lwValue);
+            if (parsed) {
+              await deleteCheckIn.mutateAsync({
+                athleteId: athlete.id,
+                timestamp: parsed.timestamp
+              });
 
-          // const thisWeekCheckIn = checkInsResponse.data.find((checkIn: any) =>
-          //   checkIn.hid === host.id && isWithinCurrentWeek(checkIn.c)
-          // );
+              success(`Removed check-in for ${athlete.fn} ${athlete.ln}`);
 
-          // if (thisWeekCheckIn) {
-          await deleteCheckIn.mutateAsync({
-            athleteId: athlete.id,
-            // timestamp: thisWeekCheckIn.c
-            timestamp: currentCheckIn.c
-          });
+              // Update local state
+              setAthleteStatuses(prev => prev.map(status => {
+                if (status.athlete.id === athlete.id) {
+                  console.log('DEBUG: before delete:', status.athlete.lw);
+                  delete status.athlete.lw[host.id];
+                  console.log('DEBUG: new lw:', status.athlete.lw);
+                  const hasCheckins = Object.keys(status.athlete.lw).length > 0;
+                  console.log('DEBUG: hasCheckins:', hasCheckins);
 
-          success(`Removed check-in for ${athlete.fn} ${athlete.ln}`);
-
-          // Update local state
-          setAthleteStatuses(prev => prev.map(status =>
-            status.athlete.id === athlete.id
-              ? {
-                ...status,
-                // hasCheckedInThisWeek: false,
-                currentCheckIn: undefined,
-                // currentActivity: undefined,
-                checkInCount: status.checkInCount - 1
-              }
-              : status
-          ));
-          // }
-          // }
+                  return {
+                    ...status,
+                    canCheckIn: true,
+                    currentActivity: null,
+                    athlete: {
+                      ...status.athlete,
+                      gc: hasCheckins ? status.athlete.gc - 1 : status.athlete.gc,
+                    }
+                  }
+                }
+                return status;
+              }));
+            }
+          }
         } catch (err) {
           console.error('Error removing check-in:', err);
           error('Failed to remove check-in');
         }
         return;
       } else {
+        // Different activity - update check-in
         try {
-          // Perform update
-          const updatedCheckIn = await updateCheckIn.mutateAsync({
-            athleteId: athlete.id,
-            timestamp: currentCheckIn.c,
-            activityId: activity.id
-          });
+          const lwValue = athlete.lw?.[host.id];
+          if (lwValue) {
+            const parsed = Helpers.parseLwValue(lwValue);
+            if (parsed) {
+              await updateCheckIn.mutateAsync({
+                athleteId: athlete.id,
+                hostId: host.id,
+                timestamp: parsed.timestamp,
+                activityId: activity.id
+              });
 
-          success(`Updated check-in for ${athlete.fn} ${athlete.ln} - set to ${activity.n}`);
+              success(`Updated check-in for ${athlete.fn} ${athlete.ln} - set to ${activity.n}`);
 
-          // Update local state
-          setAthleteStatuses(prev => prev.map(status =>
-            status.athlete.id === athlete.id
-              ? {
-                ...status,
-                currentCheckIn: updatedCheckIn,
-                // status.currentCheckIn ? {
-                //   ...status.currentCheckIn,
-                //   activityId: activity.id
-                // } : undefined,
-              }
-              : status
-          ));
+              // Update local state
+              setAthleteStatuses(prev => prev.map(status =>
+                status.athlete.id === athlete.id
+                  ? {
+                    ...status,
+                    currentActivity: activity.id,
+                    athlete: {
+                      ...status.athlete,
+                      lw: {
+                        ...status.athlete.lw,
+                        [host.id]: `${parsed.timestamp}#${activity.id}`
+                      }
+                    }
+                  }
+                  : status
+              ));
+            }
+          }
         } catch (err) {
           console.error('Error updating check-in:', err);
           error('Failed to update check-in. Please try again.');
         }
         return;
       }
+    }
+
+    // New check-in flow
+    if (!canCheckIn) {
+      error('Athlete has already checked in at this host this week');
+      return;
     }
 
     // Check if disclaimer is needed
@@ -358,13 +348,14 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     };
   }, []);
 
+  // TODO: Update this method to get the global rewards and associated icon
   // Get reward icon class based on check-in count
-  const getRewardIconClass = (count: number): string => {
-    if (count >= 60) return 'user-activity__icon--complete-60';
-    if (count >= 30) return 'user-activity__icon--complete-30';
-    if (count >= 8) return 'user-activity__icon--complete';
-    return 'user-activity__icon';
-  };
+  // const getRewardIconClass = (count: number): string => {
+  //   if (count >= 60) return 'user-activity__icon--complete-60';
+  //   if (count >= 30) return 'user-activity__icon--complete-30';
+  //   if (count >= 8) return 'user-activity__icon--complete';
+  //   return 'user-activity__icon';
+  // };
 
   return (
     <div className={className}>
@@ -397,7 +388,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
               <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 border-b font-medium text-sm">
                 <div className="col-span-3">Last Name</div>
                 <div className="col-span-3">First Name</div>
-                <div className="col-span-2 text-center">Activities</div>
+                <div className="col-span-2 text-center">Count</div>
                 <div className="col-span-4">Check-in</div>
               </div>
 
@@ -420,24 +411,16 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
                       </span>
                     </div>
 
-                    {/* Reward Icon with Count */}
+                    {/* Global Count from athlete.gc property */}
                     <div className="col-span-2 flex items-center justify-center">
                       <div className="relative">
+                        {/* TODO: Get current reward icon for this athlete */}
                         <Icon
                           name={IconNames.Shirt}
-                          // <ShirtIcon
                           className='w-16 h-16 stroke-primary fill-primary'
-                        // color={'blue'}
                         />
-                        {/* <Icon
-                          name={ActivityIcon.DirectionsBike}
-                          size='xxl'
-                          className={cn(
-                            getRewardIconClass(status.checkInCount)
-                          )}
-                        /> */}
                         <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-sm">
-                          {status.checkInCount}
+                          {status.athlete.gc || 0}
                         </span>
                       </div>
                     </div>
@@ -445,21 +428,9 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
                     {/* Activity Buttons */}
                     <div className="col-span-4 flex items-center gap-2">
                       {activities?.slice(0, 3).map((activity) => {
-                        const isSelected = status.currentCheckIn?.actid === activity.id;
+                        const isSelected = status.currentActivity === activity.id;
 
                         return (
-                          // <TouchTarget
-                          //   key={activity.id}
-                          //   onClick={() => handleActivityToggle(status, activity)}
-                          //   haptic={true}
-                          //   className={cn(
-                          //     'flex flex-col items-center justify-center p-2 border-1 rounded-lg transition-all duration-200',
-                          //     'hover:shadow-md active:scale-95 min-h-[60px] min-w-[60px]',
-                          //     isSelected
-                          //       ? 'bg-primary text-white border-primary shadow-md'
-                          //       : 'bg-white hover:bg-gray-50 border-gray-200'
-                          //   )}
-                          // >
                           <Button
                             key={activity.id}
                             variant={isSelected ? 'default' : 'ghost'}
@@ -467,9 +438,6 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
                             className={cn(
                               'flex flex-col items-center justify-center p-2 border-1 rounded-lg transition-all duration-200',
                               'hover:shadow-md active:scale-95 min-h-[60px] min-w-[60px]',
-                              // isSelected
-                              //   ? 'bg-primary text-white border-primary shadow-md'
-                              //   : 'bg-white hover:bg-gray-50 border-gray-200'
                             )}
                           >
                             <ActivityIconCircle
@@ -483,7 +451,6 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
                             />
                             {activity.n}
                           </Button>
-                          // </TouchTarget>
                         );
                       })}
                     </div>
