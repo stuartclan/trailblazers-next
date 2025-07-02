@@ -2,19 +2,18 @@
 
 import * as React from 'react';
 
-import { ActivityEntity, AthleteEntity, CheckInEntity, HostEntity, LocationEntity } from '@/lib/db/entities/types';
+import { ActivityEntity, AthleteEntity, HostEntity, LocationEntity } from '@/lib/db/entities/types';
+import { AthleteCheckInStatus, AthleteItem } from '@/components/molecules/athlete-item/athlete-item';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { Icon, IconNames } from '@/components/atoms/icon/icon';
 import { LuSearch as Search, LuUser as User } from 'react-icons/lu';
-import { getCurrentWeekStart, isWithinCurrentWeek } from '@/lib/utils/dates';
 import { useCreateCheckIn, useDeleteCheckIn, useUpdateCheckIn } from '@/hooks/useCheckIn';
 
-import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
 import { Button } from '@/components/atoms/button/button';
 import { CheckInHelper } from '@/lib/utils/helpers/checkin';
 import { DisclaimerModal } from '@/components/molecules/disclaimer-modal/disclaimer-modal';
 import { Input } from '@/components/atoms/input/input';
-import { cn } from '@/lib/utils/ui';
+import { SkeletonSearchResults } from '@/components/atoms/skeleton/skeleton';
+import { isWithinCurrentWeek } from '@/lib/utils/dates';
 import { useAthleteSearch } from '@/hooks/useAthlete';
 import { useLocationActivities } from '@/hooks/useActivity';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -24,13 +23,6 @@ interface CheckInFlowProps {
   location: LocationEntity;
   onNewAthlete?: () => void;
   className?: string;
-}
-
-interface AthleteCheckInStatus {
-  athlete: AthleteEntity;
-  canCheckIn: boolean;
-  currentActivity: string | null;
-  needsDisclaimer: boolean;
 }
 
 // Helper functions for optimization
@@ -158,7 +150,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     resetAutoResetTimer();
   };
 
-  // OPTIMIZED: Process search results without additional API calls
+  // Process search results without additional API calls
   React.useEffect(() => {
     if (!searchResults || !activities) return;
 
@@ -395,66 +387,12 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
               {/* Athletes */}
               <div className="divide-y">
                 {athleteStatuses.map((status) => (
-                  <div
+                  <AthleteItem
                     key={status.athlete.id}
-                    className="grid grid-cols-12 gap-4 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    {/* Last Name */}
-                    <div className="col-span-3 flex items-center">
-                      <h5 className="font-medium">{status.athlete.ln}</h5>
-                    </div>
-
-                    {/* First Name + MI */}
-                    <div className="col-span-3 flex items-center">
-                      <span>
-                        {status.athlete.fn} {status.athlete.mi || ''}
-                      </span>
-                    </div>
-
-                    {/* Global Count from athlete.gc property */}
-                    <div className="col-span-2 flex items-center justify-center">
-                      <div className="relative">
-                        {/* TODO: Get current reward icon for this athlete */}
-                        <Icon
-                          name={IconNames.Shirt}
-                          className='w-16 h-16 stroke-primary fill-primary'
-                        />
-                        <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-sm">
-                          {status.athlete.gc || 0}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Activity Buttons */}
-                    <div className="col-span-4 flex items-center gap-2">
-                      {activities?.slice(0, 3).map((activity) => {
-                        const isSelected = status.currentActivity === activity.id;
-
-                        return (
-                          <Button
-                            key={activity.id}
-                            variant={isSelected ? 'default' : 'ghost'}
-                            onClick={() => handleActivityToggle(status, activity)}
-                            className={cn(
-                              'flex flex-col items-center justify-center p-2 border-1 rounded-lg transition-all duration-200',
-                              'hover:shadow-md active:scale-95 min-h-[60px] min-w-[60px]',
-                            )}
-                          >
-                            <ActivityIconCircle
-                              activity={{
-                                en: true,
-                                i: activity.i,
-                                n: activity.n
-                              }}
-                              size="sm"
-                              variant={isSelected ? 'default' : 'ghost'}
-                            />
-                            {activity.n}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                    status={status}
+                    activities={activities}
+                    onActivityToggle={handleActivityToggle}
+                  />
                 ))}
               </div>
             </div>
@@ -486,6 +424,12 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
               <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">Ready for Check-in</p>
               <p className="text-sm">Search for an athlete by last name to begin</p>
+            </div>
+          )}
+          {/* Searching */}
+          {searchQuery.length > 2 && !athleteStatuses?.length && (
+            <div className="text-center py-8 text-gray-500">
+              <SkeletonSearchResults count={3} />
             </div>
           )}
         </CardContent>

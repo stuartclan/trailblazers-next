@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { MdAcUnit, MdCardGiftcard, MdCelebration, MdDirectionsBike, MdDirectionsRun, MdDirectionsWalk, MdDownhillSkiing, MdEmojiEvents, MdFitnessCenter, MdHiking, MdKayaking, MdLocalActivity, MdNordicWalking, MdPets, MdPool, MdRedeem, MdRowing, MdSailing, MdSnowboarding, MdSnowshoeing, MdSportsBasketball, MdSportsGymnastics, MdSportsTennis, MdSportsVolleyball, MdStar, MdSurfing, MdVerified, MdWaves } from 'react-icons/md';
+import { MdAcUnit, MdCardGiftcard, MdCelebration, MdDirectionsBike, MdDirectionsRun, MdDirectionsWalk, MdDownhillSkiing, MdEmojiEvents, MdFitnessCenter, MdHiking, MdKayaking, MdLocalActivity, MdNordicWalking, MdPets, MdPool, MdQuestionMark, MdRedeem, MdRowing, MdSailing, MdSnowboarding, MdSnowshoeing, MdSportsBasketball, MdSportsGymnastics, MdSportsTennis, MdSportsVolleyball, MdStar, MdSurfing, MdVerified, MdWaves } from 'react-icons/md';
 
 import { GiMailShirt } from 'react-icons/gi';
 import { IoIosShirt } from 'react-icons/io';
@@ -177,10 +177,17 @@ const getIconName = (name: string | IconNames, variant: 'activity' | 'reward' | 
 };
 
 const Icon = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ name, variant = 'activity', size = 'md', color = 'inherit', className, ...props }, ref) => {
+  ({
+    name,
+    variant = 'activity',
+    size = 'md',
+    color = 'inherit',
+    className,
+    ...props
+  }, ref) => {
     const iconName = getIconName(name, variant) as IconNames;
 
-    const IconComponent = iconMap[iconName] as React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    const IconComponent = iconMap[iconName] as React.ComponentType<React.SVGProps<SVGSVGElement>> || MdQuestionMark;
 
     return (
       <IconComponent

@@ -205,7 +205,7 @@ export class RewardRepository {
     const defaultGlobalRewards = [
       { count: 8, name: 'Tier 1 Reward', icon: IconNames.Shirt },
       { count: 30, name: 'Tier 2 Reward', icon: IconNames.ShirtLongSleeve },
-      { count: 60, name: 'Tier 3 Reward', icon: IconNames.EmojiEvents }
+      { count: 60, name: 'Tier 3 Reward', icon: IconNames.Trophy }
     ];
 
     // Create all default global rewards
