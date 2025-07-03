@@ -1,0 +1,81 @@
+import { ACTIVITY_TERM, ACTIVITY_TERM_SINGULAR } from "@/lib/utils/constants";
+import { Icon, RewardIcons } from "@/components/atoms/icon/icon";
+
+import { ActivityEntity } from "@/lib/db/entities/types";
+import { ActivityIconCircle } from "../activity-icon-circle/activity-icon-circle";
+import { AthleteCheckInStatus } from "../athlete-item/athlete-item";
+import { Button } from "@/components/atoms/button/button";
+import { FC } from "react";
+import { Skeleton } from "@/components/atoms/skeleton/skeleton";
+import { cn } from "@/lib/utils/ui";
+import { useAthleteCheckInCount } from "@/hooks/useCheckIn";
+
+interface AthleteItemActionsProps {
+  activities?: ActivityEntity[];
+  hostId: string;
+  status: AthleteCheckInStatus;
+  onActivityToggle: (
+    athleteStatus: AthleteCheckInStatus,
+    activity: ActivityEntity
+  ) => Promise<void>;
+}
+
+export const AthleteItemActions: FC<AthleteItemActionsProps> = ({
+  activities,
+  hostId,
+  status,
+  onActivityToggle,
+}) => {
+  const { data: checkInCount, isLoading: isCheckInCountLoading } = useAthleteCheckInCount(status.athlete.id, hostId);
+  return (
+    <>
+      {isCheckInCountLoading && <Skeleton height={84} className="col-span-full" />}
+      {!isCheckInCountLoading && (
+        <div className="grid grid-cols-9 gap-x-4 col-span-full items-center justify-between p-3 gap-2 bg-secondary">
+          <div className="col-span-6 flex gap-2">
+            {activities?.slice(0, 3).map((activity) => {
+              const isSelected = status.currentActivity === activity.id;
+
+              return (
+                <Button
+                  key={activity.id}
+                  variant={isSelected ? 'default' : 'ghost'}
+                  onClick={() => onActivityToggle(status, activity)}
+                  className={cn(
+                    'flex flex-col items-center justify-center p-2 border-1 rounded-lg transition-all duration-200',
+                    'hover:shadow-md active:scale-95 min-h-[60px] min-w-[60px]',
+                  )}
+                >
+                  <ActivityIconCircle
+                    activity={{
+                      en: true,
+                      i: activity.i,
+                      n: activity.n
+                    }}
+                    size="sm"
+                    variant={isSelected ? 'default' : 'ghost'}
+                  />
+                  {activity.n}
+                </Button>
+              );
+            })}
+          </div>
+          <div className="col-span-3 text-white flex items-center justify-center">
+            <div className="relative">
+              {/* TODO: Get current reward icon for this athlete/host */}
+              <Icon
+                name={RewardIcons.Star}
+                variant='reward'
+                className='w-12 h-12 stroke-white fill-white'
+              />
+              <span className="absolute inset-0 flex items-center justify-center text-primary font-bold text-sm">
+                {checkInCount}
+              </span>
+            </div>
+            <span>Host {checkInCount !== 1 ? ACTIVITY_TERM : ACTIVITY_TERM_SINGULAR}</span>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

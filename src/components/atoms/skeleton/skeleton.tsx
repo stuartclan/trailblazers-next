@@ -32,16 +32,16 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
-  ({ 
-    className, 
-    width, 
-    height, 
-    circle = false, 
-    animate = true, 
+  ({
+    className,
+    width,
+    height,
+    circle = false,
+    animate = true,
     lines = 1,
     variant = 'rectangular',
     style,
-    ...props 
+    ...props
   }, ref) => {
     const skeletonStyle = {
       width: typeof width === 'number' ? `${width}px` : width,
@@ -103,7 +103,7 @@ export const SkeletonAvatar: React.FC<{ size?: 'sm' | 'md' | 'lg' }> = ({ size =
     md: 40,
     lg: 64,
   };
-  
+
   return <Skeleton circle width={sizeMap[size]} height={sizeMap[size]} />;
 };
 
@@ -116,15 +116,15 @@ export const SkeletonButton: React.FC<{ size?: 'sm' | 'md' | 'lg' }> = ({ size =
     md: { width: 120, height: 40 },
     lg: { width: 160, height: 48 },
   };
-  
+
   return <Skeleton variant="rounded" {...sizeMap[size]} />;
 };
 
 /**
  * Card skeleton
  */
-export const SkeletonCard: React.FC<{ 
-  showAvatar?: boolean; 
+export const SkeletonCard: React.FC<{
+  showAvatar?: boolean;
   lines?: number;
   className?: string;
 }> = ({ showAvatar = false, lines = 3, className }) => {
@@ -182,9 +182,9 @@ export const SkeletonActivitySelector: React.FC<{ count?: number }> = ({ count =
 /**
  * Search results skeleton
  */
-export const SkeletonSearchResults: React.FC<{ count?: number }> = ({ count = 3 }) => {
+export const SkeletonSearchResults: React.FC<{ className?: string, count?: number }> = ({ className, count = 3 }) => {
   return (
-    <div className="border-1 rounded-md overflow-hidden divide-y">
+    <div className={cn("border-1 rounded-md overflow-hidden divide-y", className)}>
       {Array.from({ length: count }).map((_, index) => (
         <div key={index} className="flex items-center p-3">
           <SkeletonAvatar size="sm" />
@@ -201,23 +201,23 @@ export const SkeletonSearchResults: React.FC<{ count?: number }> = ({ count = 3 
 /**
  * Check-in flow skeleton
  */
-export const SkeletonCheckInFlow: React.FC = () => {
+export const SkeletonCheckInFlow: React.FC<{ className?: string }> = ({ className }) => {
   return (
-    <div className="bg-white rounded-lg border-1 p-6 space-y-6">
+    <div className={cn("bg-white rounded-lg border-1 p-6 space-y-6", className)}>
       <div className="space-y-2">
         <Skeleton variant="text" width="40%" height={28} />
         <Skeleton variant="text" width="60%" />
       </div>
-      
+
       <div className="space-y-4">
         <Skeleton variant="text" width="30%" />
         <div className="relative">
           <Skeleton height={40} variant="rounded" />
         </div>
       </div>
-      
+
       <SkeletonActivitySelector count={3} />
-      
+
       <div className="flex space-x-3">
         <SkeletonButton />
         <SkeletonButton />

@@ -5,7 +5,6 @@ import * as React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { Alert } from '@/components/atoms/alert/alert';
-import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
@@ -82,18 +81,18 @@ export const HostForm: React.FC<HostFormProps> = ({
     },
   });
 
-  const { watch, setValue, reset } = form;
+  // const { watch, setValue, reset } = form;
 
   // Enhanced form submission with comprehensive toast feedback
   const handleSubmit = async (data: HostFormValues) => {
     setIsSubmitting(true);
 
-    // Show initial progress toast
-    const action = isEdit ? 'Updating' : 'Creating';
-    const progressToastId = info(
-      `${action} host configuration...`,
-      `Host ${isEdit ? 'Update' : 'Creation'}`
-    );
+    // // Show initial progress toast
+    // const action = isEdit ? 'Updating' : 'Creating';
+    // const progressToastId = info(
+    //   `${action} host configuration...`,
+    //   `Host ${isEdit ? 'Update' : 'Creation'}`
+    // );
 
     try {
       // // Validate password strength visually for user

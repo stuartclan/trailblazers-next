@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/utils/api-client.ts
 
 interface ApiRequestOptions extends RequestInit {
@@ -20,7 +21,7 @@ export async function apiRequest<T = any>(
   const { requireAuth = true, headers = {}, ...fetchOptions } = options;
 
   // Prepare headers
-  const requestHeaders: HeadersInit = {
+  let requestHeaders: HeadersInit = {
     'Content-Type': 'application/json',
     ...headers,
   };
@@ -31,7 +32,10 @@ export async function apiRequest<T = any>(
       // Get access token from Cognito
       const token = await getAccessTokenFromCognito();
       if (token) {
-        requestHeaders['Authorization'] = `Bearer ${token}`;
+        requestHeaders = {
+          ...requestHeaders,
+          Authorization: `Bearer ${token}`,
+        };
       } else {
         return {
           error: 'No authentication token available',
@@ -89,7 +93,7 @@ export async function apiRequest<T = any>(
 async function getAccessTokenFromCognito(): Promise<string | null> {
   // Import Cognito dependencies
   const { CognitoUserPool } = await import('amazon-cognito-identity-js');
-  
+
   const userPoolId = process.env.NEXT_PUBLIC_POOL_ID || '';
   const userPoolClientId = process.env.NEXT_PUBLIC_POOL_CLIENT_ID || '';
 

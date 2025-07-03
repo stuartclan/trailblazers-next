@@ -5,9 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAthletes } from '@/hooks/useAthlete';
 import { useAuth } from '@/hooks/useAuth';
-import { useHost } from '@/hooks/useHost';
 import { useHostCheckIns } from '@/hooks/useCheckIn';
-import { useLocation } from '@/hooks/useLocation';
 import { useRouter } from 'next/navigation';
 
 interface EmergencyContact {
@@ -24,13 +22,13 @@ export default function EmergencyContacts() {
 
   // Get current host and location from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
-  const [locationId, setLocationId] = useState<string | null>(null);
+  // const [locationId, setLocationId] = useState<string | null>(null);
 
-  // Get host data
-  const { data: host } = useHost(hostId || '');
+  // // Get host data
+  // const { data: host } = useHost(hostId || '');
 
-  // Get location data
-  const { data: location } = useLocation(hostId || '', locationId || '');
+  // // Get location data
+  // const { data: location } = useLocation(hostId || '', locationId || '');
 
   // Get recent check-ins
   const { data: recentCheckIns } = useHostCheckIns(hostId || '', 100);
@@ -49,7 +47,7 @@ export default function EmergencyContacts() {
 
     if (savedHostId && savedLocationId) {
       setHostId(savedHostId);
-      setLocationId(savedLocationId);
+      // setLocationId(savedLocationId);
     } else {
       // If no location is selected, redirect to location selection
       router.push('/host/select-location');

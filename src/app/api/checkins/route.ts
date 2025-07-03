@@ -138,6 +138,7 @@ export async function POST(request: NextRequest) {
     ]);
 
     return NextResponse.json(checkIn);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error creating check-in:', error);
     return NextResponse.json(

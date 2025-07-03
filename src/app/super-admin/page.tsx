@@ -1,6 +1,6 @@
 'use client';
 
-import { MdAdd as Add, MdChevronRight as ChevronRight, MdSettings as Settings } from 'react-icons/md';
+import { MdAdd as Add, MdChevronRight as ChevronRight } from 'react-icons/md';
 
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';

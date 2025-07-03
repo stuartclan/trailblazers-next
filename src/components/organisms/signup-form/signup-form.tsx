@@ -70,7 +70,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 }) => {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [isMobile, setIsMobile] = React.useState(false);
-    const { success, error, info } = useToastNotifications();
+    const { error, info } = useToastNotifications();
 
     // Check if we're on mobile
     React.useEffect(() => {
@@ -102,7 +102,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     });
 
     const { watch, setValue, reset } = form;
-    const hasPet = watch('hasPet');
+    // const hasPet = watch('hasPet');
 
     // Enhanced form submission with comprehensive toast feedback
     const handleSubmit = async (data: AthleteFormValues) => {

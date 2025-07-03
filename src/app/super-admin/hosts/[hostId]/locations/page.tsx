@@ -1,9 +1,9 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { Card, CardContent } from '@/components/atoms/card/card';
 import { LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuTrash2 as Trash2, LuUsers as Users } from 'react-icons/lu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/atoms/tooltip/tooltip';
-import { useDeleteLocation, useLocations, useLocationsByHost } from '@/hooks/useLocation';
+import { useDeleteLocation, useLocationsByHost } from '@/hooks/useLocation';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 

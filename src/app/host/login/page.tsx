@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/car
 import { Alert } from '@/components/atoms/alert/alert';
 import { Button } from '@/components/atoms/button/button';
 import { Input } from '@/components/atoms/input/input';
-import { isSuperAdmin } from '@/lib/auth/api-auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -48,6 +47,7 @@ export default function HostLogin() {
         router.push('/host/select-location');
       }, 1000);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Login error:', err);
       const errorMessage = err.message || 'Failed to login. Please check your credentials.';

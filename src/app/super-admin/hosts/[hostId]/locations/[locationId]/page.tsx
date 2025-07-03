@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { LuMapPin as MapPin, LuPenLine as PenLine, LuSettings as Settings, LuTarget as TargetIcon, LuTrash2 as Trash2 } from 'react-icons/lu';
+import { LuPenLine as PenLine, LuSettings as Settings, LuTarget as TargetIcon, LuTrash2 as Trash2 } from 'react-icons/lu';
 import { useDeleteLocation, useLocation, useUpdateLocation } from '@/hooks/useLocation';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -353,7 +353,7 @@ export default function SuperAdminLocationEdit() {
                                                 {activity.i}
                                             </span> */}
                                             <div className="flex-1 flex flex-col items-start space-y-1">
-                                                <Label size="md">{activity.n}</Label>
+                                                <Label>{activity.n}</Label>
                                                 <Badge
                                                     variant={activity.en ? "success" : "outline"}
                                                     size="sm"

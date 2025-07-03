@@ -58,7 +58,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
         },
     });
 
-    const { watch, setValue, reset } = form;
+    const { reset } = form;
 
     // Enhanced form submission with comprehensive toast feedback
     const handleSubmit = async (data: LocationFormValues) => {

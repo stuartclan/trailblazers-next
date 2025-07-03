@@ -6,7 +6,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/atoms/tool
 import { useCreateReward, useDeleteReward, useGlobalRewards, useUpdateReward } from '@/hooks/useReward';
 import { useEffect, useState } from 'react';
 
-import { Badge } from '@/components/atoms/badge/badge';
 import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';

@@ -14,20 +14,20 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const cursor = searchParams.get('cursor') || undefined;
-    
+
     // Get athletes
     const result = await repositories.athletes.getAllAthletes(limit, cursor ? JSON.parse(cursor) : undefined);
-    
+
     return NextResponse.json({
       athletes: result.athletes,
       nextCursor: result.lastEvaluatedKey ? JSON.stringify(result.lastEvaluatedKey) : undefined
     });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error fetching athletes:', error);
     return NextResponse.json(
@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate required fields
     if (!body.firstName || !body.lastName || !body.email) {
       return NextResponse.json(
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Create athlete
     const athlete = await repositories.athletes.createAthlete({
       firstName: body.firstName,
@@ -73,8 +73,9 @@ export async function POST(request: NextRequest) {
       emergencyPhone: body.emergencyPhone,
       legacyCount: body.legacyCount
     });
-    
+
     return NextResponse.json(athlete);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error creating athlete:', error);
     return NextResponse.json(

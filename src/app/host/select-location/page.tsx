@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-import { Button } from '@/components/atoms/button/button';
 import { LuChevronRight as ChevronRight } from 'react-icons/lu';
 import type { LocationEntity } from '@/lib/db/entities/types';
 import { useAuth } from '@/hooks/useAuth';
+import { useEffect } from 'react';
 import { useLocationsByHost } from '@/hooks/useLocation';
 import { useRouter } from 'next/navigation';
 
@@ -13,7 +11,6 @@ export default function SelectLocation() {
   const router = useRouter();
   const { isAuthenticated, isLoading, user, getHostId } = useAuth();
   // const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   // Get host ID from auth hook
   const hostId = getHostId();
@@ -105,12 +102,6 @@ export default function SelectLocation() {
           <h1 className="text-2xl font-bold">Select Location</h1>
           <p className="text-gray-600 mt-2">Choose a location to begin check-ins</p>
         </div>
-
-        {error && (
-          <div className="bg-red-100 border-1 border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
-            <p>{error}</p>
-          </div>
-        )}
 
         <div className="flex flex-col gap-4">
           {locations.map((location) => (

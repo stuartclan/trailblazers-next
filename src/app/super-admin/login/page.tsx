@@ -15,19 +15,19 @@ export default function SuperAdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const router = useRouter();
   const { login } = useAuth();
   const { success, error: toastError, info } = useToastNotifications();
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     // Show progress toast
     info('Authenticating super admin access...', 'Admin authentication');
-    
+
     try {
       const res = await login(email, password);
 
@@ -43,34 +43,35 @@ export default function SuperAdminLogin() {
         router.push('/super-admin/new-password');
         return;
       }
-      
+
       // Show success toast
       success(
         'Super admin access granted! Welcome to the admin dashboard.',
         'Admin access granted'
       );
-      
+
       // Delay to show success message, then redirect
       setTimeout(() => {
         router.push('/super-admin');
       }, 1000);
-      
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Super admin login error:', err);
       const errorMessage = err.message || 'Failed to login. Please check your credentials.';
-      
+
       // if (errorMessage === 'New password required') {
       //   router.push('/super-admin/reset');
       // } else {
-        // Show error in both local state and toast
-        setError(errorMessage);
-        toastError(errorMessage, 'Admin authentication failed');
+      // Show error in both local state and toast
+      setError(errorMessage);
+      toastError(errorMessage, 'Admin authentication failed');
       // }
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-md">
@@ -88,7 +89,7 @@ export default function SuperAdminLogin() {
               {error}
             </Alert>
           )}
-          
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
               label="Admin Email"
@@ -101,7 +102,7 @@ export default function SuperAdminLogin() {
               placeholder="Enter admin email"
               disabled={loading}
             />
-            
+
             <Input
               label="Admin Password"
               type="password"
@@ -112,7 +113,7 @@ export default function SuperAdminLogin() {
               placeholder="Enter admin password"
               disabled={loading}
             />
-            
+
             <Button
               type="submit"
               disabled={loading || !email || !password}
@@ -121,7 +122,7 @@ export default function SuperAdminLogin() {
               {loading ? 'Authenticating...' : 'Sign In as Super Admin'}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
               For host access, please{' '}

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils/ui';
 import { Slot } from '@radix-ui/react-slot';
-import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
+// import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 
 // Define button variants using class-variance-authority
 const buttonVariants = cva(
@@ -16,7 +16,7 @@ const buttonVariants = cva(
         destructive: 'bg-red-500 text-white hover:bg-red-600',
         outline: 'border-1 border-primary text-primary hover:bg-primary-light hover:text-white',
         secondary: 'bg-primary-light text-white hover:bg-secondary-dark',
-        ghost: 'hover:bg-gray-100 hover:text-gray-900',
+        ghost: 'bg-white hover:bg-gray-100 hover:text-gray-900',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
@@ -57,9 +57,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     variant,
     size,
     asChild = false,
-    enableTouch = true, // Enable touch by default for better mobile UX
-    ripple = true,
-    haptic = false,
+    // enableTouch = true, // Enable touch by default for better mobile UX
+    // ripple = true,
+    // haptic = false,
     disabled,
     children,
     onClick,

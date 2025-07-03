@@ -1,7 +1,7 @@
 'use client';
 
 import { LuArrowLeft as ArrowLeft, LuUser as User } from 'react-icons/lu';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { Card, CardContent } from '@/components/atoms/card/card';
 import { useCreateAthlete, useSignDisclaimer } from '@/hooks/useAthlete';
 import { useEffect, useState } from 'react';
 

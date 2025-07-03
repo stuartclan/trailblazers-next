@@ -16,13 +16,15 @@ export default $config({
     };
   },
   async run() {
+    const isProd = $app.stage === 'prod';
+
     // DynamoDB Table for single-table design
     const table = new sst.aws.Dynamo("Trailblazers", {
       fields: {
         pk: "string",
         sk: "string",
         GSI1PK: "string",
-        GSI1SK: "string", 
+        GSI1SK: "string",
         GSI2PK: "string",
         GSI2SK: "string",
         GSI3PK: "string",
@@ -51,13 +53,13 @@ export default $config({
               required: false,
             },
             {
-              attributeDataType: 'String', 
+              attributeDataType: 'String',
               name: 'hostId',
               mutable: true,
               required: false,
             }
           ],
-              // TODO: Configure custom email via SES?
+          // TODO: Configure custom email via SES?
           // emailConfiguration: {
           //   fromEmailAddress: 'info@clubtrailblazers.com',
           //   emailSendingAccount: 'DEVELOPER',
@@ -70,11 +72,11 @@ export default $config({
             requireSymbols: true,
             requireUppercase: true,
           },
-          
+
           // Account recovery settings
           accountRecoverySetting: {
             recoveryMechanisms: [
-              { 
+              {
                 name: 'verified_email',
                 priority: 1,
               },
@@ -135,7 +137,7 @@ export default $config({
     //     "ALLOW_REFRESH_TOKEN_AUTH",
     //   ],
     //   generateSecret: false, // Set to true for server-side apps
-      
+
     //   // // OAuth settings (optional - for social login)
     //   // oauth: {
     //   //   flows: ["code"],
@@ -147,7 +149,7 @@ export default $config({
     //   //     $dev ? "http://localhost:3000" : "https://trailblazers.app"
     //   //   ],
     //   // },
-      
+
     //   // Token validity
     //   accessTokenValidity: 60, // 1 hour
     //   idTokenValidity: 60, // 1 hour  
@@ -263,29 +265,29 @@ export default $config({
       environment: {
         // AWS Configuration
         AWS_REGION_NAME: aws.getRegionOutput().name, // Reserved and already provided
-        
+
         // DynamoDB
         DYNAMODB_TABLE_NAME: table.name,
-        
+
         // Cognito Configuration
         COGNITO_USER_POOL_ID: userPool.id,
         COGNITO_USER_POOL_CLIENT_ID: userPoolClient.id,
         // COGNITO_IDENTITY_POOL_ID: identityPool.id,
-        
+
         // NextAuth Configuration
         NEXTAUTH_URL: $dev ? "http://localhost:3000" : "https://clubtrailblazers.com",
         NEXTAUTH_SECRET: new random.RandomPassword("NextAuthSecret", {
           length: 32,
           special: false,
         }).result,
-        
+
         // // API Configuration
         // API_URL: api.url,
-        
+
         // // S3 Configuration
         // S3_BUCKET_NAME: bucket.name,
         // S3_BUCKET_URL: bucket.domain,
-        
+
         // Application Configuration
         APP_NAME: "Trailblazers Check-In System",
         APP_VERSION: "1.0.0",
@@ -293,20 +295,21 @@ export default $config({
         NEXT_PUBLIC_POOL_ID: userPool.id,
         NEXT_PUBLIC_POOL_CLIENT_ID: userPoolClient.id,
       },
-      
+
       // Domain configuration (optional)
       domain: $dev ? undefined : {
-        name: "clubtrailblazers.com",
-        dns: sst.aws.dns(),
+        name: `checkin${!isProd ? `.${$app.stage}` : ''}.clubtrailblazers.com`,
+        dns: false,
+        cert: process.env.AWS_CERT_ARN,
       },
-      
+
       // OpenNext configuration
       openNextVersion: "3.0.0",
       buildCommand: "pnpm run build",
       dev: {
         command: 'pnpm run dev:next',
       },
-      
+
       // Performance optimizations
       server: {
         memory: "1024 MB",
@@ -320,7 +323,7 @@ export default $config({
           }
         }
       }
-      
+
       // // Edge configuration for global performance
       // edge: false, // Set to true for edge deployment
     });
@@ -372,20 +375,20 @@ export default $config({
       // Application URLs
       url: nextjs.url,
       // apiUrl: api.url,
-      
+
       // AWS Resources
       tableName: table.name,
       tableArn: table.arn,
-      
+
       // Cognito Configuration
       userPoolId: userPool.id,
       userPoolClientId: userPoolClient.id,
       // identityPoolId: identityPool.id,
-      
+
       // // S3 Configuration
       // bucketName: bucket.name,
       // bucketUrl: bucket.domain,
-      
+
       // // Monitoring
       // dashboardUrl: `https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=${dashboard.dashboardName}`,
     };

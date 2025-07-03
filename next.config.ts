@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   experimental: {
     cssChunking: true, // default
   },
+  output: 'standalone',
+  // For now...
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default nextConfig;

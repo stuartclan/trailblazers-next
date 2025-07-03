@@ -113,6 +113,8 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
   // Auto-reset timer function
   const resetAutoResetTimer = React.useCallback(() => {
+    return;
+
     if (resetTimeoutRef.current) {
       clearTimeout(resetTimeoutRef.current);
     }
@@ -377,11 +379,10 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
           {athleteStatuses.length > 0 && (
             <div className="border-1 rounded-md overflow-hidden">
               {/* Header */}
-              <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 border-b font-medium text-sm">
+              <div className="grid grid-cols-9 gap-4 p-3 bg-gray-50 border-b font-medium text-sm">
                 <div className="col-span-3">Last Name</div>
                 <div className="col-span-3">First Name</div>
-                <div className="col-span-2 text-center">Count</div>
-                <div className="col-span-4">Check-in</div>
+                <div className="col-span-3 text-center">Progress</div>
               </div>
 
               {/* Athletes */}
@@ -389,6 +390,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
                 {athleteStatuses.map((status) => (
                   <AthleteItem
                     key={status.athlete.id}
+                    hostId={host.id}
                     status={status}
                     activities={activities}
                     onActivityToggle={handleActivityToggle}

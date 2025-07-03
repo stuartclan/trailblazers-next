@@ -15,15 +15,20 @@ import { useAsync } from 'react-use';
 const userPoolId = process.env.NEXT_PUBLIC_POOL_ID || '';
 const userPoolClientId = process.env.NEXT_PUBLIC_POOL_CLIENT_ID || '';
 
+interface AuthResponse {
+  success: boolean;
+  session?: CognitoUserSession | null;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: AuthUser | null;
-  login: (email: string, password: string) => Promise<any>;
+  login: (email: string, password: string) => Promise<AuthResponse>;
   logout: () => void;
-  confirmNewPassword: (newPassword: string) => Promise<any>;
-  confirm: (verificationCode: string, newPassword: string) => Promise<any>;
-  changePassword: (oldPassword: string, newPassword: string) => Promise<any>;
+  confirmNewPassword: (newPassword: string) => Promise<AuthResponse>;
+  confirm: (verificationCode: string, newPassword: string) => Promise<AuthResponse>;
+  changePassword: (oldPassword: string, newPassword: string) => Promise<AuthResponse>;
   getUserGroups: () => string[] | null;
   getHostId: () => string | null;
   getAccessToken: () => Promise<string | null>; // NEW: Get current access token
@@ -45,11 +50,11 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   user: null,
-  login: async () => ({}),
+  login: async () => ({ success: false }),
   logout: () => { },
-  confirmNewPassword: async () => ({}),
-  confirm: async () => ({}),
-  changePassword: async () => ({}),
+  confirmNewPassword: async () => ({ success: false }),
+  confirm: async () => ({ success: false }),
+  changePassword: async () => ({ success: false }),
   getUserGroups: () => null,
   getHostId: () => null,
   getAccessToken: async () => null, // NEW
@@ -153,7 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [getCurrentUser]);
 
   // Login function
-  const login = async (email: string, password: string): Promise<any> => {
+  const login = async (email: string, password: string): Promise<AuthResponse> => {
     return new Promise((resolve, reject) => {
       const authDetails = new AuthenticationDetails({
         Username: email,
@@ -173,7 +178,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         onFailure: (err) => {
           reject(err);
         },
-        newPasswordRequired: (userAttributes, requiredAttributes) => {
+        newPasswordRequired: () => {
+          // newPasswordRequired: (userAttributes, requiredAttributes) => {
           // Handle new password required case
           // Can uncomment this and just set the password used as the permanent password.
           // cognitoUser.completeNewPasswordChallenge(password, requiredAttributes, {
@@ -208,8 +214,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Confirm function
-  // const confirmNewPassword = async (newPassword: string): Promise<{ success: boolean; session: CognitoUserSession }> => {
-  const confirmNewPassword = async (newPassword: string): Promise<any> => {
+  const confirmNewPassword = async (newPassword: string): Promise<AuthResponse> => {
     return new Promise((resolve, reject) => {
       const email = user?.email;
       if (!email) {
@@ -235,7 +240,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Confirm function
-  const confirm = async (verificationCode: string, newPassword: string): Promise<any> => {
+  const confirm = async (verificationCode: string, newPassword: string): Promise<AuthResponse> => {
     return new Promise((resolve, reject) => {
       const email = user?.email;
       if (!email) {
@@ -249,9 +254,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       cognitoUser.confirmPassword(verificationCode, newPassword, {
-        onSuccess: async (session) => {
-          await getSession();
-          resolve({ success: true, session });
+        onSuccess: async () => {
+          resolve({ success: true, session: await getSession() });
         },
         onFailure: (err) => {
           reject(err);
@@ -261,7 +265,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Reset function
-  const changePassword = async (oldPassword: string, newPassword: string): Promise<any> => {
+  const changePassword = async (oldPassword: string, newPassword: string): Promise<AuthResponse> => {
     return new Promise((resolve, reject) => {
       const cognitoUser = getCurrentUser();
 
@@ -270,7 +274,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      cognitoUser.changePassword(oldPassword, newPassword, (err, result) => {
+      cognitoUser.changePassword(oldPassword, newPassword, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -322,7 +326,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Initialize authentication state
   useAsync(async () => {
     if (isLoading) {
-      const sess = await getSession();
+      // const sess = await getSession();
+      await getSession();
     }
   }, [isLoading]);
 

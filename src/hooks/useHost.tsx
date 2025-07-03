@@ -1,9 +1,9 @@
 // src/hooks/useHost.tsx
 'use client';
 
-import type { ErrorCognito, HostEntity } from '@/lib/db/entities/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { HostEntity } from '@/lib/db/entities/types';
 import { apiClient } from '@/lib/utils/api-client';
 
 // API client functions using the new authenticated client
