@@ -265,7 +265,7 @@ export default function SuperAdminGlobalRewards() {
                                 <CardContent className="p-6">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center space-x-3">
-                                            <div className="p-2 bg-primary rounded-lg">
+                                            <div className="p-2 bg-primary rounded-full">
                                                 <Icon name={reward.i} variant="reward" size="lg" className="text-white" />
                                             </div>
                                             <div>

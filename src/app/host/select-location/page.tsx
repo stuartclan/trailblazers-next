@@ -95,39 +95,40 @@ export default function SelectLocation() {
     );
   }
 
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="card w-full max-w-md">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold">Select Location</h1>
-          <p className="text-gray-600 mt-2">Choose a location to begin check-ins</p>
-        </div>
+  if (locations.length > 1) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="card w-full max-w-md">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold">Select Location</h1>
+            <p className="text-gray-600 mt-2">Choose a location to begin check-ins</p>
+          </div>
 
-        <div className="flex flex-col gap-4">
-          {locations.map((location) => (
+          <div className="flex flex-col gap-4">
+            {locations.map((location) => (
+              <button
+                key={location.id}
+                onClick={() => handleLocationSelect(location)}
+                className="border-1 bg-primary text-white rounded-md p-4 text-left hover:bg-primary-light transition-colors"
+              >
+                <div className='flex flex-row justify-between items-center'>
+                  <h3 className="font-medium text-lg !mb-0">{location.n}</h3>
+                  <ChevronRight className="w-6 h-6" />
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-6 text-center">
             <button
-              key={location.id}
-              onClick={() => handleLocationSelect(location)}
-              className="border-1 bg-primary text-white rounded-md p-4 text-left hover:bg-primary-light transition-colors"
+              onClick={() => router.push('/host/login')}
+              className="text-primary hover:underline"
             >
-              <div className='flex flex-row justify-between items-center'>
-                <h3 className="font-medium text-lg">{location.n}</h3>
-                <p className="text-gray-600 text-sm">{location.a}</p>
-                <ChevronRight className="w-6 h-6" />
-              </div>
+              Back to Login
             </button>
-          ))}
-        </div>
-
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => router.push('/host/login')}
-            className="text-primary hover:underline"
-          >
-            Back to Login
-          </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    )
+  };
 }

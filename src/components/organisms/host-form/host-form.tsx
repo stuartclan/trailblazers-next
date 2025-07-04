@@ -82,6 +82,7 @@ export const HostForm: React.FC<HostFormProps> = ({
   });
 
   // const { watch, setValue, reset } = form;
+  const { reset } = form;
 
   // Enhanced form submission with comprehensive toast feedback
   const handleSubmit = async (data: HostFormValues) => {
@@ -243,13 +244,12 @@ export const HostForm: React.FC<HostFormProps> = ({
         {!isEdit && (
           <FormControl
             name="password"
-            label="Cognito password"
-            helpText="At least 8 characters with uppercase, lowercase, and number. This is the password to log into a device for a host."
+            label="Check-in password"
             render={(fieldProps) => (
               <Input
                 {...fieldProps}
                 type="password"
-                placeholder="Enter cognito password"
+                helpText="At least 8 characters with uppercase, lowercase, and number. This is the password to log into a device for the host."
                 disabled={isSubmitting}
               />
             )}
@@ -265,7 +265,7 @@ export const HostForm: React.FC<HostFormProps> = ({
             <Input
               {...fieldProps}
               type="password"
-              description='This is the shared password to access the admin dashboard'
+              helpText='This is the shared password to access the admin dashboard for rewards'
               placeholder={isEdit ? "Enter new admin password (leave blank to keep current)" : "Enter admin password"}
               disabled={isSubmitting}
             />
@@ -280,7 +280,7 @@ export const HostForm: React.FC<HostFormProps> = ({
           render={(fieldProps) => (
             <Textarea
               {...fieldProps}
-              description="This text will be shown to athletes during registration or their first check-in"
+              description="This text will be shown to athletes during registration or their first check-in at this host. This form accepts <a href='https://www.markdownguide.org/cheat-sheet/' target='_blank'>Markdown</a> for formatting."
               placeholder="Enter disclaimer text"
               rows={5}
               disabled={isSubmitting}

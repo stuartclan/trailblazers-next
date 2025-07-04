@@ -4,7 +4,7 @@
 export default $config({
   app(input) {
     return {
-      name: "trailblazers",
+      name: "trailblazers-checkin",
       removal: input?.stage === "production" ? "retain" : "remove",
       home: "aws",
       providers: {
@@ -304,7 +304,7 @@ export default $config({
       },
 
       // OpenNext configuration
-      openNextVersion: "3.0.0",
+      openNextVersion: "3.6.6",
       buildCommand: "pnpm run build",
       dev: {
         command: 'pnpm run dev:next',

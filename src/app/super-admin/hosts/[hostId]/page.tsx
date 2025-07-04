@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuSettings as Settings, LuUsers as Users } from 'react-icons/lu';
+import { LuChevronDown, LuChevronUp, LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuSettings as Settings, LuUsers as Users } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 import { useHost, useUpdateHost } from '@/hooks/useHost';
 import { useParams, useRouter } from 'next/navigation';
@@ -12,8 +12,10 @@ import { ErrorDisplay } from '@/components/molecules/error-display/error-display
 import { HostEntity } from '@/lib/db/entities/types';
 import { HostForm } from '@/components/organisms/host-form/host-form';
 import Link from 'next/link';
+import Markdown from 'markdown-to-jsx';
 import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
+import { cn } from '@/lib/utils/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocationsByHost } from '@/hooks/useLocation';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -26,6 +28,7 @@ export default function SuperAdminHostDetail() {
 
   const hostId = params.hostId as string;
   const [isEditing, setIsEditing] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   // Data fetching
   const {
@@ -255,12 +258,18 @@ export default function SuperAdminHostDetail() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Disclaimer</label>
-                    <div className="mt-1 p-3 bg-gray-50 rounded-md">
+                    <div className="mt-1 p-3 bg-gray-50 text-gray-700 text-sm rounded-md">
                       {host.disc ? (
-                        <p className="text-gray-700 text-sm">{host.disc}</p>
+                        <>
+                          <Button className={cn('w-full', showDisclaimer && 'mb-4')} variant={'link'} onClick={() => setShowDisclaimer(!showDisclaimer)}>
+                            {showDisclaimer ? 'Hide' : 'Show'} Disclaimer
+                            {showDisclaimer && <LuChevronUp className='inline' size={18} />}
+                            {!showDisclaimer && <LuChevronDown className='inline' size={18} />}
+                          </Button>
+                          {showDisclaimer && <Markdown>{host.disc}</Markdown>}
+                        </>
                       ) : (
-                        <p className="text-gray-500 text-sm italic">No disclaimer set</p>
+                        <p className="text-gray-500 text-sm italic text-center">No disclaimer set</p>
                       )}
                     </div>
                   </div>

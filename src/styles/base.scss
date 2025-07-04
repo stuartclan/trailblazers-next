@@ -110,6 +110,28 @@ h2 {
   text-transform: uppercase;
 }
 
+h3,
+h4,
+h5 {
+  font-weight: 600;
+  margin-bottom: 1.25em;
+}
+
+p:not(:last-child) {
+  margin-bottom: 1.25em;
+}
+ul,
+ol {
+  margin-left: 1.5em;
+  margin-bottom: 1.25em;
+}
+ul {
+  list-style-type: square;
+}
+ol {
+  list-style-type: upper-alpha;
+}
+
 /*
 Preferrably refactor these into components
 */
