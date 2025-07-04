@@ -5,6 +5,7 @@ import * as React from 'react';
 
 import { Button } from '@/components/atoms/button/button';
 import { Checkbox } from '@/components/atoms/checkbox/checkbox';
+import Markdown from 'markdown-to-jsx';
 import { LuX as X } from 'react-icons/lu';
 import { cn } from '@/lib/utils/ui';
 import { useSignDisclaimer } from '@/hooks/useAthlete';
@@ -94,8 +95,8 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
         <Dialog.Content
           className={cn(
-            "fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2",
-            "bg-white rounded-lg shadow-lg p-6 max-h-[85vh] overflow-y-auto"
+            "fixed left-1/2 top-1/2 z-50 w-full max-w-[70vw] -translate-x-1/2 -translate-y-1/2",
+            "bg-white rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto"
           )}
         >
           <div className="flex items-center justify-between mb-4">
@@ -120,10 +121,8 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({
               </p>
             </div>
 
-            <div className="border-1 rounded-md p-4 bg-gray-50 max-h-48 overflow-y-auto">
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {disclaimerText || defaultDisclaimerText}
-              </p>
+            <div className="border-1 rounded-md p-4 bg-gray-50 max-h-[45vh] overflow-y-auto text-sm text-gray-700 leading-relaxed">
+              <Markdown>{disclaimerText || defaultDisclaimerText}</Markdown>
             </div>
 
             {error && (

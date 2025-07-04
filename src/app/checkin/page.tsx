@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { Alert } from '@/components/atoms/alert/alert';
 import { Button } from '@/components/atoms/button/button';
-import { CheckInFlow } from '@/components/organisms/check-in-flow/check-in-flow';
+import { CheckInFlow } from '@/components/organisms/checkin-flow/checkin-flow';
 import { CheckInPageLoading } from '@/components/molecules/loading-states/loading-states';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import Link from 'next/link';

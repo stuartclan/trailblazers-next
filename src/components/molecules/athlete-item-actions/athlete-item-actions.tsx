@@ -42,7 +42,7 @@ export const AthleteItemActions: FC<AthleteItemActionsProps> = ({
                   variant={isSelected ? 'default' : 'ghost'}
                   onClick={() => onActivityToggle(status, activity)}
                   className={cn(
-                    'flex flex-col items-center justify-center p-2 border-1 rounded-lg transition-all duration-200',
+                    'flex flex-col items-center justify-center p-2 border-1 rounded-lg transition-discrete duration-200',
                     'hover:shadow-md active:scale-95 min-h-[60px] min-w-[60px]',
                   )}
                 >

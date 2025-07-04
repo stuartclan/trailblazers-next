@@ -89,10 +89,12 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   const { success, error, info } = useToastNotifications();
 
   // State management
+  const [isSearching, setIsSearching] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState('');
   const [athleteStatuses, setAthleteStatuses] = React.useState<AthleteCheckInStatus[]>([]);
   const [disclaimerAthlete, setDisclaimerAthlete] = React.useState<AthleteEntity | null>(null);
+  const [activeAthleteId, setActiveAthleteId] = React.useState<string | null>(null);
   const [pendingCheckIn, setPendingCheckIn] = React.useState<{
     athlete: AthleteEntity;
     activity: ActivityEntity;
@@ -104,7 +106,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
   // Data fetching
   const { data: activities } = useLocationActivities(host.id, location.id);
-  const { data: searchResults } = useAthleteSearch(debouncedSearchQuery);
+  const { data: searchResults, isLoading: isSearchLoading } = useAthleteSearch(debouncedSearchQuery);
 
   // Mutations
   const createCheckIn = useCreateCheckIn();
@@ -113,6 +115,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
   // Auto-reset timer function
   const resetAutoResetTimer = React.useCallback(() => {
+    // TODO: DEBUG: remove this to bring timer back
     return;
 
     if (resetTimeoutRef.current) {
@@ -120,6 +123,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     }
 
     resetTimeoutRef.current = setTimeout(() => {
+      setIsSearching(false);
       setSearchQuery('');
       setDebouncedSearchQuery('');
       setAthleteStatuses([]);
@@ -131,6 +135,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   // Handle search input change with debouncing
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
+    setIsSearching(true);
     setSearchQuery(query);
 
     // Clear existing search timeout
@@ -159,6 +164,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     // Process athletes using optimization helper - no additional API calls needed!
     const statuses = Helpers.processAthletes(searchResults, host.id);
     setAthleteStatuses(statuses);
+    setIsSearching(false);
   }, [searchResults, activities, host.id]);
 
   // Perform the actual check-in
@@ -394,6 +400,8 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
                     status={status}
                     activities={activities}
                     onActivityToggle={handleActivityToggle}
+                    activeAthleteId={activeAthleteId}
+                    onFocusToggle={setActiveAthleteId}
                   />
                 ))}
               </div>
@@ -401,7 +409,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
           )}
 
           {/* No Results */}
-          {debouncedSearchQuery.length >= 2 && athleteStatuses.length === 0 && (
+          {debouncedSearchQuery.length >= 2 && !isSearchLoading && athleteStatuses.length === 0 && (
             <div className="text-center py-6">
               <div className="flex flex-col items-center space-y-4">
                 <User className="h-12 w-12 text-gray-400" />
@@ -429,7 +437,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
             </div>
           )}
           {/* Searching */}
-          {searchQuery.length > 2 && !athleteStatuses?.length && (
+          {searchQuery.length > 0 && isSearching && (
             <div className="text-center py-8 text-gray-500">
               <SkeletonSearchResults count={3} />
             </div>
