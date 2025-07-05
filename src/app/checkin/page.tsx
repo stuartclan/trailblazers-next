@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 
 import { Alert } from '@/components/atoms/alert/alert';
-import { Button } from '@/components/atoms/button/button';
+// import { Button } from '@/components/atoms/button/button';
 import { CheckInFlow } from '@/components/organisms/checkin-flow/checkin-flow';
 import { CheckInPageLoading } from '@/components/molecules/loading-states/loading-states';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useHost } from '@/hooks/useHost';
 import { useLocation } from '@/hooks/useLocation';
@@ -64,10 +64,10 @@ export default function CheckIn() {
     router.push('/signup');
   };
 
-  // Handle changing location
-  const handleChangeLocation = () => {
-    router.push('/host/select-location');
-  };
+  // // Handle changing location
+  // const handleChangeLocation = () => {
+  //   router.push('/host/select-location');
+  // };
 
   // Show skeleton loading state instead of spinner
   if (isLoading || isLoadingHost || isLoadingLocation || !isReady) {
@@ -93,9 +93,9 @@ export default function CheckIn() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="">
       {/* Header */}
-      <div className="border-b border-gray-200">
+      {/* <div className="border-b border-gray-200">
         <div className="container max-w-6xl mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -119,19 +119,19 @@ export default function CheckIn() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Content */}
       <div className="container max-w-6xl mx-auto px-4 py-8">
         {/* Location Info */}
-        <Alert variant="info" className="mb-6">
+        {/* <Alert variant="info" className="mb-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Current Location: {location.n}</p>
               <p className="text-sm text-gray-600">{location.a}</p>
             </div>
           </div>
-        </Alert>
+        </Alert> */}
 
         {/* Main Check-in Flow */}
         <CheckInFlow
@@ -142,7 +142,7 @@ export default function CheckIn() {
         />
 
         {/* Footer */}
-        <div className="bg-white rounded-lg border-1 p-4 mt-8">
+        {/* <div className="bg-white rounded-lg border-1 p-4 mt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <div>
               <p>Need help? Contact your host administrator.</p>
@@ -156,7 +156,7 @@ export default function CheckIn() {
               </Link>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

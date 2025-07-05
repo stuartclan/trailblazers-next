@@ -1,14 +1,13 @@
 import '@/styles/global.scss';
 
 import { AuthProvider } from '@/hooks/useAuth';
-// import { Inter } from 'next/font/google';
+import { Footer } from '@/components/molecules/footer/footer';
+import { Header } from '@/components/molecules/header/header';
 import type { Metadata } from 'next';
 import { Providers } from './providers';
 import { ToastProvider } from '@/hooks/useToast';
 import { Toaster } from '@/components/molecules/toaster/toaster';
 import { TooltipProvider } from '@/components/atoms/tooltip/tooltip';
-
-// const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Trailblazers Check-In System',
@@ -22,18 +21,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* <body className={inter.className}> */}
       <body className='bg-primary'>
         <Providers>
           <AuthProvider>
             <TooltipProvider delayDuration={100}>
               <ToastProvider>
-                {/* <header>
-                  <div className=''
-                </header> */}
-                {/* <Header /> */}
-                {children}
-                {/* <Footer /> */}
+                <Header />
+                <main>
+                  {children}
+                </main>
+                <Footer />
                 <Toaster />
                 {/* <Analytics /> */}
               </ToastProvider>
