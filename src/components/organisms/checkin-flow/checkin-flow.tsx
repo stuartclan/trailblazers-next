@@ -430,7 +430,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
 
           {/* Instructions */}
           {searchQuery.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center pb-8 text-gray-500">
               <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">Ready for Check-in</p>
               <p className="text-sm">Search for an athlete by last name to begin</p>
@@ -438,7 +438,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
           )}
           {/* Searching */}
           {searchQuery.length > 0 && isSearching && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center pb-8 text-gray-500">
               <SkeletonSearchResults count={3} />
             </div>
           )}
