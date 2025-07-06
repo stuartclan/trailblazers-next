@@ -145,7 +145,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
         if (onCancel) {
             onCancel();
         }
-        info('Form editing cancelled', 'Cancelled');
+        // info('Form editing cancelled', 'Cancelled');
     };
 
     return (

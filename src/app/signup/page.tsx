@@ -174,9 +174,9 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="">
       <div className="container max-w-2xl mx-auto px-4">
-        <PageHeader
+        {/* <PageHeader
           title="Register New Athlete"
           description={`Join the Trailblazers community at ${host.n}`}
           breadcrumbs={[
@@ -195,7 +195,7 @@ export default function Signup() {
               </Button>
             </TouchTarget>
           }
-        />
+        /> */}
 
         <SignupForm
           onSubmit={handleSignupSubmit}

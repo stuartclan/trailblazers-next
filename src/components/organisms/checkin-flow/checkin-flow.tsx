@@ -5,7 +5,7 @@ import * as React from 'react';
 import { ActivityEntity, AthleteEntity, HostEntity, LocationEntity } from '@/lib/db/entities/types';
 import { AthleteCheckInStatus, AthleteItem } from '@/components/molecules/athlete-item/athlete-item';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { LuSearch as Search, LuUser as User } from 'react-icons/lu';
+import { LuPlus, LuSearch as Search, LuUser as User } from 'react-icons/lu';
 import { useCreateCheckIn, useDeleteCheckIn, useUpdateCheckIn } from '@/hooks/useCheckIn';
 
 import { Button } from '@/components/atoms/button/button';
@@ -13,6 +13,7 @@ import { CheckInHelper } from '@/lib/utils/helpers/checkin';
 import { DisclaimerModal } from '@/components/molecules/disclaimer-modal/disclaimer-modal';
 import { Input } from '@/components/atoms/input/input';
 import { SkeletonSearchResults } from '@/components/atoms/skeleton/skeleton';
+import { cn } from '@/lib/utils/ui';
 import { isWithinCurrentWeek } from '@/lib/utils/dates';
 import { useAthleteSearch } from '@/hooks/useAthlete';
 import { useLocationActivities } from '@/hooks/useActivity';
@@ -249,7 +250,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
                     currentActivity: null,
                     athlete: {
                       ...status.athlete,
-                      gc: hasCheckins ? status.athlete.gc - 1 : status.athlete.gc,
+                      gc: !hasCheckins ? status.athlete.gc - 1 : status.athlete.gc,
                     }
                   }
                 }
@@ -358,92 +359,98 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   // };
 
   return (
-    <div className={className}>
-      <Card>
+    <div className={cn('space-y-6', className)}>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="uppercase">Athlete Check-in</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Search Input */}
-          <div>
-            <Input
-              value={searchQuery}
-              onChange={handleSearchChange}
-              placeholder="Search by last name..."
-              leftIcon={<Search className="h-4 w-4" />}
-              label="Find Athlete"
-            />
+        <CardContent className="space-y-6"> */}
+      <div className="grid grid-cols-3 items-end justify-between gap-4">
+        {/* Search Input */}
+        <div className='col-span-2'>
+          <Input
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search by last name..."
+            leftIcon={<Search className="h-4 w-4" />}
+            label="Find Athlete"
+          />
 
-            {searchQuery.length > 0 && searchQuery.length < 2 && (
-              <p className="mt-1 text-xs text-gray-500">
-                Enter at least 2 characters to search
-              </p>
-            )}
+          {searchQuery.length > 0 && searchQuery.length < 2 && (
+            <p className="mt-1 text-xs text-gray-500">
+              Enter at least 2 characters to search
+            </p>
+          )}
+        </div>
+        <Button onClick={onNewAthlete} variant="default" >
+          <LuPlus className="h-4 w-4" />
+          <span className="ml-2">Register New Athlete</span>
+        </Button>
+      </div>
+
+      {/* Search Results */}
+      {athleteStatuses.length > 0 && (
+        <div className="border-1 rounded-md overflow-hidden">
+          {/* Header */}
+          <div className="grid grid-cols-9 gap-4 p-3 bg-gray-50 border-b font-medium text-sm">
+            <div className="col-span-3">Last Name</div>
+            <div className="col-span-3">First Name</div>
+            <div className="col-span-3 text-center">Progress</div>
           </div>
 
-          {/* Search Results */}
-          {athleteStatuses.length > 0 && (
-            <div className="border-1 rounded-md overflow-hidden">
-              {/* Header */}
-              <div className="grid grid-cols-9 gap-4 p-3 bg-gray-50 border-b font-medium text-sm">
-                <div className="col-span-3">Last Name</div>
-                <div className="col-span-3">First Name</div>
-                <div className="col-span-3 text-center">Progress</div>
-              </div>
+          {/* Athletes */}
+          <div className="divide-y">
+            {athleteStatuses.map((status) => (
+              <AthleteItem
+                key={status.athlete.id}
+                hostId={host.id}
+                status={status}
+                activities={activities}
+                onActivityToggle={handleActivityToggle}
+                activeAthleteId={activeAthleteId}
+                onFocusToggle={setActiveAthleteId}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
-              {/* Athletes */}
-              <div className="divide-y">
-                {athleteStatuses.map((status) => (
-                  <AthleteItem
-                    key={status.athlete.id}
-                    hostId={host.id}
-                    status={status}
-                    activities={activities}
-                    onActivityToggle={handleActivityToggle}
-                    activeAthleteId={activeAthleteId}
-                    onFocusToggle={setActiveAthleteId}
-                  />
-                ))}
-              </div>
+      {/* No Results */}
+      {debouncedSearchQuery.length >= 2 && !isSearchLoading && athleteStatuses.length === 0 && (
+        <div className="text-center py-6">
+          <div className="flex flex-col items-center space-y-4">
+            <User className="h-12 w-12 text-gray-400" />
+            <div>
+              <p className="text-gray-600 mb-2">No athletes found</p>
+              <p className="text-sm text-gray-500 mb-4">
+                Try a different search or register a new athlete
+              </p>
+              {onNewAthlete && (
+                <Button onClick={onNewAthlete} variant="outline">
+                  Register New Athlete
+                </Button>
+              )}
             </div>
-          )}
+          </div>
+        </div>
+      )}
 
-          {/* No Results */}
-          {debouncedSearchQuery.length >= 2 && !isSearchLoading && athleteStatuses.length === 0 && (
-            <div className="text-center py-6">
-              <div className="flex flex-col items-center space-y-4">
-                <User className="h-12 w-12 text-gray-400" />
-                <div>
-                  <p className="text-gray-600 mb-2">No athletes found</p>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Try a different search or register a new athlete
-                  </p>
-                  {onNewAthlete && (
-                    <Button onClick={onNewAthlete} variant="outline">
-                      Register New Athlete
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Instructions */}
-          {searchQuery.length === 0 && (
-            <div className="text-center pb-8 text-gray-500">
-              <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">Ready for Check-in</p>
-              <p className="text-sm">Search for an athlete by last name to begin</p>
-            </div>
-          )}
-          {/* Searching */}
-          {searchQuery.length > 0 && isSearching && (
-            <div className="text-center pb-8 text-gray-500">
-              <SkeletonSearchResults count={3} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Instructions */}
+      {searchQuery.length === 0 && (
+        <div className="text-center pb-8 text-gray-500">
+          <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p className="text-lg font-medium mb-2">Ready for Check-in</p>
+          <p className="text-sm">Search for an athlete by last name to begin</p>
+        </div>
+      )}
+      {/* Searching */}
+      {searchQuery.length > 0 && isSearching && (
+        <div className="text-center pb-8 text-gray-500">
+          <SkeletonSearchResults count={3} />
+        </div>
+      )}
+      {/* </CardContent>
+      </Card> */}
 
       {/* Disclaimer Modal */}
       {disclaimerAthlete && (

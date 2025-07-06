@@ -135,7 +135,7 @@ export default function SuperAdminNewLocation() {
     return (
         <div className="min-h-screen">
             <div className="container max-w-2xl mx-auto px-4 py-8">
-                <PageHeader
+                {/* <PageHeader
                     title="Create New Location"
                     description="Add a new location for a host"
                     breadcrumbs={[
@@ -143,7 +143,7 @@ export default function SuperAdminNewLocation() {
                         { label: 'Locations', href: baseUrl },
                         { label: 'New Location', current: true }
                     ]}
-                />
+                /> */}
 
                 <Card>
                     <CardHeader>

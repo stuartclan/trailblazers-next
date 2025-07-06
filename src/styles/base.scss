@@ -40,12 +40,12 @@
   --spacing-3xl: 4rem;
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  height: 100%;
-}
+// html,
+// body {
+//   max-width: 100vw;
+//   overflow-x: hidden;
+//   height: 100%;
+// }
 
 body {
   color: var(--color-text);
@@ -95,9 +95,9 @@ textarea:focus {
   box-shadow: 0 0 0 2px var(--color-primary-light);
 }
 
-h1 {
-  color: #fff;
-}
+// h1 {
+//   color: #fff;
+// }
 
 h1,
 h2 {

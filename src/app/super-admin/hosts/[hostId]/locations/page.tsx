@@ -11,8 +11,7 @@ import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import Link from 'next/link';
-import { PageHeader } from '@/components/molecules/page-header/page-header';
-import { Skeleton } from '@/components/atoms/skeleton/skeleton';
+import { SkeletonCard } from '@/components/atoms/skeleton/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useHosts } from '@/hooks/useHost';
 import { useToastNotifications } from '@/hooks/useToast';
@@ -101,32 +100,9 @@ export default function SuperAdminLocations() {
     // Loading state
     if (isAuthLoading || isLoadingLocations || isLoadingHosts) {
         return (
-            <div className="min-h-screen">
-                <div className="container max-w-6xl mx-auto px-4 py-8 space-y-6">
-                    <div className="flex justify-between items-center">
-                        <Skeleton variant="text" width="200px" height={32} />
-                        <Skeleton width={120} height={40} variant="rounded" />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Array.from({ length: 6 }).map((_, index) => (
-                            <Card key={index} className="p-6">
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <Skeleton variant="text" width="120px" height={20} />
-                                        <Skeleton circle width={32} height={32} />
-                                    </div>
-                                    <Skeleton variant="text" width="80px" height={16} />
-                                    <Skeleton variant="text" width="100px" height={16} />
-                                    <div className="flex space-x-2">
-                                        <Skeleton width={80} height={32} variant="rounded" />
-                                        <Skeleton width={80} height={32} variant="rounded" />
-                                    </div>
-                                </div>
-                            </Card>
-                        ))}
-                    </div>
-                </div>
+            <div className="flex items-center justify-start gap-4">
+                <SkeletonCard className='w-[50%]' lines={5} showAvatar={false} />
+                <SkeletonCard className='w-[50%]' lines={5} showAvatar={false} />
             </div>
         );
     }
@@ -147,7 +123,7 @@ export default function SuperAdminLocations() {
     return (
         <div className="min-h-screen">
             <div className="container max-w-6xl mx-auto px-4 py-8">
-                <PageHeader
+                {/* <PageHeader
                     title="Manage Locations"
                     description="Create and manage host locations"
                     breadcrumbs={[
@@ -163,7 +139,7 @@ export default function SuperAdminLocations() {
                             Add Location
                         </Button>
                     }
-                />
+                /> */}
 
                 {/* Locations Grid */}
                 {!locations || locations.length === 0 ? (
@@ -237,6 +213,15 @@ export default function SuperAdminLocations() {
                                 </CardContent>
                             </Card>
                         ))}
+                        <Button
+                            size='lg'
+                            variant='secondary'
+                            onClick={() => router.push(`/super-admin/hosts/${hostId}/locations/new`)}
+                            className="flex items-center gap-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add Location
+                        </Button>
                     </div>
                 )}
 

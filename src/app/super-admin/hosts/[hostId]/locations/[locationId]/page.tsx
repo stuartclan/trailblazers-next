@@ -223,9 +223,9 @@ export default function SuperAdminLocationEdit() {
     }));
 
     return (
-        <div className="min-h-screen">
+        <div className="">
             <div className="container max-w-4xl mx-auto px-4 py-8">
-                <PageHeader
+                {/* <PageHeader
                     title={location.n}
                     description="Manage location settings and activities"
                     breadcrumbs={[
@@ -253,16 +253,37 @@ export default function SuperAdminLocationEdit() {
                             </Button>
                         </div>
                     }
-                />
+                /> */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Location Information */}
                     <Card>
-                        <CardHeader>
+                        <CardHeader row>
                             <CardTitle className="flex items-center gap-2">
                                 <Settings className="h-5 w-5" />
                                 Location Information
                             </CardTitle>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size='sm'
+                                    className="flex items-center gap-2"
+                                    onClick={() => setIsEditing(!isEditing)}
+                                >
+                                    <PenLine className="h-4 w-4" />
+                                    {isEditing ? 'Cancel Edit' : 'Edit Location'}
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size='sm'
+                                    // className="flex items-center gap-2 text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                                    className="flex items-center gap-2 border-red-300 hover:border-red-400"
+                                    onClick={handleDeleteLocation}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                    Delete
+                                </Button>
+                            </div>
                         </CardHeader>
                         <CardContent>
                             {isEditing ? (
@@ -404,7 +425,7 @@ export default function SuperAdminLocationEdit() {
                 </Card> */}
 
                 {/* Warning for Deletion */}
-                {isEditing && (
+                {/* {isEditing && (
                     <Card className="mt-6 border-yellow-200 bg-yellow-50">
                         <CardContent className="p-4">
                             <div className="flex items-start">
@@ -428,7 +449,7 @@ export default function SuperAdminLocationEdit() {
                             </div>
                         </CardContent>
                     </Card>
-                )}
+                )} */}
             </div>
         </div>
     );

@@ -155,7 +155,7 @@ export default function HostAdmin() {
   // Password authentication form
   if (showPasswordForm || !isPasswordAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-[50vh] flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Host Admin Access</CardTitle>
@@ -214,7 +214,7 @@ export default function HostAdmin() {
   return (
     <div className="min-h-screen">
       <div className="container max-w-6xl mx-auto px-4 py-8">
-        <PageHeader
+        {/* <PageHeader
           title="Host Admin Dashboard"
           description={`Managing ${host.n}`}
           breadcrumbs={[
@@ -232,16 +232,16 @@ export default function HostAdmin() {
               Logout
             </Button>
           }
-        />
+        /> */}
 
         {/* Current Location Info */}
-        <Alert variant="info" className="mb-6">
+        {/* <Alert variant="info" className="mb-6">
           <MapPin className="h-4 w-4" />
           <div className="ml-2">
             <p className="font-medium">Current Location: {location.n}</p>
             <p className="text-sm text-gray-600">{location.a}</p>
           </div>
-        </Alert>
+        </Alert> */}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

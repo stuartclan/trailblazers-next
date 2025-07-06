@@ -16,7 +16,7 @@ export const CheckInPageLoading: React.FC = () => {
     <div className="min-h-screen py-8">
       <div className="container max-w-4xl mx-auto px-4 space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        {/* <div className="flex justify-between items-center">
           <div className="space-y-2">
             <Skeleton variant="text" width="300px" height={32} />
             <Skeleton variant="text" width="200px" height={20} />
@@ -25,10 +25,10 @@ export const CheckInPageLoading: React.FC = () => {
             <Skeleton width={120} height={36} variant="rounded" />
             <Skeleton width={100} height={36} variant="rounded" />
           </div>
-        </div>
-        
+        </div> */}
+
         {/* Location info */}
-        <div className="bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
+        {/* <div className="bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
           <div className="flex items-center space-x-3">
             <Skeleton circle width={20} height={20} />
             <div className="space-y-1 flex-1">
@@ -36,10 +36,10 @@ export const CheckInPageLoading: React.FC = () => {
               <Skeleton variant="text" width="40%" />
             </div>
           </div>
-        </div>
-        
+        </div> */}
+
         {/* Main check-in flow */}
-        <SkeletonCheckInFlow />
+        <SkeletonCheckInFlow className='mt-[135px]' />
       </div>
     </div>
   );
@@ -60,7 +60,7 @@ export const HostAdminLoading: React.FC = () => {
           </div>
           <Skeleton width={100} height={36} variant="rounded" />
         </div>
-        
+
         {/* Current location info */}
         <div className="bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
           <div className="flex items-center space-x-3">
@@ -71,7 +71,7 @@ export const HostAdminLoading: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Quick stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {Array.from({ length: 4 }).map((_, index) => (
@@ -88,7 +88,7 @@ export const HostAdminLoading: React.FC = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Quick actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, index) => (
@@ -102,7 +102,7 @@ export const HostAdminLoading: React.FC = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Recent check-ins */}
         <div className="bg-white rounded-lg border-1">
           <div className="p-6 border-b">
@@ -161,7 +161,7 @@ export const RewardsPageLoading: React.FC = () => {
           <Skeleton variant="text" width="200px" height={32} />
           <Skeleton variant="text" width="100px" height={20} />
         </div>
-        
+
         {/* Eligible athletes section */}
         <div className="bg-white rounded-lg border-1 p-6 space-y-4">
           <div className="flex justify-between items-center">
@@ -171,7 +171,7 @@ export const RewardsPageLoading: React.FC = () => {
               <Skeleton variant="text" width="150px" height={16} />
             </div>
           </div>
-          
+
           <div className="border-1 rounded-md overflow-hidden">
             <div className="grid grid-cols-4 gap-4 p-3 bg-gray-50 border-b">
               <Skeleton variant="text" width="60px" />
@@ -192,14 +192,14 @@ export const RewardsPageLoading: React.FC = () => {
             ))}
           </div>
         </div>
-        
+
         {/* Host custom rewards */}
         <div className="bg-white rounded-lg border-1 p-6 space-y-4">
           <div className="flex justify-between items-center">
             <Skeleton variant="text" width="180px" height={24} />
             <Skeleton variant="text" width="120px" height={16} />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="border-1 rounded-md p-4">
@@ -214,11 +214,11 @@ export const RewardsPageLoading: React.FC = () => {
             ))}
           </div>
         </div>
-        
+
         {/* Global rewards */}
         <div className="bg-white rounded-lg border-1 p-6 space-y-4">
           <Skeleton variant="text" width="200px" height={24} />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="border-1 rounded-md p-4">
@@ -253,7 +253,7 @@ export const SignupFormLoading: React.FC = () => {
           </div>
           <Skeleton width={120} height={36} variant="rounded" />
         </div>
-        
+
         {/* Form cards */}
         {Array.from({ length: 5 }).map((_, cardIndex) => (
           <div key={cardIndex} className="bg-white rounded-lg border-1 p-6 space-y-4">
@@ -261,7 +261,7 @@ export const SignupFormLoading: React.FC = () => {
               <Skeleton circle width={20} height={20} />
               <Skeleton variant="text" width="150px" height={20} />
             </div>
-            
+
             {Array.from({ length: cardIndex === 0 ? 3 : cardIndex === 1 ? 2 : 2 }).map((_, fieldIndex) => (
               <div key={fieldIndex} className="space-y-2">
                 <Skeleton variant="text" width="25%" height={16} />
@@ -270,7 +270,7 @@ export const SignupFormLoading: React.FC = () => {
             ))}
           </div>
         ))}
-        
+
         {/* Submit buttons */}
         <div className="flex space-x-4">
           <Skeleton width={120} height={40} variant="rounded" />

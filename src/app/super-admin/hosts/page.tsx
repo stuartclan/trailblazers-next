@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuTrash2 as Trash2, LuUsers as Users } from 'react-icons/lu';
+import { Skeleton, SkeletonCard } from '@/components/atoms/skeleton/skeleton';
 import { useCreateHost, useDeleteHost, useHosts } from '@/hooks/useHost';
 import { useEffect, useState } from 'react';
 
@@ -10,8 +11,6 @@ import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import { HostForm } from '@/components/organisms/host-form/host-form';
 import Link from 'next/link';
-import { PageHeader } from '@/components/molecules/page-header/page-header';
-import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { fetchLocationsByHost } from '@/hooks/useLocation';
 import { useAsync } from 'react-use';
 import { useAuth } from '@/hooks/useAuth';
@@ -155,32 +154,9 @@ export default function SuperAdminHosts() {
   // Loading state
   if (isAuthLoading || isLoadingHosts || isLoadingHostLocations) {
     return (
-      <div className="min-h-screen">
-        <div className="container max-w-6xl mx-auto px-4 py-8 space-y-6">
-          <div className="flex justify-between items-center">
-            <Skeleton variant="text" width="200px" height={32} />
-            <Skeleton width={120} height={40} variant="rounded" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <Card key={index} className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Skeleton variant="text" width="120px" height={20} />
-                    <Skeleton circle width={32} height={32} />
-                  </div>
-                  <Skeleton variant="text" width="80px" height={16} />
-                  <Skeleton variant="text" width="100px" height={16} />
-                  <div className="flex space-x-2">
-                    <Skeleton width={80} height={32} variant="rounded" />
-                    <Skeleton width={80} height={32} variant="rounded" />
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
+      <div className="flex items-center justify-start gap-4">
+        <SkeletonCard className='w-[50%]' lines={5} showAvatar={false} />
+        <SkeletonCard className='w-[50%]' lines={5} showAvatar={false} />
       </div>
     );
   }
@@ -201,7 +177,7 @@ export default function SuperAdminHosts() {
   return (
     <div className="min-h-screen">
       <div className="container max-w-6xl mx-auto px-4 py-8">
-        <PageHeader
+        {/* <PageHeader
           title="Manage Hosts"
           description="Create and manage host organizations"
           breadcrumbs={[
@@ -217,7 +193,7 @@ export default function SuperAdminHosts() {
               Add Host
             </Button>
           }
-        />
+        /> */}
 
         {/* Create Host Form */}
         {showCreateForm && (
@@ -294,6 +270,15 @@ export default function SuperAdminHosts() {
                 </CardContent>
               </Card>
             ))}
+            <Button
+              size='lg'
+              variant='secondary'
+              onClick={() => setShowCreateForm(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Host
+            </Button>
           </div>
         )}
 

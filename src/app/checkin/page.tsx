@@ -1,5 +1,6 @@
 'use client';
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { useEffect, useState } from 'react';
 
 import { Alert } from '@/components/atoms/alert/alert';
@@ -93,7 +94,7 @@ export default function CheckIn() {
   }
 
   return (
-    <div className="">
+    <div className="container max-w-6xl mx-auto px-4 py-8">
       {/* Header */}
       {/* <div className="border-b border-gray-200">
         <div className="container max-w-6xl mx-auto px-4 py-4">
@@ -122,9 +123,31 @@ export default function CheckIn() {
       </div> */}
 
       {/* Main Content */}
-      <div className="container max-w-6xl mx-auto px-4 py-8">
-        {/* Location Info */}
-        {/* <Alert variant="info" className="mb-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className='text-2xl uppercase'>Trailblazers Check-In</CardTitle>
+          <CardDescription>Welcome to {host.n} ({location.n})</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CheckInFlow
+            host={host}
+            location={location}
+            onNewAthlete={handleNewAthlete}
+            className="mb-6"
+          />
+        </CardContent>
+      </Card>
+      {/* <div className="container max-w-6xl mx-auto px-4 py-8">
+        <div className="container max-w-6xl mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Trailblazers Check-In</h1>
+              <p className="text-gray-600 mt-1">Welcome to {host.n}</p>
+            </div>
+          </div>
+        </div> */}
+      {/* Location Info */}
+      {/* <Alert variant="info" className="mb-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Current Location: {location.n}</p>
@@ -133,16 +156,16 @@ export default function CheckIn() {
           </div>
         </Alert> */}
 
-        {/* Main Check-in Flow */}
-        <CheckInFlow
+      {/* Main Check-in Flow */}
+      {/* <CheckInFlow
           host={host}
           location={location}
           onNewAthlete={handleNewAthlete}
           className="mb-6"
-        />
+        /> */}
 
-        {/* Footer */}
-        {/* <div className="bg-white rounded-lg border-1 p-4 mt-8">
+      {/* Footer */}
+      {/* <div className="bg-white rounded-lg border-1 p-4 mt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <div>
               <p>Need help? Contact your host administrator.</p>
@@ -157,7 +180,7 @@ export default function CheckIn() {
             </div>
           </div>
         </div> */}
-      </div>
+      {/* </div> */}
     </div>
   );
 }

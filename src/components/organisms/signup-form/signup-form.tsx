@@ -11,6 +11,8 @@ import { Checkbox } from '@/components/atoms/checkbox/checkbox';
 import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
+import { IoMdShirt } from 'react-icons/io';
+import Markdown from 'markdown-to-jsx';
 import { MobileFormField } from '@/components/molecules/mobile-form-field/mobile-form-field';
 import { Select } from '@/components/atoms/select/select';
 import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
@@ -211,7 +213,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="md:col-span-2">
-                                {isMobile ? (
+                                {/* {isMobile ? (
                                     <MobileFormField
                                         type="input"
                                         label="First Name"
@@ -220,21 +222,21 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                         required
                                         error={form.formState.errors.firstName?.message}
                                     />
-                                ) : (
-                                    <FormControl
-                                        name="firstName"
-                                        label="First Name"
-                                        render={(props) => (
-                                            <Input
-                                                {...props}
-                                                required
-                                            />
-                                        )}
-                                    />
-                                )}
+                                ) : ( */}
+                                <FormControl
+                                    name="firstName"
+                                    label="First Name"
+                                    render={(props) => (
+                                        <Input
+                                            {...props}
+                                            required
+                                        />
+                                    )}
+                                />
+                                {/* )} */}
                             </div>
 
-                            {isMobile ? (
+                            {/* {isMobile ? (
                                 <MobileFormField
                                     type="input"
                                     label="Middle Initial"
@@ -242,22 +244,22 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                     onChange={(value) => setValue('middleInitial', value)}
                                     error={form.formState.errors.middleInitial?.message}
                                 />
-                            ) : (
-                                <FormControl
-                                    name="middleInitial"
-                                    label="Middle Initial"
-                                    render={(props) => (
-                                        <Input
-                                            {...props}
-                                            maxLength={1}
-                                            placeholder='Optional'
-                                        />
-                                    )}
-                                />
-                            )}
+                            ) : ( */}
+                            <FormControl
+                                name="middleInitial"
+                                label="Middle Initial"
+                                render={(props) => (
+                                    <Input
+                                        {...props}
+                                        maxLength={1}
+                                        placeholder='Optional'
+                                    />
+                                )}
+                            />
+                            {/* )} */}
                         </div>
 
-                        {isMobile ? (
+                        {/* {isMobile ? (
                             <MobileFormField
                                 type="input"
                                 label="Last Name"
@@ -266,20 +268,20 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                 required
                                 error={form.formState.errors.lastName?.message}
                             />
-                        ) : (
-                            <FormControl
-                                name="lastName"
-                                label="Last Name"
-                                render={(props) => (
-                                    <Input
-                                        {...props}
-                                        required
-                                    />
-                                )}
-                            />
-                        )}
+                        ) : ( */}
+                        <FormControl
+                            name="lastName"
+                            label="Last Name"
+                            render={(props) => (
+                                <Input
+                                    {...props}
+                                    required
+                                />
+                            )}
+                        />
+                        {/* )} */}
 
-                        {isMobile ? (
+                        {/* {isMobile ? (
                             <MobileFormField
                                 type="input"
                                 label="Email Address"
@@ -288,21 +290,21 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                 required
                                 error={form.formState.errors.email?.message}
                             />
-                        ) : (
-                            <FormControl
-                                name="email"
-                                label="Email Address"
-                                render={(props) => (
-                                    <Input
-                                        {...props}
-                                        type="email"
-                                        required
-                                    />
-                                )}
-                            />
-                        )}
+                        ) : ( */}
+                        <FormControl
+                            name="email"
+                            label="Email Address"
+                            render={(props) => (
+                                <Input
+                                    {...props}
+                                    type="email"
+                                    required
+                                />
+                            )}
+                        />
+                        {/* )} */}
 
-                        {isMobile ? (
+                        {/* {isMobile ? (
                             <MobileFormField
                                 type="input"
                                 label="Employer"
@@ -310,18 +312,18 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                 onChange={(value) => setValue('employer', value)}
                                 error={form.formState.errors.employer?.message}
                             />
-                        ) : (
-                            <FormControl
-                                name="employer"
-                                label="Employer"
-                                render={(props) => (
-                                    <Input
-                                        {...props}
-                                        placeholder="Optional"
-                                    />
-                                )}
-                            />
-                        )}
+                        ) : ( */}
+                        <FormControl
+                            name="employer"
+                            label="Employer"
+                            render={(props) => (
+                                <Input
+                                    {...props}
+                                    placeholder="Optional"
+                                />
+                            )}
+                        />
+                        {/* )} */}
                     </CardContent>
                 </Card>
 
@@ -329,13 +331,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 <Card className="mb-6">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <PawPrintIcon className="h-5 w-5 text-primary" />
-                            T-Shirt Information (Optional)
+                            <IoMdShirt className="h-5 w-5 text-primary" />
+                            T-Shirt Information
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {isMobile ? (
+                            {/* {isMobile ? (
                                 <MobileFormField
                                     type="select"
                                     label="Shirt Style"
@@ -345,25 +347,25 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                     error={form.formState.errors.shirtGender?.message}
                                     required
                                 />
-                            ) : (
-                                <FormControl
-                                    name="shirtGender"
-                                    label="Shirt Style"
-                                    render={(props) => (
-                                        <Select
-                                            label={props.label}
-                                            options={shirtGenderOptions}
-                                            value={props.value || ''}
-                                            onValueChange={props.onChange}
-                                            error={props.error}
-                                            placeholder="Select shirt type"
-                                            required
-                                        />
-                                    )}
-                                />
-                            )}
+                            ) : ( */}
+                            <FormControl
+                                name="shirtGender"
+                                label="Shirt Style"
+                                render={(props) => (
+                                    <Select
+                                        label={props.label}
+                                        options={shirtGenderOptions}
+                                        value={props.value || ''}
+                                        onValueChange={props.onChange}
+                                        error={props.error}
+                                        placeholder="Select shirt type"
+                                        required
+                                    />
+                                )}
+                            />
+                            {/* )} */}
 
-                            {isMobile ? (
+                            {/* {isMobile ? (
                                 <MobileFormField
                                     type="select"
                                     label="Shirt Size"
@@ -373,23 +375,23 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                     error={form.formState.errors.shirtSize?.message}
                                     required
                                 />
-                            ) : (
-                                <FormControl
-                                    name="shirtSize"
-                                    label="Shirt Size"
-                                    render={(props) => (
-                                        <Select
-                                            label={props.label}
-                                            options={shirtSizeOptions}
-                                            value={props.value || ''}
-                                            onValueChange={props.onChange}
-                                            error={props.error}
-                                            placeholder="Select shirt size"
-                                            required
-                                        />
-                                    )}
-                                />
-                            )}
+                            ) : ( */}
+                            <FormControl
+                                name="shirtSize"
+                                label="Shirt Size"
+                                render={(props) => (
+                                    <Select
+                                        label={props.label}
+                                        options={shirtSizeOptions}
+                                        value={props.value || ''}
+                                        onValueChange={props.onChange}
+                                        error={props.error}
+                                        placeholder="Select shirt size"
+                                        required
+                                    />
+                                )}
+                            />
+                            {/* )} */}
                         </div>
                     </CardContent>
                 </Card>
@@ -403,7 +405,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {isMobile ? (
+                        {/* {isMobile ? (
                             <MobileFormField
                                 type="input"
                                 label="Contact Name"
@@ -412,20 +414,20 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                 required
                                 error={form.formState.errors.emergencyName?.message}
                             />
-                        ) : (
-                            <FormControl
-                                name="emergencyName"
-                                label="Contact Name"
-                                render={(props) => (
-                                    <Input
-                                        {...props}
-                                        required
-                                    />
-                                )}
-                            />
-                        )}
+                        ) : ( */}
+                        <FormControl
+                            name="emergencyName"
+                            label="Contact Name"
+                            render={(props) => (
+                                <Input
+                                    {...props}
+                                    required
+                                />
+                            )}
+                        />
+                        {/* )} */}
 
-                        {isMobile ? (
+                        {/* {isMobile ? (
                             <MobileFormField
                                 type="input"
                                 label="Contact Phone"
@@ -434,19 +436,19 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                                 required
                                 error={form.formState.errors.emergencyPhone?.message}
                             />
-                        ) : (
-                            <FormControl
-                                name="emergencyPhone"
-                                label="Contact Phone"
-                                render={(props) => (
-                                    <Input
-                                        {...props}
-                                        type="tel"
-                                        required
-                                    />
-                                )}
-                            />
-                        )}
+                        ) : ( */}
+                        <FormControl
+                            name="emergencyPhone"
+                            label="Contact Phone"
+                            render={(props) => (
+                                <Input
+                                    {...props}
+                                    type="tel"
+                                    required
+                                />
+                            )}
+                        />
+                        {/* )} */}
                     </CardContent>
                 </Card>
 
@@ -507,10 +509,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="bg-gray-50 p-4 rounded-md max-h-48 overflow-y-auto">
-                                <p className="text-sm text-gray-700 leading-relaxed">
-                                    {disclaimerText}
-                                </p>
+                            <div className="bg-gray-50 p-4 rounded-md max-h-48 overflow-y-auto text-sm text-gray-700 leading-relaxed">
+                                <Markdown>{disclaimerText}</Markdown>
                             </div>
 
                             <FormControl
@@ -530,39 +530,41 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t">
+                <div className="flex flex-col sm:flex-row items-center justify-end gap-8 mb-8">
                     {onCancel && (
-                        <TouchTarget>
-                            <Button
-                                variant="ghost"
-                                type="button"
-                                onClick={handleCancel}
-                                disabled={isSubmitting}
-                            >
-                                Cancel
-                            </Button>
-                        </TouchTarget>
+                        <Button
+                            variant="link"
+                            className="text-white"
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={isSubmitting}
+                        >
+                            Cancel
+                        </Button>
+                        // <TouchTarget>
+                        // </TouchTarget>
                     )}
 
-                    <TouchTarget>
-                        <Button
-                            variant="outline"
-                            type="button"
-                            onClick={handleReset}
-                            disabled={isSubmitting}
-                        >
-                            Reset Form
-                        </Button>
-                    </TouchTarget>
+                    {/* <TouchTarget> */}
+                    {/* <Button
+                        variant="secondary"
+                        type="button"
+                        onClick={handleReset}
+                        disabled={isSubmitting}
+                    >
+                        Reset Form
+                    </Button> */}
+                    {/* </TouchTarget> */}
 
-                    <TouchTarget>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Registering...' : 'Register Athlete'}
-                        </Button>
-                    </TouchTarget>
+                    {/* <TouchTarget> */}
+                    <Button
+                        type="submit"
+                        size={'lg'}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Registering...' : 'Register Athlete'}
+                    </Button>
+                    {/* </TouchTarget> */}
                 </div>
 
                 {/* Progress indicator for long operations */}

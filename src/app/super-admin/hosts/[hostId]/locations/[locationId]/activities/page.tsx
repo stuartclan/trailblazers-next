@@ -108,6 +108,7 @@ export default function SuperAdminLocationActivities() {
 
             // Refetch location to get updated data
             refetchLocation();
+            router.push(`/super-admin/hosts/${hostId}/locations/${locationId}`);
 
         } catch (err) {
             console.error('Activity update error:', err);
@@ -132,7 +133,7 @@ export default function SuperAdminLocationActivities() {
     // Loading state
     if (isAuthLoading || isLoadingLocation || isLoadingActivities) {
         return (
-            <div className="min-h-screen">
+            <div className="">
                 <div className="container max-w-4xl mx-auto px-4 py-8 space-y-6">
                     <div className="space-y-2">
                         <Skeleton variant="text" width="300px" height={32} />
@@ -190,7 +191,7 @@ export default function SuperAdminLocationActivities() {
     return (
         <div className="min-h-screen">
             <div className="container max-w-4xl mx-auto px-4 py-8">
-                <PageHeader
+                {/* <PageHeader
                     title={`Manage Activities: ${location.n}`}
                     description="Assign up to 3 activities for this location"
                     breadcrumbs={[
@@ -216,15 +217,30 @@ export default function SuperAdminLocationActivities() {
                             </Button>
                         </div>
                     }
-                />
+                /> */}
 
                 {/* Current Selection Summary */}
                 <Card className="mb-6">
-                    <CardHeader>
+                    <CardHeader row>
                         <CardTitle className="flex items-center gap-2">
                             <Check className="h-5 w-5" />
                             Selected Activities ({selectedActivityIds.length}/3)
                         </CardTitle>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={handleReset}
+                                disabled={!hasChanges || isSubmitting}
+                            >
+                                Reset
+                            </Button>
+                            <Button
+                                onClick={handleSaveActivities}
+                                disabled={!hasChanges || isSubmitting}
+                            >
+                                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {selectedActivityIds.length === 0 ? (

@@ -151,7 +151,7 @@ const RewardForm: React.FC<RewardFormProps> = ({
     if (onCancel) {
       onCancel();
     }
-    info('Form editing cancelled', 'Cancelled');
+    // info('Form editing cancelled', 'Cancelled');
   };
 
   return (

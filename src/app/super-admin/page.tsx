@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, user, logout } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   // Fetch summary data
   // const { data: hosts } = useHosts();
@@ -40,10 +40,10 @@ export default function SuperAdminDashboard() {
   }, [isAuthenticated, isLoading, user]);
 
   // Handle logout
-  const handleLogout = () => {
-    logout();
-    router.push('/super-admin/login');
-  };
+  // const handleLogout = () => {
+  //   logout();
+  //   router.push('/super-admin/login');
+  // };
 
   // Show loading state
   if (isLoading) {
@@ -57,17 +57,16 @@ export default function SuperAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="">
       <div className="container max-w-7xl">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Trailblazers Super Admin</h1>
-
-          <button
+          <h1 className="text-2xl text-white font-bold">Trailblazers Super Admin</h1>
+          {/* <button
             onClick={handleLogout}
             className="text-red-500 hover:underline"
           >
             Logout
-          </button>
+          </button> */}
         </div>
 
         {/* Quick Stats */}
