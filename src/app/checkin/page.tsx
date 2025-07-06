@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { useEffect, useState } from 'react';
 
-import { Alert } from '@/components/atoms/alert/alert';
+// import { Alert } from '@/components/atoms/alert/alert';
 // import { Button } from '@/components/atoms/button/button';
 import { CheckInFlow } from '@/components/organisms/checkin-flow/checkin-flow';
 import { CheckInPageLoading } from '@/components/molecules/loading-states/loading-states';

@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import { LocationForm } from '@/components/organisms/location-form/location-form';
-import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreateLocation } from '@/hooks/useLocation';

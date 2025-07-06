@@ -13,7 +13,6 @@ import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import { Label } from '@/components/atoms/label/label';
 import { LocationForm } from '@/components/organisms/location-form/location-form';
-import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { useActivities } from '@/hooks/useActivity';
 import { useAuth } from '@/hooks/useAuth';

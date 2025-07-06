@@ -13,7 +13,6 @@ import { HostEntity } from '@/lib/db/entities/types';
 import { HostForm } from '@/components/organisms/host-form/host-form';
 import Link from 'next/link';
 import Markdown from 'markdown-to-jsx';
-import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { cn } from '@/lib/utils/ui';
 import { useAuth } from '@/hooks/useAuth';
@@ -186,17 +185,15 @@ export default function SuperAdminHostDetail() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="container max-w-4xl mx-auto px-4 py-8">
-        <PageHeader
-          title={host.n}
-          description="Manage host settings and locations"
-          breadcrumbs={[
-            { label: 'Dashboard', href: '/super-admin' },
-            { label: 'Hosts', href: '/super-admin/hosts' },
-            { label: host.n, current: true }
-          ]}
-          actions={
+    <div className="container max-w-4xl mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Host Information */}
+        <Card>
+          <CardHeader row>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Host Information
+            </CardTitle>
             <Button
               onClick={() => setIsEditing(!isEditing)}
               variant="outline"
@@ -205,196 +202,184 @@ export default function SuperAdminHostDetail() {
               <PenLine className="h-4 w-4" />
               {isEditing ? 'Cancel Edit' : 'Edit Host'}
             </Button>
-          }
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Host Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Host Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <HostForm
-                  defaultValues={{
-                    name: host.n,
-                    email: host.e, // Email can't be changed after creation
-                    // password: host.p, // Password is optional for updates
-                    adminPassword: host.p, // Password is optional for updates
-                    disclaimer: host.disc || '',
-                  }}
-                  isEdit={true}
-                  onSubmit={handleUpdateHost}
-                  onCancel={() => setIsEditing(false)}
-                />
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Host Name</label>
-                    <p className="text-gray-900">{host.n}</p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Cognito ID</label>
-                    <p className="text-gray-600 text-sm font-mono">{host.cid}</p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Created</label>
-                    <p className="text-gray-600">
-                      {new Date(host.c * 1000).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Last Updated</label>
-                    <p className="text-gray-600">
-                      {new Date(host.u * 1000).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="mt-1 p-3 bg-gray-50 text-gray-700 text-sm rounded-md">
-                      {host.disc ? (
-                        <>
-                          <Button className={cn('w-full', showDisclaimer && 'mb-4')} variant={'link'} onClick={() => setShowDisclaimer(!showDisclaimer)}>
-                            {showDisclaimer ? 'Hide' : 'Show'} Disclaimer
-                            {showDisclaimer && <LuChevronUp className='inline' size={18} />}
-                            {!showDisclaimer && <LuChevronDown className='inline' size={18} />}
-                          </Button>
-                          {showDisclaimer && <Markdown>{host.disc}</Markdown>}
-                        </>
-                      ) : (
-                        <p className="text-gray-500 text-sm italic text-center">No disclaimer set</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Locations */}
-          <Card>
-            <CardHeader row>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Locations ({locations?.length || 0})
-                </div>
-              </CardTitle>
-              <Link href={`/super-admin/hosts/${hostId}/locations/new`}>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="flex items-center gap-1"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Location
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              {isLoadingLocations ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border-1 rounded animate-pulse">
-                      <div className="space-y-1 flex-1">
-                        <Skeleton variant="text" width="120px" height={16} />
-                        <Skeleton variant="text" width="180px" height={14} />
-                      </div>
-                      <Skeleton width={60} height={32} variant="rounded" />
-                    </div>
-                  ))}
-                </div>
-              ) : locationsError ? (
-                <div className="text-center py-4">
-                  <p className="text-red-600 mb-2">Failed to load locations</p>
-                  <Button variant="outline" size="sm" onClick={refetchLocations}>
-                    Retry
-                  </Button>
-                </div>
-              ) : !locations || locations.length === 0 ? (
-                <EmptyState
-                  icon={<MapPin className="h-8 w-8" />}
-                  title="No locations"
-                  description="This host doesn't have any locations yet."
-                />
-              ) : (
-                <div className="space-y-3">
-                  {locations.map((location) => (
-                    <div
-                      key={location.id}
-                      className="flex items-center justify-between p-3 border-1 rounded hover:bg-gray-50"
-                    >
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{location.n}</h4>
-                        <p className="text-sm text-gray-600">{location.a}</p>
-                        <p className="text-xs text-gray-500">
-                          {location.acts?.length || 0} activities
-                        </p>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <Link href={`/super-admin/hosts/${hostId}/locations/${location.id}`}>
-                          <Button variant="outline" size="sm">
-                            <PenLine className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Host Statistics */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Host Statistics
-            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {locations?.length || 0}
+            {isEditing ? (
+              <HostForm
+                defaultValues={{
+                  name: host.n,
+                  email: host.e, // Email can't be changed after creation
+                  // password: host.p, // Password is optional for updates
+                  adminPassword: host.p, // Password is optional for updates
+                  disclaimer: host.disc || '',
+                }}
+                isEdit={true}
+                onSubmit={handleUpdateHost}
+                onCancel={() => setIsEditing(false)}
+              />
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Host Name</label>
+                  <p className="text-gray-900">{host.n}</p>
                 </div>
-                <div className="text-sm text-gray-600">Total Locations</div>
-              </div>
 
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {locations?.reduce((sum, loc) => sum + (loc.acts?.length || 0), 0) || 0}
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Cognito ID</label>
+                  <p className="text-gray-600 text-sm font-mono">{host.cid}</p>
                 </div>
-                <div className="text-sm text-gray-600">Total Activities</div>
-              </div>
 
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {host.cr?.length || 0}
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Created</label>
+                  <p className="text-gray-600">
+                    {new Date(host.c * 1000).toLocaleDateString()}
+                  </p>
                 </div>
-                <div className="text-sm text-gray-600">Custom Rewards</div>
-              </div>
 
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {host.disc ? 'Yes' : 'No'}
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Last Updated</label>
+                  <p className="text-gray-600">
+                    {new Date(host.u * 1000).toLocaleDateString()}
+                  </p>
                 </div>
-                <div className="text-sm text-gray-600">Has Disclaimer</div>
+
+                <div>
+                  <div className="mt-1 p-3 bg-gray-50 text-gray-700 text-sm rounded-md">
+                    {host.disc ? (
+                      <>
+                        <Button className={cn('w-full', showDisclaimer && 'mb-4')} variant={'link'} onClick={() => setShowDisclaimer(!showDisclaimer)}>
+                          {showDisclaimer ? 'Hide' : 'Show'} Disclaimer
+                          {showDisclaimer && <LuChevronUp className='inline' size={18} />}
+                          {!showDisclaimer && <LuChevronDown className='inline' size={18} />}
+                        </Button>
+                        {showDisclaimer && <Markdown>{host.disc}</Markdown>}
+                      </>
+                    ) : (
+                      <p className="text-gray-500 text-sm italic text-center">No disclaimer set</p>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Locations */}
+        <Card>
+          <CardHeader row>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Locations ({locations?.length || 0})
+              </div>
+            </CardTitle>
+            <Link href={`/super-admin/hosts/${hostId}/locations/new`}>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="flex items-center gap-1"
+              >
+                <Plus className="h-4 w-4" />
+                Add Location
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {isLoadingLocations ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border-1 rounded animate-pulse">
+                    <div className="space-y-1 flex-1">
+                      <Skeleton variant="text" width="120px" height={16} />
+                      <Skeleton variant="text" width="180px" height={14} />
+                    </div>
+                    <Skeleton width={60} height={32} variant="rounded" />
+                  </div>
+                ))}
+              </div>
+            ) : locationsError ? (
+              <div className="text-center py-4">
+                <p className="text-red-600 mb-2">Failed to load locations</p>
+                <Button variant="outline" size="sm" onClick={refetchLocations}>
+                  Retry
+                </Button>
+              </div>
+            ) : !locations || locations.length === 0 ? (
+              <EmptyState
+                icon={<MapPin className="h-8 w-8" />}
+                title="No locations"
+                description="This host doesn't have any locations yet."
+              />
+            ) : (
+              <div className="space-y-3">
+                {locations.map((location) => (
+                  <div
+                    key={location.id}
+                    className="flex items-center justify-between p-3 border-1 rounded hover:bg-gray-50"
+                  >
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">{location.n}</h4>
+                      <p className="text-sm text-gray-600">{location.a}</p>
+                      <p className="text-xs text-gray-500">
+                        {location.acts?.length || 0} activities
+                      </p>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Link href={`/super-admin/hosts/${hostId}/locations/${location.id}`}>
+                        <Button variant="outline" size="sm">
+                          <PenLine className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Host Statistics */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Host Statistics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">
+                {locations?.length || 0}
+              </div>
+              <div className="text-sm text-gray-600">Total Locations</div>
+            </div>
+
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">
+                {locations?.reduce((sum, loc) => sum + (loc.acts?.length || 0), 0) || 0}
+              </div>
+              <div className="text-sm text-gray-600">Total Activities</div>
+            </div>
+
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">
+                {host.cr?.length || 0}
+              </div>
+              <div className="text-sm text-gray-600">Custom Rewards</div>
+            </div>
+
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">
+                {host.disc ? 'Yes' : 'No'}
+              </div>
+              <div className="text-sm text-gray-600">Has Disclaimer</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

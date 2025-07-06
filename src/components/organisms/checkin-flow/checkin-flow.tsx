@@ -1,10 +1,8 @@
 'use client';
 
-import * as React from 'react';
-
 import { ActivityEntity, AthleteEntity, HostEntity, LocationEntity } from '@/lib/db/entities/types';
 import { AthleteCheckInStatus, AthleteItem } from '@/components/molecules/athlete-item/athlete-item';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
+import { ChangeEvent, FC, useCallback, useEffect, useRef, useState } from 'react';
 import { LuPlus, LuSearch as Search, LuUser as User } from 'react-icons/lu';
 import { useCreateCheckIn, useDeleteCheckIn, useUpdateCheckIn } from '@/hooks/useCheckIn';
 
@@ -17,6 +15,7 @@ import { cn } from '@/lib/utils/ui';
 import { isWithinCurrentWeek } from '@/lib/utils/dates';
 import { useAthleteSearch } from '@/hooks/useAthlete';
 import { useLocationActivities } from '@/hooks/useActivity';
+import { useSearchParams } from 'next/navigation';
 import { useToastNotifications } from '@/hooks/useToast';
 
 interface CheckInFlowProps {
@@ -81,29 +80,31 @@ class Helpers {
   }
 }
 
-export const CheckInFlow: React.FC<CheckInFlowProps> = ({
+export const CheckInFlow: FC<CheckInFlowProps> = ({
   host,
   location,
   onNewAthlete,
   className,
 }) => {
   const { success, error, info } = useToastNotifications();
+  const searchParams = useSearchParams();
+  const newAthleteLastName = searchParams.get('naln');
 
   // State management
-  const [isSearching, setIsSearching] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState('');
-  const [athleteStatuses, setAthleteStatuses] = React.useState<AthleteCheckInStatus[]>([]);
-  const [disclaimerAthlete, setDisclaimerAthlete] = React.useState<AthleteEntity | null>(null);
-  const [activeAthleteId, setActiveAthleteId] = React.useState<string | null>(null);
-  const [pendingCheckIn, setPendingCheckIn] = React.useState<{
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [athleteStatuses, setAthleteStatuses] = useState<AthleteCheckInStatus[]>([]);
+  const [disclaimerAthlete, setDisclaimerAthlete] = useState<AthleteEntity | null>(null);
+  const [activeAthleteId, setActiveAthleteId] = useState<string | null>(null);
+  const [pendingCheckIn, setPendingCheckIn] = useState<{
     athlete: AthleteEntity;
     activity: ActivityEntity;
   } | null>(null);
 
   // Timers
-  const searchTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
-  const resetTimeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const resetTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Data fetching
   const { data: activities } = useLocationActivities(host.id, location.id);
@@ -115,10 +116,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   const deleteCheckIn = useDeleteCheckIn();
 
   // Auto-reset timer function
-  const resetAutoResetTimer = React.useCallback(() => {
-    // TODO: DEBUG: remove this to bring timer back
-    return;
-
+  const resetAutoResetTimer = useCallback(() => {
     if (resetTimeoutRef.current) {
       clearTimeout(resetTimeoutRef.current);
     }
@@ -133,11 +131,15 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle search input change with debouncing
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
+  const initiateSearch = (query: string) => {
     setIsSearching(true);
     setSearchQuery(query);
+  };
+
+  // Handle search input change with debouncing
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    initiateSearch(query);
 
     // Clear existing search timeout
     if (searchTimeoutRef.current) {
@@ -159,7 +161,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   };
 
   // Process search results without additional API calls
-  React.useEffect(() => {
+  useEffect(() => {
     if (!searchResults || !activities) return;
 
     // Process athletes using optimization helper - no additional API calls needed!
@@ -167,6 +169,15 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
     setAthleteStatuses(statuses);
     setIsSearching(false);
   }, [searchResults, activities, host.id]);
+
+  useEffect(() => {
+    if (newAthleteLastName) {
+      initiateSearch(newAthleteLastName);
+      setDebouncedSearchQuery(newAthleteLastName);
+      resetAutoResetTimer();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newAthleteLastName]);
 
   // Perform the actual check-in
   const performCheckIn = async (athlete: AthleteEntity, activity: ActivityEntity) => {
@@ -238,11 +249,8 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
               // Update local state
               setAthleteStatuses(prev => prev.map(status => {
                 if (status.athlete.id === athlete.id) {
-                  console.log('DEBUG: before delete:', status.athlete.lw);
                   delete status.athlete.lw[host.id];
-                  console.log('DEBUG: new lw:', status.athlete.lw);
                   const hasCheckins = Object.keys(status.athlete.lw).length > 0;
-                  console.log('DEBUG: hasCheckins:', hasCheckins);
 
                   return {
                     ...status,
@@ -338,7 +346,7 @@ export const CheckInFlow: React.FC<CheckInFlowProps> = ({
   };
 
   // Cleanup timers on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);

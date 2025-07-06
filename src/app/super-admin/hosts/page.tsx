@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { LuMapPin as MapPin, LuPenLine as PenLine, LuPlus as Plus, LuTrash2 as Trash2, LuUsers as Users } from 'react-icons/lu';
-import { Skeleton, SkeletonCard } from '@/components/atoms/skeleton/skeleton';
 import { useCreateHost, useDeleteHost, useHosts } from '@/hooks/useHost';
 import { useEffect, useState } from 'react';
 
@@ -11,6 +10,7 @@ import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import { HostForm } from '@/components/organisms/host-form/host-form';
 import Link from 'next/link';
+import { SkeletonCard } from '@/components/atoms/skeleton/skeleton';
 import { fetchLocationsByHost } from '@/hooks/useLocation';
 import { useAsync } from 'react-use';
 import { useAuth } from '@/hooks/useAuth';

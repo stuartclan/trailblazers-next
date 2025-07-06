@@ -1,16 +1,15 @@
 'use client';
 
-import { LuArrowLeft as ArrowLeft, LuUser as User } from 'react-icons/lu';
 import { Card, CardContent } from '@/components/atoms/card/card';
 import { useCreateAthlete, useSignDisclaimer } from '@/hooks/useAthlete';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/atoms/button/button';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
-import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { SignupForm } from '@/components/organisms/signup-form/signup-form';
 import { SignupFormLoading } from '@/components/molecules/loading-states/loading-states';
 import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
+import { LuUser as User } from 'react-icons/lu';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreatePet } from '@/hooks/usePet';
 import { useHost } from '@/hooks/useHost';
@@ -75,7 +74,6 @@ export default function Signup() {
 
     try {
       // Create the athlete
-      info('Creating athlete profile...', 'Creating Profile');
       const newAthlete = await createAthlete.mutateAsync({
         firstName: data.firstName,
         lastName: data.lastName,
@@ -87,8 +85,6 @@ export default function Signup() {
         emergencyName: data.emergencyName,
         emergencyPhone: data.emergencyPhone,
       });
-
-      info('Signing disclaimer...', 'Disclaimer');
 
       // Sign the disclaimer
       await signDisclaimer.mutateAsync({
@@ -113,7 +109,7 @@ export default function Signup() {
 
       // Redirect after success
       setTimeout(() => {
-        router.push('/checkin');
+        router.push('/checkin?naln=' + encodeURIComponent(newAthlete.ln));
       }, 2000);
 
     } catch (err) {

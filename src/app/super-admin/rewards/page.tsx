@@ -10,7 +10,6 @@ import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import { Icon } from '@/components/atoms/icon/icon';
-import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { RewardForm } from '@/components/organisms/reward-form/reward-form';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
@@ -193,9 +192,8 @@ export default function SuperAdminGlobalRewards() {
     }
 
     return (
-        <div className="min-h-screen">
-            <div className="container max-w-6xl mx-auto px-4 py-8">
-                <PageHeader
+        <div className="container max-w-6xl mx-auto px-4 py-8">
+            {/* <PageHeader
                     title="Manage Global Rewards"
                     description="Create and manage global rewards that athletes earn across all host locations"
                     breadcrumbs={[
@@ -211,119 +209,128 @@ export default function SuperAdminGlobalRewards() {
                             Add Global Reward
                         </Button>
                     }
+                /> */}
+
+            {/* Create Reward Form */}
+            {showCreateForm && (
+                <Card className="mb-6">
+                    <CardHeader>
+                        <CardTitle>Create New Global Reward</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <RewardForm
+                            onSubmit={handleCreateReward}
+                            onCancel={() => setShowCreateForm(false)}
+                        />
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Edit Reward Form */}
+            {editingReward && rewardBeingEdited && (
+                <Card className="mb-6">
+                    <CardHeader>
+                        <CardTitle>Edit Global Reward</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <RewardForm
+                            defaultValues={{
+                                count: rewardBeingEdited.cnt,
+                                name: rewardBeingEdited.n,
+                                icon: rewardBeingEdited.i,
+                            }}
+                            isEdit={true}
+                            onSubmit={handleUpdateReward}
+                            onCancel={() => setEditingReward(null)}
+                        />
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Rewards Grid */}
+            {!rewards || rewards.length === 0 ? (
+                <EmptyState
+                    icon={<Gift className="h-12 w-12" />}
+                    title="No global rewards found"
+                    description="Get started by creating your first global reward that athletes can earn across all host locations."
+                    actionLabel="Create Global Reward"
+                    onAction={() => setShowCreateForm(true)}
                 />
-
-                {/* Create Reward Form */}
-                {showCreateForm && (
-                    <Card className="mb-6">
-                        <CardHeader>
-                            <CardTitle>Create New Global Reward</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <RewardForm
-                                onSubmit={handleCreateReward}
-                                onCancel={() => setShowCreateForm(false)}
-                            />
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Edit Reward Form */}
-                {editingReward && rewardBeingEdited && (
-                    <Card className="mb-6">
-                        <CardHeader>
-                            <CardTitle>Edit Global Reward</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <RewardForm
-                                defaultValues={{
-                                    count: rewardBeingEdited.cnt,
-                                    name: rewardBeingEdited.n,
-                                    icon: rewardBeingEdited.i,
-                                }}
-                                isEdit={true}
-                                onSubmit={handleUpdateReward}
-                                onCancel={() => setEditingReward(null)}
-                            />
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Rewards Grid */}
-                {!rewards || rewards.length === 0 ? (
-                    <EmptyState
-                        icon={<Gift className="h-12 w-12" />}
-                        title="No global rewards found"
-                        description="Get started by creating your first global reward that athletes can earn across all host locations."
-                        actionLabel="Create Global Reward"
-                        onAction={() => setShowCreateForm(true)}
-                    />
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {rewards.sort((a, b) => a.cnt - b.cnt).map((reward) => (
-                            <Card key={reward.id} className="hover:shadow-lg transition-shadow">
-                                <CardContent className="p-6">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="p-2 bg-primary rounded-full">
-                                                <Icon name={reward.i} variant="reward" size="lg" className="text-white" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-gray-900">
-                                                    {reward.n}
-                                                </h3>
-                                                {/* <Badge variant="default" size="sm" className="mt-1">
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {rewards.sort((a, b) => a.cnt - b.cnt).map((reward) => (
+                        <Card key={reward.id} className="hover:shadow-lg transition-shadow">
+                            <CardContent className="p-6">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="p-2 bg-primary rounded-full">
+                                            <Icon name={reward.i} variant="reward" size="lg" className="text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900">
+                                                {reward.n}
+                                            </h3>
+                                            {/* <Badge variant="default" size="sm" className="mt-1">
                                                     Global Reward
                                                 </Badge> */}
-                                            </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div className="mb-4">
-                                        <div className="flex items-center text-sm text-gray-600 mb-1">
-                                            <TrendingUp className="h-4 w-4 mr-1" />
-                                            Earned after {reward.cnt} check-ins
-                                        </div>
-                                        <p className="text-xs text-gray-500">
-                                            Created: {new Date(reward.c * 1000).toLocaleDateString()}
-                                        </p>
+                                <div className="mb-4">
+                                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                                        <TrendingUp className="h-4 w-4 mr-1" />
+                                        Earned after {reward.cnt} check-ins
                                     </div>
+                                    <p className="text-xs text-gray-500">
+                                        Created: {new Date(reward.c * 1000).toLocaleDateString()}
+                                    </p>
+                                </div>
 
-                                    <div className="flex space-x-2">
-                                        <TouchTarget
-                                            onClick={() => setEditingReward(reward.id)}
-                                            className="flex-1"
-                                        >
-                                            <Button variant="outline" size="sm" className="w-full">
-                                                <PenLine className="h-4 w-4 mr-1" />
-                                                Edit
-                                            </Button>
-                                        </TouchTarget>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <TouchTarget onClick={() => handleDeleteReward(reward.id, reward.n)}>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </TouchTarget>
-                                            </TooltipTrigger>
-                                            <TooltipContent align='end'>
-                                                Delete global reward
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
+                                <div className="flex space-x-2">
+                                    <TouchTarget
+                                        onClick={() => setEditingReward(reward.id)}
+                                        className="flex-1"
+                                    >
+                                        <Button variant="outline" size="sm" className="w-full">
+                                            <PenLine className="h-4 w-4 mr-1" />
+                                            Edit
+                                        </Button>
+                                    </TouchTarget>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <TouchTarget onClick={() => handleDeleteReward(reward.id, reward.n)}>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TouchTarget>
+                                        </TooltipTrigger>
+                                        <TooltipContent align='end'>
+                                            Delete global reward
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                    <Button
+                        size='lg'
+                        variant='secondary'
+                        onClick={() => setShowCreateForm(true)}
+                        className="flex items-center gap-2"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add Global Reward
+                    </Button>
+                </div>
+            )}
 
-                {/* Summary Stats */}
-                {/* {rewards && rewards.length > 0 && (
+            {/* Summary Stats */}
+            {/* {rewards && rewards.length > 0 && (
                     <Card className="mt-8">
                         <CardHeader>
                             <CardTitle>Global Rewards Statistics</CardTitle>
@@ -362,27 +369,26 @@ export default function SuperAdminGlobalRewards() {
                     </Card>
                 )} */}
 
-                {/* Help Section */}
-                <div className="mt-6 bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
-                    <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                        <div className="ml-3">
-                            <h3 className="text-sm font-medium text-blue-800">
-                                Global Rewards Guidelines
-                            </h3>
-                            <div className="mt-2 text-sm text-blue-700">
-                                <ul className="list-disc list-inside space-y-1">
-                                    <li>Global rewards are earned by athletes through check-ins at any host location</li>
-                                    <li>Set meaningful check-in requirements that encourage regular participation</li>
-                                    <li>Choose clear, descriptive names and appropriate icons for better recognition</li>
-                                    <li>Consider creating a progression of rewards with increasing requirements</li>
-                                    <li>Deleting rewards will affect all athletes who have claimed or are working towards them</li>
-                                </ul>
-                            </div>
+            {/* Help Section */}
+            <div className="mt-6 bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
+                <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <div className="ml-3">
+                        <h3 className="text-sm font-medium text-blue-800">
+                            Global Rewards Guidelines
+                        </h3>
+                        <div className="mt-2 text-sm text-blue-700">
+                            <ul className="list-disc list-inside space-y-1">
+                                <li>Global rewards are earned by athletes through check-ins at any host location</li>
+                                <li>Set meaningful check-in requirements that encourage regular participation</li>
+                                <li>Choose clear, descriptive names and appropriate icons for better recognition</li>
+                                <li>Consider creating a progression of rewards with increasing requirements</li>
+                                <li>Deleting rewards will affect all athletes who have claimed or are working towards them</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

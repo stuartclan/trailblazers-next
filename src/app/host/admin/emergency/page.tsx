@@ -1,5 +1,6 @@
 'use client';
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
@@ -109,32 +110,24 @@ export default function EmergencyContacts() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+          <h1 className="text-2xl text-white font-bold mb-4">Loading...</h1>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="container max-w-4xl">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Emergency Contacts</h1>
+    <div className="container max-w-4xl">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl text-white font-bold !m-0">Emergency Contacts</h1>
+      </div>
 
-          <Link
-            href="/host/admin"
-            className="text-primary hover:underline"
-          >
-            Back to Admin
-          </Link>
-        </div>
-
-        <div className="card mb-6">
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-bold mb-2">Emergency Contacts for Recent Check-ins</h2>
-            <p className="text-gray-600">This page shows emergency contacts for athletes who have checked in recently</p>
-          </div>
-
+      <Card>
+        <CardHeader>
+          <CardTitle>Emergency Contacts for Recent Check-ins</CardTitle>
+          <CardDescription>This page shows emergency contacts for athletes who have checked in recently</CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="mb-6">
             <input
               type="text"
@@ -180,15 +173,15 @@ export default function EmergencyContacts() {
           ) : (
             <p className="text-center text-gray-600 italic">No emergency contacts found</p>
           )}
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="bg-yellow-50 border-1 border-yellow-300 rounded-md p-4">
-          <h3 className="text-lg font-medium text-yellow-800 mb-2">Important Notice</h3>
-          <p className="text-yellow-700">
-            Emergency contact information should only be used in case of an actual emergency.
-            Please respect the privacy of our athletes and their emergency contacts.
-          </p>
-        </div>
+      <div className="bg-yellow-50 border-1 border-yellow-300 rounded-md p-4">
+        <h3 className="text-lg font-medium text-yellow-800 mb-2">Important Notice</h3>
+        <p className="text-yellow-700">
+          Emergency contact information should only be used in case of an actual emergency.
+          Please respect the privacy of our athletes and their emergency contacts.
+        </p>
       </div>
     </div>
   );

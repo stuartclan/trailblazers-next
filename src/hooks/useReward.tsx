@@ -280,8 +280,6 @@ export const useDeleteReward = () => {
   return useMutation({
     // onMutate(variables) {
     //   const reward = queryClient.getQueryData<RewardEntity>(['rewards', variables]);
-    //   console.log('DEBUG: delete mutation:', variables);
-    //   console.log('DEBUG: mutation reward:', reward);
     // },
     mutationFn: deleteReward,
     onSuccess: (_data, variables) => {

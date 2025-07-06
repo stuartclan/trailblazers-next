@@ -8,21 +8,21 @@ import { apiClient } from '@/lib/utils/api-client';
 // API client functions using the new authenticated client
 const fetchAthlete = async (athleteId: string): Promise<AthleteEntity> => {
   const response = await apiClient.get<AthleteEntity>(`/api/athletes/${athleteId}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const searchAthletes = async (searchQuery: string): Promise<AthleteEntity[]> => {
   const response = await apiClient.get<AthleteEntity[]>(`/api/athletes/search?q=${encodeURIComponent(searchQuery)}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -34,16 +34,16 @@ const fetchAthletes = async (limit = 50, cursor?: string): Promise<{
   if (cursor) {
     url += `&cursor=${encodeURIComponent(cursor)}`;
   }
-  
+
   const response = await apiClient.get<{
     athletes: AthleteEntity[],
     nextCursor?: string
   }>(url);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -60,11 +60,11 @@ const createAthlete = async (data: {
   legacyCount?: number;
 }): Promise<AthleteEntity> => {
   const response = await apiClient.post<AthleteEntity>('/api/athletes', data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -76,17 +76,17 @@ const updateAthlete = async ({
   data: Partial<Omit<AthleteEntity, 'pk' | 'sk' | 't' | 'id' | 'c' | 'GSI2PK' | 'GSI2SK'>>;
 }): Promise<AthleteEntity> => {
   const response = await apiClient.patch<AthleteEntity>(`/api/athletes/${id}`, data);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
 const deleteAthlete = async (id: string): Promise<void> => {
   const response = await apiClient.delete(`/api/athletes/${id}`);
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
@@ -100,14 +100,14 @@ const signDisclaimer = async ({
   hostId: string;
 }): Promise<AthleteEntity> => {
   const response = await apiClient.post<AthleteEntity>(
-    `/api/athletes/${athleteId}/disclaimer`, 
+    `/api/athletes/${athleteId}/disclaimer`,
     { hostId }
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!;
 };
 
@@ -121,11 +121,11 @@ const hasSignedDisclaimer = async ({
   const response = await apiClient.get<{ hasSigned: boolean }>(
     `/api/athletes/${athleteId}/disclaimer/${hostId}`
   );
-  
+
   if (response.error) {
     throw new Error(response.error);
   }
-  
+
   return response.data!.hasSigned;
 };
 
@@ -155,18 +155,19 @@ export const useAthletes = (limit = 50, cursor?: string) => {
 
 export const useCreateAthlete = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createAthlete,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['athletes', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['athletes', 'search', data.ln] });
     },
   });
 };
 
 export const useUpdateAthlete = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: updateAthlete,
     onSuccess: (data) => {
@@ -178,7 +179,7 @@ export const useUpdateAthlete = () => {
 
 export const useDeleteAthlete = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deleteAthlete,
     onSuccess: (_data, variables) => {
@@ -190,7 +191,7 @@ export const useDeleteAthlete = () => {
 
 export const useSignDisclaimer = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: signDisclaimer,
     onSuccess: (data) => {

@@ -1,10 +1,14 @@
 'use client';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { useEffect, useState } from 'react';
 import { useHost, useUpdateHost } from '@/hooks/useHost';
 import { useLocation, useLocationsByHost, useUpdateLocationActivities } from '@/hooks/useLocation';
 
-import Link from 'next/link';
+import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
+import { LuCheck } from 'react-icons/lu';
+import Markdown from 'markdown-to-jsx';
+import { cn } from '@/lib/utils/ui';
 import { useActivities } from '@/hooks/useActivity';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -224,30 +228,24 @@ export default function HostSettings() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+          <h1 className="text-2xl text-white font-bold mb-4">Loading...</h1>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="container max-w-4xl">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Host Settings</h1>
+    <div className="container max-w-4xl">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl text-white font-bold !m-0">{host?.n} Host Settings</h1>
+      </div>
 
-          <Link
-            href="/host/admin"
-            className="text-primary hover:underline"
-          >
-            Back to Admin
-          </Link>
-        </div>
-
-        {/* Admin Password Section */}
-        <div className="card mb-6">
-          <h2 className="text-xl font-bold mb-4">Admin Password</h2>
-
+      {/* Admin Password Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Admin Password</CardTitle>
+        </CardHeader>
+        <CardContent>
           {isEditingPassword ? (
             <div>
               <div className="mb-4">
@@ -299,12 +297,15 @@ export default function HostSettings() {
               </button>
             </div>
           )}
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Disclaimer Section */}
-        <div className="card mb-6">
-          <h2 className="text-xl font-bold mb-4">Disclaimer</h2>
-
+      {/* Disclaimer Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Disclaimer</CardTitle>
+        </CardHeader>
+        <CardContent>
           {isEditingDisclaimer ? (
             <div>
               <div className="mb-4">
@@ -339,9 +340,9 @@ export default function HostSettings() {
             </div>
           ) : (
             <div>
-              <div className="bg-gray-50 p-4 rounded-md mb-4">
+              <div className="bg-gray-50 p-4 rounded-md mb-4 text-gray-700">
                 {disclaimer ? (
-                  <p className="text-gray-700">{disclaimer}</p>
+                  <Markdown>{disclaimer}</Markdown>
                 ) : (
                   <p className="text-gray-500 italic">No disclaimer text set</p>
                 )}
@@ -355,12 +356,15 @@ export default function HostSettings() {
               </button>
             </div>
           )}
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Activities Section */}
-        <div className="card">
-          <h2 className="text-xl font-bold mb-4">Allowed Activities</h2>
-
+      {/* Activities Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Allowed Activities</CardTitle>
+        </CardHeader>
+        <CardContent>
           {hostLocations && hostLocations.length > 1 && (
             <div className="mb-6">
               <label htmlFor="locationSelect" className="block text-sm font-medium text-gray-700 mb-2">
@@ -386,31 +390,58 @@ export default function HostSettings() {
 
               {activities && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                  {activities.map(activity => (
-                    <div
-                      key={activity.id}
-                      className={`border-1 rounded-md p-4 cursor-pointer transition-colors ${selectedActivities.includes(activity.id)
-                        ? 'bg-primary-light border-primary'
-                        : 'hover:bg-gray-50'
-                        }`}
-                      onClick={() => handleActivityToggle(activity.id)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${selectedActivities.includes(activity.id)
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-200'
-                          }`}>
-                          <span className="material-icons">{activity.i}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{activity.n}</h3>
-                          <p className="text-xs text-gray-500">
-                            {selectedActivities.includes(activity.id) ? 'Selected' : 'Click to select'}
-                          </p>
+                  {activities.map(activity => {
+                    const isSelected = selectedActivities.includes(activity.id);
+                    return (
+                      <div
+                        key={activity.id}
+                        className={cn(
+                          'p-4 border-1 rounded-lg cursor-pointer transition-all',
+                          isSelected && 'border-primary bg-primary-light text-primary-dark',
+                          !isSelected && 'border-gray-200 hover:border-gray-300 hover:bg-gray-50',
+                        )}
+                        onClick={() => handleActivityToggle(activity.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <ActivityIconCircle activity={activity} size="md" variant={isSelected ? 'default' : 'ghost'} />
+                            <div>
+                              <h3 className={cn('font-medium !m-0', isSelected ? 'text-white' : 'text-gray-900')}>{activity.n}</h3>
+                            </div>
+                          </div>
+                          <div className={cn('w-6 h-6 rounded-full border-2 flex items-center justify-center',
+                            isSelected && 'border-primary bg-primary text-white',
+                            !isSelected && 'border-gray-300'
+                          )}>
+                            {isSelected && <LuCheck className="h-3 w-3" />}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                      // <div
+                      //       key={activity.id}
+                      //       className={`border-1 rounded-md p-4 cursor-pointer transition-colors ${selectedActivities.includes(activity.id)
+                      //         ? 'bg-primary-light border-primary'
+                      //         : 'hover:bg-gray-50'
+                      //         }`}
+                      //       onClick={() => handleActivityToggle(activity.id)}
+                      //     >
+                      //       <div className="flex items-center gap-3">
+                      //         <div className={`p-2 rounded-full ${selectedActivities.includes(activity.id)
+                      //           ? 'bg-primary text-white'
+                      //           : 'bg-gray-200'
+                      //           }`}>
+                      //           <span className="material-icons">{activity.i}</span>
+                      //         </div>
+                      //         <div>
+                      //           <h3 className="font-medium">{activity.n}</h3>
+                      //           <p className="text-xs text-gray-500">
+                      //             {selectedActivities.includes(activity.id) ? 'Selected' : 'Click to select'}
+                      //           </p>
+                      //         </div>
+                      //       </div>
+                      //     </div>
+                    )
+                  })}
                 </div>
               )}
 
@@ -440,15 +471,17 @@ export default function HostSettings() {
                     if (!activity) return null;
 
                     return (
-                      <div key={activity.id} className="border-1 rounded-md p-4">
-                        <div className="flex items-center gap-3">
+                      <div key={activity.id} className="border-1 rounded-md p-4 flex items-center space-x-3">
+                        <ActivityIconCircle activity={activity} size="md" />
+                        <h3 className='font-medium text-primary !m-0'>{activity.n}</h3>
+                        {/* <div className="flex items-center gap-3">
                           <div className="bg-primary-light p-2 rounded-full">
                             <span className="material-icons text-primary">{activity.i}</span>
                           </div>
                           <div>
                             <h3 className="font-medium">{activity.n}</h3>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     );
                   })}
@@ -465,8 +498,8 @@ export default function HostSettings() {
               </button>
             </div>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

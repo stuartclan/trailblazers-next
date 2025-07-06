@@ -4,18 +4,15 @@ import * as React from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { FormProvider, useForm } from 'react-hook-form';
-import { LuHeart as HeartIcon, LuPawPrint as PawPrintIcon, LuShield as ShieldIcon, LuUser as UserIcon } from 'react-icons/lu';
+import { LuHeart as HeartIcon, LuShield as ShieldIcon, LuShirt as Shirt, LuUser as UserIcon } from 'react-icons/lu';
 
 import { Button } from '@/components/atoms/button/button';
 import { Checkbox } from '@/components/atoms/checkbox/checkbox';
 import { Form } from '@/components/atoms/form/form';
 import { FormControl } from '@/components/atoms/form-control/form-control';
 import { Input } from '@/components/atoms/input/input';
-import { IoMdShirt } from 'react-icons/io';
 import Markdown from 'markdown-to-jsx';
-import { MobileFormField } from '@/components/molecules/mobile-form-field/mobile-form-field';
 import { Select } from '@/components/atoms/select/select';
-import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { useToastNotifications } from '@/hooks/useToast';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -71,19 +68,19 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     onCancel,
 }) => {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isMobile, setIsMobile] = React.useState(false);
+    // const [isMobile, setIsMobile] = React.useState(false);
     const { error, info } = useToastNotifications();
 
-    // Check if we're on mobile
-    React.useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
+    // // Check if we're on mobile
+    // React.useEffect(() => {
+    //     const checkMobile = () => {
+    //         setIsMobile(window.innerWidth < 768);
+    //     };
 
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
+    //     checkMobile();
+    //     window.addEventListener('resize', checkMobile);
+    //     return () => window.removeEventListener('resize', checkMobile);
+    // }, []);
 
     const form = useForm<AthleteFormValues>({
         resolver: zodResolver(athleteSchema),
@@ -103,7 +100,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
         },
     });
 
-    const { watch, setValue, reset } = form;
+    const { reset } = form;
     // const hasPet = watch('hasPet');
 
     // Enhanced form submission with comprehensive toast feedback
@@ -111,12 +108,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({
         setIsSubmitting(true);
 
         // Show initial progress toast
-        info('Creating athlete registration...', 'Registration');
+        // info('Creating athlete registration...', 'Registration');
 
         try {
-            // Show data validation step
-            info('Validating registration data...', 'Validation');
-
             // Call the submission handler
             await onSubmit(data);
 
@@ -125,7 +119,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
             // Reset form for potential next registration
             reset();
-            info('Form has been reset for next registration', 'Ready for Next Athlete');
+            // info('Form has been reset for next registration', 'Ready for Next Athlete');
 
         } catch (err) {
             console.error('Signup form submission error:', err);
@@ -167,18 +161,18 @@ export const SignupForm: React.FC<SignupFormProps> = ({
         }
     };
 
-    // Enhanced reset handler with toast feedback
-    const handleReset = () => {
-        reset();
-        info('Form has been reset to default values', 'Form Reset');
-    };
+    // // Enhanced reset handler with toast feedback
+    // const handleReset = () => {
+    //     reset();
+    //     info('Form has been reset to default values', 'Form Reset');
+    // };
 
     // Enhanced cancel handler
     const handleCancel = () => {
         if (onCancel) {
             onCancel();
         }
-        info('Registration cancelled', 'Cancelled');
+        // info('Registration cancelled', 'Cancelled');
     };
 
     const shirtGenderOptions = [
@@ -331,7 +325,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                 <Card className="mb-6">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <IoMdShirt className="h-5 w-5 text-primary" />
+                            <Shirt className="h-5 w-5 text-primary" />
                             T-Shirt Information
                         </CardTitle>
                     </CardHeader>
@@ -509,7 +503,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="bg-gray-50 p-4 rounded-md max-h-48 overflow-y-auto text-sm text-gray-700 leading-relaxed">
+                            <div className="bg-gray-50 p-4 rounded-md max-h-100 overflow-y-auto text-sm text-gray-700 leading-relaxed">
                                 <Markdown>{disclaimerText}</Markdown>
                             </div>
 

@@ -12,7 +12,6 @@ import { Button } from '@/components/atoms/button/button';
 import { EmptyState } from '@/components/molecules/empty-state/empty-state';
 import { ErrorDisplay } from '@/components/molecules/error-display/error-display';
 import { Icon } from '@/components/atoms/icon/icon';
-import { PageHeader } from '@/components/molecules/page-header/page-header';
 import { Skeleton } from '@/components/atoms/skeleton/skeleton';
 import { cn } from '@/lib/utils/ui';
 import { useActivities } from '@/hooks/useActivity';

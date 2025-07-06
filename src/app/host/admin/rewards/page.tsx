@@ -1,8 +1,10 @@
 'use client';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
 import { useCreateRewardClaim, useGlobalRewards, useHostRewards, useOneAwayAthletes } from '@/hooks/useReward';
 import { useEffect, useState } from 'react';
 
+import { Checkbox } from '@/components/atoms/checkbox/checkbox';
 import Link from 'next/link';
 import { RewardsPageLoading } from '@/components/molecules/loading-states/loading-states';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,30 +14,30 @@ import { useToastNotifications } from '@/hooks/useToast';
 export default function HostRewards() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
-  
+
   // Get current host and location from localStorage
   const [hostId, setHostId] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
   const { success, error, info } = useToastNotifications();
-    
+
   // Get rewards
   const { data: globalRewards } = useGlobalRewards();
   const { data: hostRewards } = useHostRewards(hostId || '');
-  
+
   // Get one-away athletes
   const { data: oneAwayAthletes } = useOneAwayAthletes(hostId || '');
-  
+
   // UI state
   const [showAllEligible, setShowAllEligible] = useState(false);
-  
+
   // Claim reward mutation
   const createRewardClaim = useCreateRewardClaim();
-  
+
   // Load host/location from localStorage on component mount
   useEffect(() => {
     const savedHostId = localStorage.getItem('currentHostId');
     const savedLocationId = localStorage.getItem('currentLocationId');
-    
+
     if (savedHostId && savedLocationId) {
       setHostId(savedHostId);
       setLocationId(savedLocationId);
@@ -44,14 +46,14 @@ export default function HostRewards() {
       router.push('/host/select-location');
     }
   }, [router]);
-  
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/host/login');
     }
   }, [isAuthenticated, isLoading, router]);
-  
+
   // Check if admin password is already authenticated
   useEffect(() => {
     if (hostId) {
@@ -61,14 +63,14 @@ export default function HostRewards() {
       }
     }
   }, [hostId, router]);
-  
+
   // Handle claim reward
   const handleClaimReward = async (athleteId: string, rewardId: string) => {
     if (!hostId || !locationId) return;
-    
+
     // Show progress toast
     info('Processing reward claim...', 'Reward Claim');
-    
+
     try {
       await createRewardClaim.mutateAsync({
         athleteId,
@@ -76,16 +78,16 @@ export default function HostRewards() {
         hostId,
         locationId
       });
-      
+
       // Get reward name for better user experience
       const reward = [...(globalRewards || []), ...(hostRewards || [])].find(r => r.id === rewardId);
       const rewardName = reward?.n || 'Unknown Reward';
-      
+
       success(
         `Reward "${rewardName}" has been claimed successfully!`,
         'Reward Claimed'
       );
-      
+
     } catch (err) {
       console.error('Reward claim error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to claim reward';
@@ -97,7 +99,7 @@ export default function HostRewards() {
   if (isLoading) {
     return <RewardsPageLoading />;
   }
-  
+
   // Combine and process one-away athletes
   const eligibleAthletes = oneAwayAthletes ? [
     ...(oneAwayAthletes.globalOneAway || []).map(item => ({
@@ -109,7 +111,7 @@ export default function HostRewards() {
       type: 'host' as const
     }))
   ] : [];
-  
+
   // Helper function to get reward name by ID
   const getRewardName = (rewardId: string, type: 'global' | 'host') => {
     if (type === 'global' && globalRewards) {
@@ -121,39 +123,26 @@ export default function HostRewards() {
     }
     return 'Unknown Reward';
   };
-  
+
   return (
-    <div className="min-h-screen py-8">
-      <div className="container max-w-4xl">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Manage Rewards</h1>
-          
-          <Link
-            href="/host/admin"
-            className="text-primary hover:underline"
-          >
-            Back to Admin
-          </Link>
-        </div>
-        
-        <div className="card mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Athletes Eligible for Rewards</h2>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showAllEligible"
-                checked={showAllEligible}
-                onChange={() => setShowAllEligible(!showAllEligible)}
-                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-              />
-              <label htmlFor="showAllEligible" className="ml-2 text-sm text-gray-700">
-                Show all eligible (not just from today)
-              </label>
-            </div>
+    <div className="container max-w-4xl">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl text-white font-bold !m-0">Manage Rewards</h1>
+      </div>
+
+      <Card>
+        <CardHeader row>
+          <CardTitle>Athletes Eligible for Rewards</CardTitle>
+          {/* <CardDescription>This page shows emergency contacts for athletes who have checked in recently</CardDescription> */}
+          <div className="flex items-center">
+            <Checkbox
+              checked={showAllEligible}
+              onCheckedChange={() => setShowAllEligible(!showAllEligible)}
+              label="Show all eligible (not just from today)"
+            />
           </div>
-          
+        </CardHeader>
+        <CardContent>
           {eligibleAthletes && eligibleAthletes.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full border-collapse">
@@ -203,21 +192,21 @@ export default function HostRewards() {
           ) : (
             <p className="text-gray-600 italic">No athletes currently eligible for rewards</p>
           )}
-        </div>
-        
-        {/* Host Custom Rewards */}
-        <div className="card mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Host Custom Rewards</h2>
-            
-            <Link
-              href="/host/admin/rewards/custom"
-              className="text-primary hover:underline text-sm"
-            >
-              Manage Custom Rewards
-            </Link>
-          </div>
-          
+        </CardContent>
+      </Card>
+
+      {/* Host Custom Rewards */}
+      <Card>
+        <CardHeader row>
+          <CardTitle>Host Custom Rewards</CardTitle>
+          <Link
+            href="/host/admin/rewards/custom"
+            className="text-primary hover:underline text-sm"
+          >
+            Manage Custom Rewards
+          </Link>
+        </CardHeader>
+        <CardContent>
           {hostRewards && hostRewards.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {hostRewards.map((reward) => (
@@ -245,12 +234,15 @@ export default function HostRewards() {
               </Link>
             </div>
           )}
-        </div>
-        
-        {/* Global Rewards */}
-        <div className="card">
-          <h2 className="text-xl font-bold mb-4">Global Trailblazer Rewards</h2>
-          
+        </CardContent>
+      </Card>
+
+      {/* Global Rewards */}
+      <Card>
+        <CardHeader row>
+          <CardTitle>Global Trailblazer Rewards</CardTitle>
+        </CardHeader>
+        <CardContent>
           {globalRewards && globalRewards.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {globalRewards.map((reward) => (
@@ -270,8 +262,8 @@ export default function HostRewards() {
           ) : (
             <p className="text-gray-600 italic">No global rewards configured</p>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

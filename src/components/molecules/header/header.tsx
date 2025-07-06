@@ -15,7 +15,6 @@ import { Button } from '@/components/atoms/button/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LuLogOut as LogOut } from 'react-icons/lu';
-import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { cn } from '@/lib/utils/ui';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -29,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
 
   // Don't render header on login pages
-  if (HEADER_HIDDEN_ROUTES.includes(pathname as any)) {
+  if (HEADER_HIDDEN_ROUTES.includes(pathname)) {
     return null;
   }
 
@@ -111,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
               ))}
 
               {/* Logout Button */}
-              <div className="flex items-center">
+              <div className="flex items-center ml-4">
                 {/* <TouchTarget> */}
                 <Button
                   variant="ghost"

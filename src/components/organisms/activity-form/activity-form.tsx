@@ -11,7 +11,6 @@ import { FormControl } from '@/components/atoms/form-control/form-control';
 import { IconPicker } from '@/components/molecules/icon-picker/icon-picker';
 import { Input } from '@/components/atoms/input/input';
 import { Switch } from '@/components/atoms/switch/switch';
-import { TouchTarget } from '@/components/atoms/touch-target/touch-target';
 import { useToastNotifications } from '@/hooks/useToast';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -132,10 +131,10 @@ export const ActivityForm: React.FC<ActivityFormProps> = ({
     };
 
     // Enhanced reset handler with toast feedback
-    const handleReset = () => {
-        reset();
-        info('Form has been reset to default values', 'Form Reset');
-    };
+    // const handleReset = () => {
+    //     reset();
+    //     info('Form has been reset to default values', 'Form Reset');
+    // };
 
     // Enhanced cancel handler
     const handleCancel = () => {
@@ -198,19 +197,19 @@ export const ActivityForm: React.FC<ActivityFormProps> = ({
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t">
                     {onCancel && (
-                        <TouchTarget>
-                            <Button
-                                variant="ghost"
-                                type="button"
-                                onClick={handleCancel}
-                                disabled={isSubmitting}
-                            >
-                                Cancel
-                            </Button>
-                        </TouchTarget>
+                        // <TouchTarget>
+                        <Button
+                            variant="ghost"
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={isSubmitting}
+                        >
+                            Cancel
+                        </Button>
+                        // </TouchTarget>
                     )}
 
-                    <TouchTarget>
+                    {/* <TouchTarget>
                         <Button
                             variant="outline"
                             type="button"
@@ -219,19 +218,19 @@ export const ActivityForm: React.FC<ActivityFormProps> = ({
                         >
                             Reset Form
                         </Button>
-                    </TouchTarget>
+                    </TouchTarget> */}
 
-                    <TouchTarget>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                        >
-                            {isEdit
-                                ? (isSubmitting ? 'Updating Activity...' : 'Update Activity')
-                                : (isSubmitting ? 'Creating Activity...' : 'Create Activity')
-                            }
-                        </Button>
-                    </TouchTarget>
+                    {/* <TouchTarget> */}
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        {isEdit
+                            ? (isSubmitting ? 'Updating Activity...' : 'Update Activity')
+                            : (isSubmitting ? 'Creating Activity...' : 'Create Activity')
+                        }
+                    </Button>
+                    {/* </TouchTarget> */}
                 </div>
 
                 {/* Progress indicator for long operations */}

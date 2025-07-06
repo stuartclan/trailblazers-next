@@ -3,7 +3,6 @@
 import { FC, useEffect, useState } from "react";
 
 import { Button } from "@/components/atoms/button/button";
-import { useHost } from "@/hooks/useHost";
 import { useLocation } from "@/hooks/useLocation";
 import { useRouter } from 'next/navigation';
 
@@ -13,8 +12,7 @@ export const FooterLocation: FC = () => {
   const router = useRouter();
 
   // Fetch host and location data
-  const { data: host, isLoading: isLoadingHost, error: hostError } = useHost(hostId || '');
-  const { data: location, isLoading: isLoadingLocation, error: locationError } = useLocation(hostId || '', locationId || '');
+  const { data: location } = useLocation(hostId || '', locationId || '');
 
   // Load host/location from localStorage on component mount
   useEffect(() => {
