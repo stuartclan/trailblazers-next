@@ -203,10 +203,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     const cognitoUser = getCurrentUser();
     if (cognitoUser) {
+      const oldHostId = user?.hostId
       cognitoUser.signOut();
       setIsAuthenticated(false);
       setUser(null);
 
+      // Clear session storage if they'd logged into the admin
+      if (oldHostId) {
+        sessionStorage.removeItem(`host_admin_auth_${oldHostId}`);
+      }
       // Clear any localStorage that might be storing the host ID or location ID
       localStorage.removeItem('currentHostId');
       localStorage.removeItem('currentLocationId');

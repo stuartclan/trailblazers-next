@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:open-next": "open-next build",
     "dev": "sst dev next dev",
     "dev:next": "next dev --turbopack --hostname=checkin.local.clubtrailblazers.com --port=8000 --experimental-https",
     "dev:sst": "sst dev",

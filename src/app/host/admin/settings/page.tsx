@@ -237,7 +237,7 @@ export default function HostSettings() {
   return (
     <div className="container max-w-4xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl text-white font-bold !m-0">{host?.n} Host Settings</h1>
+        <h1 className="text-2xl text-white font-bold !m-0"><span className="text-primary-light">{host?.n}</span> Host Settings</h1>
       </div>
 
       {/* Admin Password Section */}

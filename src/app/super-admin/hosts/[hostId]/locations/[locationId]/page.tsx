@@ -1,9 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card/card';
-import { LuPenLine as PenLine, LuSettings as Settings, LuTarget as TargetIcon, LuTrash2 as Trash2 } from 'react-icons/lu';
-import { useDeleteLocation, useLocation, useUpdateLocation } from '@/hooks/useLocation';
+import { LuPenLine as PenLine, LuSettings as Settings, LuTarget as TargetIcon } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
+import { useLocation, useUpdateLocation } from '@/hooks/useLocation';
 import { useParams, useRouter } from 'next/navigation';
 
 import { ActivityIconCircle } from '@/components/molecules/activity-icon-circle/activity-icon-circle';
@@ -53,7 +53,7 @@ export default function SuperAdminLocationEdit() {
 
     // Mutations
     const updateLocation = useUpdateLocation();
-    const deleteLocation = useDeleteLocation();
+    // const deleteLocation = useDeleteLocation();
 
     // Check authentication and admin status
     useEffect(() => {
@@ -105,33 +105,33 @@ export default function SuperAdminLocationEdit() {
         }
     };
 
-    // Handle location deletion
-    const handleDeleteLocation = async () => {
-        if (!location) return;
+    // // Handle location deletion
+    // const handleDeleteLocation = async () => {
+    //     if (!location) return;
 
-        if (!confirm(`Are you sure you want to delete "${location.n}"? This action cannot be undone and will affect all check-ins associated with this location.`)) {
-            return;
-        }
+    //     if (!confirm(`Are you sure you want to delete "${location.n}"? This action cannot be undone and will affect all check-ins associated with this location.`)) {
+    //         return;
+    //     }
 
-        info(`Deleting location "${location.n}"...`, 'Location Deletion');
+    //     info(`Deleting location "${location.n}"...`, 'Location Deletion');
 
-        try {
-            await deleteLocation.mutateAsync({ hostId, id: locationId });
+    //     try {
+    //         await deleteLocation.mutateAsync({ hostId, id: locationId });
 
-            success(
-                `Location "${location.n}" has been deleted successfully.`,
-                'Location Deleted'
-            );
+    //         success(
+    //             `Location "${location.n}" has been deleted successfully.`,
+    //             'Location Deleted'
+    //         );
 
-            // Redirect to locations list
-            router.push(baseUrl);
+    //         // Redirect to locations list
+    //         router.push(baseUrl);
 
-        } catch (err) {
-            console.error('Location deletion error:', err);
-            const errorMessage = err instanceof Error ? err.message : 'Failed to delete location';
-            error(errorMessage, 'Deletion Failed');
-        }
-    };
+    //     } catch (err) {
+    //         console.error('Location deletion error:', err);
+    //         const errorMessage = err instanceof Error ? err.message : 'Failed to delete location';
+    //         error(errorMessage, 'Deletion Failed');
+    //     }
+    // };
 
     // Loading state
     if (isAuthLoading || isLoadingLocation || isLoadingHosts || isLoadingActivities) {
@@ -272,7 +272,7 @@ export default function SuperAdminLocationEdit() {
                                     <PenLine className="h-4 w-4" />
                                     {isEditing ? 'Cancel Edit' : 'Edit Location'}
                                 </Button>
-                                <Button
+                                {/* <Button
                                     variant="destructive"
                                     size='sm'
                                     // className="flex items-center gap-2 text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
@@ -281,7 +281,7 @@ export default function SuperAdminLocationEdit() {
                                 >
                                     <Trash2 className="h-4 w-4" />
                                     Delete
-                                </Button>
+                                </Button> */}
                             </div>
                         </CardHeader>
                         <CardContent>

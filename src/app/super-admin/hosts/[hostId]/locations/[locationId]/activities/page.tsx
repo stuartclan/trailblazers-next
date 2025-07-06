@@ -290,7 +290,7 @@ export default function SuperAdminLocationActivities() {
                             <EmptyState
                                 icon={<TargetIcon className="h-8 w-8" />}
                                 title="No activities available"
-                                description="No enabled activities found. Contact an administrator to create activities."
+                                description="No enabled activities found. Use the navigation to go to activity management."
                             />
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -5,9 +5,9 @@ import {
   QueryCommand,
   UpdateCommand
 } from '@aws-sdk/lib-dynamodb';
+import { IconNames, RewardIcons } from '@/components/atoms/icon/icon';
 import { getDynamoDBDocumentClient, getTableName } from '../utils/client';
 
-import { IconNames } from '@/components/atoms/icon/icon';
 import { RewardEntity } from '../entities/types';
 import { nanoid } from 'nanoid';
 
@@ -203,9 +203,9 @@ export class RewardRepository {
 
     // Define default global rewards
     const defaultGlobalRewards = [
-      { count: 8, name: 'Tier 1 Reward', icon: IconNames.Shirt },
-      { count: 30, name: 'Tier 2 Reward', icon: IconNames.ShirtLongSleeve },
-      { count: 60, name: 'Tier 3 Reward', icon: IconNames.Trophy }
+      { count: 8, name: 'Tier 1 Reward', icon: RewardIcons.Shirt },
+      { count: 30, name: 'Tier 2 Reward', icon: RewardIcons.ShirtLongSleeve },
+      { count: 60, name: 'Tier 3 Reward', icon: RewardIcons.Trophy }
     ];
 
     // Create all default global rewards

@@ -262,6 +262,7 @@ export default $config({
 
     // Next.js application using OpenNext
     const nextjs = new sst.aws.Nextjs("TrailblazersWeb", {
+      link: [table, userPool],
       environment: {
         // AWS Configuration
         AWS_REGION_NAME: aws.getRegionOutput().name, // Reserved and already provided
@@ -305,7 +306,7 @@ export default $config({
 
       // OpenNext configuration
       openNextVersion: "3.6.6",
-      buildCommand: "pnpm run build",
+      buildCommand: "pnpm run build:open-next",
       dev: {
         command: 'pnpm run dev:next',
       },
