@@ -69,8 +69,8 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
   const showNavigation = navigationItems.length > 0;
 
   return (
-    <header className={cn('bg-transparent py-4 mb-4 flex items-center relative', className)}>
-      <div className={cn('max-w-6xl w-full mx-auto flex justify-between items-end gap-4 shadow-[0_10px_5px_rgba(0,0,0,0.15)]', !showNavigation && 'justify-center')}>
+    <header className={cn('bg-transparent mt-2 mb-6 flex items-center relative shadow-[0_10px_5px_rgba(0,0,0,0.15)]', className)}>
+      <div className={cn('max-w-6xl w-full mx-auto flex justify-between items-end gap-4', !showNavigation && 'justify-center')}>
         {/* Logo */}
         <div className={cn('flex-shrink-0 z-10', showNavigation && 'pl-4')}>
           <Link

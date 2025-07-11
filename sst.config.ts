@@ -5,7 +5,7 @@ export default $config({
   app(input) {
     return {
       name: "trailblazers-checkin",
-      removal: input?.stage === "production" ? "retain" : "remove",
+      removal: input?.stage === 'prod' ? "retain" : "remove",
       home: "aws",
       providers: {
         aws: {
@@ -275,12 +275,12 @@ export default $config({
         COGNITO_USER_POOL_CLIENT_ID: userPoolClient.id,
         // COGNITO_IDENTITY_POOL_ID: identityPool.id,
 
-        // NextAuth Configuration
-        NEXTAUTH_URL: $dev ? "http://localhost:3000" : "https://clubtrailblazers.com",
-        NEXTAUTH_SECRET: new random.RandomPassword("NextAuthSecret", {
-          length: 32,
-          special: false,
-        }).result,
+        // // NextAuth Configuration
+        // NEXTAUTH_URL: $dev ? "http://localhost:3000" : "https://clubtrailblazers.com",
+        // NEXTAUTH_SECRET: new random.RandomPassword("NextAuthSecret", {
+        //   length: 32,
+        //   special: false,
+        // }).result,
 
         // // API Configuration
         // API_URL: api.url,
