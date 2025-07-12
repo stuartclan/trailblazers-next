@@ -197,6 +197,15 @@ export const useCreateCheckIn = () => {
       queryClient.invalidateQueries({ queryKey: ['checkins', 'host', data.hid] });
       queryClient.invalidateQueries({ queryKey: ['checkins', 'count', data.aid] });
       queryClient.invalidateQueries({ queryKey: ['rewards', 'eligibility'] });
+      // Need to reset the search result for the athlete global count...
+      queryClient.invalidateQueries({ queryKey: ['athletes', 'search'] });
+    },
+    onError(error, variables) {
+      queryClient.invalidateQueries({ queryKey: ['checkins', 'athlete', variables.athleteId] });
+      queryClient.invalidateQueries({ queryKey: ['checkins', 'host', variables.hostId] });
+      queryClient.invalidateQueries({ queryKey: ['checkins', 'count', variables.athleteId] });
+      // queryClient.invalidateQueries({ queryKey: ['rewards', 'eligibility'] });
+      queryClient.invalidateQueries({ queryKey: ['athletes', 'search'] });
     },
   });
 };
@@ -225,6 +234,7 @@ export const useUpdateCheckIn = () => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['checkins', 'athlete', data.aid] });
       queryClient.invalidateQueries({ queryKey: ['checkins', 'host', data.hid] });
+      queryClient.invalidateQueries({ queryKey: ['athletes', 'search'] });
     },
   });
 };
@@ -238,6 +248,7 @@ export const useDeleteCheckIn = () => {
       queryClient.invalidateQueries({ queryKey: ['checkins', 'athlete', variables.athleteId] });
       queryClient.invalidateQueries({ queryKey: ['checkins', 'count', variables.athleteId] });
       queryClient.invalidateQueries({ queryKey: ['rewards', 'eligibility'] });
+      queryClient.invalidateQueries({ queryKey: ['athletes', 'search'] });
     },
   });
 };

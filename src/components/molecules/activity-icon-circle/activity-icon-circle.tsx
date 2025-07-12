@@ -1,4 +1,4 @@
-import { Icon, IconProps } from "@/components/atoms/icon/icon";
+import { Icon, IconNames, IconProps } from "@/components/atoms/icon/icon";
 
 import { ActivityEntity } from "@/lib/db/entities/types";
 import { cn } from "@/lib/utils/ui";
@@ -7,6 +7,7 @@ interface ActivityIconCircleProps {
     activity: Partial<ActivityEntity>;
     size?: 'sm' | 'md' | 'lg';
     variant?: 'default' | 'ghost';
+    busy?: boolean;
 }
 
 const sizeMapper: Record<string, { size: string, iconSize: IconProps['size'] }> = {
@@ -23,14 +24,16 @@ const styles = {
     'ghost': 'bg-gray-200 text-gray-500',
 }
 
-export const ActivityIconCircle = ({ activity, size = 'md', variant = 'default' }: ActivityIconCircleProps) => {
+export const ActivityIconCircle = ({ activity, size = 'md', variant = 'default', busy = false }: ActivityIconCircleProps) => {
     const { size: wrapperSize, iconSize } = sizeMapper[size];
+
     return (
         <span className={cn('rounded-full flex items-center justify-center',
             activity.en ? styles[variant] : styles['ghost'],
             wrapperSize,
         )}>
-            <Icon name={activity.i || ''} variant="activity" size={iconSize} />
+            {!busy && <Icon name={activity.i || ''} variant="activity" size={iconSize} />}
+            {busy && <Icon name={IconNames.Rotate} variant="icon" className="animate-spin" size={iconSize} />}
         </span>
     )
 }

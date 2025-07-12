@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils/ui';
 import { isWithinCurrentWeek } from '@/lib/utils/dates';
 import { useAthleteSearch } from '@/hooks/useAthlete';
 import { useLocationActivities } from '@/hooks/useActivity';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { useToastNotifications } from '@/hooks/useToast';
 
@@ -114,6 +115,9 @@ export const CheckInFlow: FC<CheckInFlowProps> = ({
   const createCheckIn = useCreateCheckIn();
   const updateCheckIn = useUpdateCheckIn();
   const deleteCheckIn = useDeleteCheckIn();
+
+  // Query Client
+  const queryClient = useQueryClient();
 
   // Auto-reset timer function
   const resetAutoResetTimer = useCallback(() => {
@@ -221,6 +225,11 @@ export const CheckInFlow: FC<CheckInFlowProps> = ({
     }
   };
 
+  const handleAthleteFocus = (athleteId: string | null) => {
+    resetAutoResetTimer();
+    setActiveAthleteId(athleteId);
+  };
+
   // Handle activity selection/toggle
   const handleActivityToggle = async (
     athleteStatus: AthleteCheckInStatus,
@@ -315,6 +324,8 @@ export const CheckInFlow: FC<CheckInFlowProps> = ({
 
     // New check-in flow
     if (!canCheckIn) {
+      // reset the search query to get the latest check-ins
+      queryClient.invalidateQueries({ queryKey: ['athletes', 'search'] });
       error('Athlete has already checked in at this host this week');
       return;
     }
@@ -380,6 +391,9 @@ export const CheckInFlow: FC<CheckInFlowProps> = ({
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Search by last name..."
+            autoComplete='off'
+            autoCorrect='off'
+            spellCheck={false}
             leftIcon={<Search className="h-4 w-4" />}
             label="Find Athlete"
           />
@@ -416,7 +430,7 @@ export const CheckInFlow: FC<CheckInFlowProps> = ({
                 activities={activities}
                 onActivityToggle={handleActivityToggle}
                 activeAthleteId={activeAthleteId}
-                onFocusToggle={setActiveAthleteId}
+                onFocusToggle={handleAthleteFocus}
               />
             ))}
           </div>

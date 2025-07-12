@@ -13,34 +13,32 @@ import {
  */
 export const CheckInPageLoading: React.FC = () => {
   return (
-    <div className="min-h-screen py-8">
-      <div className="container max-w-4xl mx-auto px-4 space-y-6">
-        {/* Header */}
-        {/* <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <Skeleton variant="text" width="300px" height={32} />
-            <Skeleton variant="text" width="200px" height={20} />
-          </div>
-          <div className="flex space-x-2">
-            <Skeleton width={120} height={36} variant="rounded" />
-            <Skeleton width={100} height={36} variant="rounded" />
-          </div>
-        </div> */}
+    <div className="container max-w-4xl mx-auto px-4 space-y-6">
+      {/* Header */}
+      {/* <div className="flex justify-between items-center">
+        <div className="space-y-2">
+          <Skeleton variant="text" width="300px" height={32} />
+          <Skeleton variant="text" width="200px" height={20} />
+        </div>
+        <div className="flex space-x-2">
+          <Skeleton width={120} height={36} variant="rounded" />
+          <Skeleton width={100} height={36} variant="rounded" />
+        </div>
+      </div> */}
 
-        {/* Location info */}
-        {/* <div className="bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
-          <div className="flex items-center space-x-3">
-            <Skeleton circle width={20} height={20} />
-            <div className="space-y-1 flex-1">
-              <Skeleton variant="text" width="60%" />
-              <Skeleton variant="text" width="40%" />
-            </div>
+      {/* Location info */}
+      {/* <div className="bg-blue-50 border-1 border-blue-200 rounded-lg p-4">
+        <div className="flex items-center space-x-3">
+          <Skeleton circle width={20} height={20} />
+          <div className="space-y-1 flex-1">
+            <Skeleton variant="text" width="60%" />
+            <Skeleton variant="text" width="40%" />
           </div>
-        </div> */}
+        </div>
+      </div> */}
 
-        {/* Main check-in flow */}
-        <SkeletonCheckInFlow className='mt-[135px]' />
-      </div>
+      {/* Main check-in flow */}
+      <SkeletonCheckInFlow className='mt-[135px]' />
     </div>
   );
 };

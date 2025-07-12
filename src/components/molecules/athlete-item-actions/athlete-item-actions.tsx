@@ -1,11 +1,11 @@
 import { ACTIVITY_TERM, ACTIVITY_TERM_SINGULAR } from "@/lib/utils/constants";
+import { FC, useState } from "react";
 import { Icon, RewardIcons } from "@/components/atoms/icon/icon";
 
 import { ActivityEntity } from "@/lib/db/entities/types";
 import { ActivityIconCircle } from "../activity-icon-circle/activity-icon-circle";
 import { AthleteCheckInStatus } from "../athlete-item/athlete-item";
 import { Button } from "@/components/atoms/button/button";
-import { FC } from "react";
 import { Skeleton } from "@/components/atoms/skeleton/skeleton";
 import { cn } from "@/lib/utils/ui";
 import { useAthleteCheckInCount } from "@/hooks/useCheckIn";
@@ -28,6 +28,14 @@ export const AthleteItemActions: FC<AthleteItemActionsProps> = ({
 }) => {
   const { athlete: { id: athleteId } } = status;
   const { data: checkInCount, isLoading: isCheckInCountLoading } = useAthleteCheckInCount(athleteId, hostId);
+  const [selectingActivity, setIsSelectingActivity] = useState<ActivityEntity | null>(null);
+  const selectActivity = (activity: ActivityEntity) => {
+    setIsSelectingActivity(activity);
+    onActivityToggle(status, activity).then(() => {
+      setIsSelectingActivity(null);
+    });
+  }
+
   return (
     <>
       {isCheckInCountLoading && <Skeleton height={84} className="col-span-full" />}
@@ -42,7 +50,7 @@ export const AthleteItemActions: FC<AthleteItemActionsProps> = ({
                   <Button
                     key={activity.id}
                     variant={isSelected ? 'default' : 'ghost'}
-                    onClick={() => onActivityToggle(status, activity)}
+                    onClick={() => selectActivity(activity)}
                     className={cn(
                       'flex flex-col items-center justify-center p-2 border-1 rounded-lg transition-discrete duration-200',
                       'hover:shadow-md active:scale-95 min-h-[60px] min-w-[60px]',
@@ -56,6 +64,7 @@ export const AthleteItemActions: FC<AthleteItemActionsProps> = ({
                       }}
                       size="sm"
                       variant={isSelected ? 'default' : 'ghost'}
+                      busy={(selectingActivity && activity === selectingActivity) || undefined}
                     />
                     {activity.n}
                   </Button>

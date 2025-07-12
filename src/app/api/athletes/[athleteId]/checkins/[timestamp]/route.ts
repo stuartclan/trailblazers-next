@@ -149,10 +149,13 @@ export async function DELETE(
       );
     }
 
+    // In case a duplicate delete call is made
+    const hadTimestamp = Object.keys(athlete.lw).includes(checkin?.hid || '');
+
     // remove host from the week's check-ins
     delete athlete.lw[checkin?.hid || ''];
     // See if there are no more entries for this week
-    const shouldDecrement = CheckInHelper.shouldIncrementGlobalCount(athlete);
+    const shouldDecrement = hadTimestamp && CheckInHelper.shouldIncrementGlobalCount(athlete);
 
     await Promise.all([
       // Delete the check-in

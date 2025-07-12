@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { MdAcUnit, MdCardGiftcard, MdCelebration, MdDirectionsBike, MdDirectionsRun, MdDirectionsWalk, MdDownhillSkiing, MdEmojiEvents, MdFitnessCenter, MdHiking, MdKayaking, MdLocalActivity, MdNordicWalking, MdPets, MdPool, MdQuestionMark, MdRedeem, MdRowing, MdSailing, MdSnowboarding, MdSnowshoeing, MdSportsBasketball, MdSportsGymnastics, MdSportsTennis, MdSportsVolleyball, MdStar, MdSurfing, MdVerified, MdWaves } from 'react-icons/md';
+import { MdAcUnit, MdCardGiftcard, MdCelebration, MdDirectionsBike, MdDirectionsRun, MdDirectionsWalk, MdDownhillSkiing, MdEmojiEvents, MdFitnessCenter, MdHiking, MdKayaking, MdLocalActivity, MdNordicWalking, MdPets, MdPool, MdQuestionMark, MdRedeem, MdRotateRight, MdRowing, MdSailing, MdSnowboarding, MdSnowshoeing, MdSportsBasketball, MdSportsGymnastics, MdSportsTennis, MdSportsVolleyball, MdStar, MdSurfing, MdVerified, MdWaves } from 'react-icons/md';
 
 import { GiMailShirt } from 'react-icons/gi';
 import { IoIosShirt } from 'react-icons/io';
@@ -46,6 +46,7 @@ export enum IconNames {
   CardGiftcard,
   Celebration,
   Star,
+  Rotate,
 };
 
 export const ActivityIcons = {
@@ -129,11 +130,12 @@ const iconMap: Record<IconNames, React.ComponentType<React.SVGProps<SVGSVGElemen
   [IconNames.CardGiftcard]: MdCardGiftcard,
   [IconNames.Celebration]: MdCelebration,
   [IconNames.Star]: MdStar,
+  [IconNames.Rotate]: MdRotateRight,
 }
 
 export interface IconProps extends React.HTMLAttributes<SVGSVGElement> {
   name: IconNames | string;
-  variant?: 'activity' | 'reward';
+  variant?: 'activity' | 'reward' | 'icon';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   color?:
   | 'primary'
