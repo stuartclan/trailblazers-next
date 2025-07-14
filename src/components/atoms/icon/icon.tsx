@@ -2,13 +2,42 @@
 
 import * as React from 'react';
 
-import { MdAcUnit, MdCardGiftcard, MdCelebration, MdDirectionsBike, MdDirectionsRun, MdDirectionsWalk, MdDownhillSkiing, MdEmojiEvents, MdFitnessCenter, MdHiking, MdKayaking, MdLocalActivity, MdNordicWalking, MdPets, MdPool, MdQuestionMark, MdRedeem, MdRotateRight, MdRowing, MdSailing, MdSnowboarding, MdSnowshoeing, MdSportsBasketball, MdSportsGymnastics, MdSportsTennis, MdSportsVolleyball, MdStar, MdSurfing, MdVerified, MdWaves } from 'react-icons/md';
+import { IoIosPint, IoIosShirt } from 'react-icons/io';
+import {
+  MdAcUnit,
+  MdCardGiftcard,
+  MdCelebration,
+  MdDirectionsBike,
+  MdDirectionsRun,
+  MdDirectionsWalk,
+  MdDownhillSkiing,
+  MdEmojiEvents,
+  MdFitnessCenter,
+  MdHiking,
+  MdKayaking,
+  MdLocalActivity,
+  MdNordicWalking,
+  MdPets,
+  MdPool,
+  MdQuestionMark,
+  MdRedeem,
+  MdRowing,
+  MdSailing,
+  MdSnowboarding,
+  MdSnowshoeing,
+  MdSportsBasketball,
+  MdSportsGymnastics,
+  MdSportsTennis,
+  MdSportsVolleyball,
+  MdStar,
+  MdSurfing,
+  MdVerified,
+  MdWaves,
+} from "react-icons/md";
 
 import { GiMailShirt } from 'react-icons/gi';
-import { IoIosShirt } from 'react-icons/io';
+import { ImSpinner4 } from "react-icons/im";
 import { cn } from '@/lib/utils/ui';
-
-// import { useMaterialIcons } from '@/lib/utils/material-icons';
 
 export enum IconNames {
   // Outdoor activities
@@ -41,12 +70,15 @@ export enum IconNames {
   Trophy,
   Verified,
   Pets,
+  Pint,
   LocalActivity,
   Redeem,
   CardGiftcard,
   Celebration,
   Star,
-  Rotate,
+
+  // Misc
+  Busy,
 };
 
 export const ActivityIcons = {
@@ -88,6 +120,7 @@ const activityMap = {
 export const RewardIcons = {
   Shirt: 'shirt',
   ShirtLongSleeve: 'shirtLongSleeve',
+  Pint: 'pint',
   Trophy: 'trophy',
   Star: 'star',
 }
@@ -95,6 +128,7 @@ export const RewardIcons = {
 const rewardMap = {
   [RewardIcons.Shirt]: IconNames.Shirt,
   [RewardIcons.ShirtLongSleeve]: IconNames.ShirtLongSleeve,
+  [RewardIcons.Pint]: IconNames.Pint,
   [RewardIcons.Trophy]: IconNames.Trophy,
   [RewardIcons.Star]: IconNames.Star,
 }
@@ -122,6 +156,7 @@ const iconMap: Record<IconNames, React.ComponentType<React.SVGProps<SVGSVGElemen
   [IconNames.SportsVolleyball]: MdSportsVolleyball,
   [IconNames.Shirt]: IoIosShirt,
   [IconNames.ShirtLongSleeve]: GiMailShirt,
+  [IconNames.Pint]: IoIosPint,
   [IconNames.Trophy]: MdEmojiEvents,
   [IconNames.Verified]: MdVerified,
   [IconNames.Pets]: MdPets,
@@ -130,7 +165,7 @@ const iconMap: Record<IconNames, React.ComponentType<React.SVGProps<SVGSVGElemen
   [IconNames.CardGiftcard]: MdCardGiftcard,
   [IconNames.Celebration]: MdCelebration,
   [IconNames.Star]: MdStar,
-  [IconNames.Rotate]: MdRotateRight,
+  [IconNames.Busy]: ImSpinner4,
 }
 
 export interface IconProps extends React.HTMLAttributes<SVGSVGElement> {
@@ -168,7 +203,7 @@ const colorMap = {
   inherit: 'text-inherit',
 };
 
-const getIconName = (name: string | IconNames, variant: 'activity' | 'reward' | undefined) => {
+const getIconName = (name: string | IconNames, variant: IconProps['variant'] | undefined) => {
   if (variant === 'activity') {
     return activityMap[name as keyof typeof activityMap];
   } else if (variant === 'reward') {

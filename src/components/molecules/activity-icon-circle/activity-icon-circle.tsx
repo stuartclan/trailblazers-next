@@ -33,7 +33,7 @@ export const ActivityIconCircle = ({ activity, size = 'md', variant = 'default',
             wrapperSize,
         )}>
             {!busy && <Icon name={activity.i || ''} variant="activity" size={iconSize} />}
-            {busy && <Icon name={IconNames.Rotate} variant="icon" className="animate-spin" size={iconSize} />}
+            {busy && <Icon name={IconNames.Busy} variant="icon" className="animate-spin" size={iconSize} />}
         </span>
     )
 }

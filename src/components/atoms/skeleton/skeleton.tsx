@@ -129,7 +129,7 @@ export const SkeletonCard: React.FC<{
   className?: string;
 }> = ({ showAvatar = false, lines = 3, className }) => {
   return (
-    <div className={cn('p-6 bg-white rounded-lg border-1 space-y-4', className)}>
+    <div className={cn('p-6 bg-white rounded-md border-1 space-y-4', className)}>
       {showAvatar && (
         <div className="flex items-center space-x-3">
           <SkeletonAvatar />
@@ -203,7 +203,7 @@ export const SkeletonSearchResults: React.FC<{ className?: string, count?: numbe
  */
 export const SkeletonCheckInFlow: React.FC<{ className?: string }> = ({ className }) => {
   return (
-    <div className={cn("bg-white rounded-lg border-1 p-6 space-y-6", className)}>
+    <div className={cn("bg-white rounded-md border-1 p-6 space-y-6", className)}>
       <div className="space-y-2">
         <Skeleton variant="text" width="40%" height={28} />
         <Skeleton variant="text" width="60%" />
